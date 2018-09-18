@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace _3BEvaluation.API
+namespace Evaluation.API
 {
     public class Startup
     {
