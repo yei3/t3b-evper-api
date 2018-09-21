@@ -9,7 +9,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-.Development.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -270,6 +269,9 @@ __pycache__/
 
 # Cake - Uncomment if you are using it
 # tools/
+
+# Removed the appsettings file per environment
+appsettings.*.
 
 ### VisualStudioCode ###
 .vscode/*
