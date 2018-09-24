@@ -1,7 +1,7 @@
 using Evaluation.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TodoApi.Models
+namespace Evaluation.API.Models
 {
     public class TodoContext : DbContext
     {

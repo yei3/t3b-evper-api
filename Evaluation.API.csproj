@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0-preview2-35157" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos.Sql" Version="2.2.0-preview2-35157" />
   </ItemGroup>
 
 </Project>
