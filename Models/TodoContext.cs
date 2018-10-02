@@ -10,6 +10,13 @@ namespace Evaluation.API.Models
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // set name of collection
+            var db = modelBuilder.Entity<TodoItem>().Metadata;
+            db.CosmosSql().CollectionName = nameof(TodoItems);
+        }
+
         public DbSet<TodoItem> TodoItems { get; set; }
     }
 }

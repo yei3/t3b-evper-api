@@ -12,6 +12,7 @@ using AutoMapper;
 using Evaluation.API.Helpers;
 using Evaluation.API.Services;
 using Evaluation.API.Extensions;
+using Evaluation.API.Models;
 
 namespace Evaluation.API
 {
@@ -27,6 +28,13 @@ namespace Evaluation.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // setting CosmosDB
+            services.AddDbContext<TodoContext>(opt => opt.UseCosmosSql(
+                "https://bbb-yei-dev.documents.azure.com:443/",
+                "ESMqKIBocTVI4ezv6OKApmKZU3S5WxwZAxt8BVgjyZ1f02BezTD3EWY2jNCu4tmt03cukfFDGJxkxscH34hMNQ==",
+                "ToDoList"
+            ));
+
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             // Add Services
