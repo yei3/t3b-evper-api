@@ -15,9 +15,7 @@ using Evaluation.API.Entities;
 
 namespace Evaluation.API.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/users")]
+    [Authorize, ApiController, Route("api/users")]
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
@@ -34,8 +32,7 @@ namespace Evaluation.API.Controllers
             _appSettings = appSettings.Value;
         }
 
-        [AllowAnonymous]
-        [HttpPost("register")]
+        [AllowAnonymous, HttpPost]
         public IActionResult Register([FromBody]UserDto userDto)
         {
             // map dto to entity

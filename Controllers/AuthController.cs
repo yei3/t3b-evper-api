@@ -15,27 +15,14 @@ using Evaluation.API.Entities;
 
 namespace Evaluation.API.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/auth")]
+    [Authorize, ApiController, Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private IUserService _userService;
-        private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
-        public AuthController(
-            IUserService userService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
-        {
-            _userService = userService;
-            _mapper = mapper;
-            _appSettings = appSettings.Value;
-        }
 
-        [AllowAnonymous]
-        [HttpPost]
+        [AllowAnonymous, HttpPost]
         public IActionResult Authenticate([FromBody]UserDto userDto)
         {
             var user = _userService.Authenticate(userDto.Username, userDto.Password);

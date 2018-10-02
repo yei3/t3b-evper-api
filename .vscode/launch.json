@@ -20,7 +20,7 @@
                 "args": "${auto-detect-url}",
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start \"\" \"C:/Program Files/Mozilla Firefox/firefox.exe\" ${auto-detect-url}"
+                    "args": "/C start ${auto-detect-url}"
                 },
                 "osx": {
                     "command": "open"
