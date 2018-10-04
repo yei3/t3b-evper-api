@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using AutoMapper;
+using Evaluation.API.Helpers;
+using Evaluation.API.Services;
+using Evaluation.API.Extensions;
+using Evaluation.API.Models;
 
 namespace Evaluation.API
 {
@@ -25,22 +28,41 @@ namespace Evaluation.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            // setting CosmosDB
+            services.AddDbContext<TodoContext>(opt => opt.UseCosmosSql(
+                "https://bbb-yei-dev.documents.azure.com:443/",
+                "ESMqKIBocTVI4ezv6OKApmKZU3S5WxwZAxt8BVgjyZ1f02BezTD3EWY2jNCu4tmt03cukfFDGJxkxscH34hMNQ==",
+                "ToDoList"
+            ));
+
+            // configure strongly typed settings objects
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            // Add Services
+            services.AddCors();
+            services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDB"));            
+            services.AddAutoMapper();            
+            services.AddJWTAuthetication(appSettingsSection);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // configure DI for application services
+            services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
-            }
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
 
-            app.UseHttpsRedirection();
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+
+            app.UseAuthentication();
+
             app.UseMvc();
         }
     }
