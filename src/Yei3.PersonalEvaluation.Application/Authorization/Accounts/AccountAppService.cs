@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using Abp.Configuration;
 using Abp.Zero.Configuration;
+using Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
 
@@ -9,11 +11,14 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
     public class AccountAppService : PersonalEvaluationAppServiceBase, IAccountAppService
     {
         private readonly UserRegistrationManager _userRegistrationManager;
+        private readonly UserManager _userManager;
 
         public AccountAppService(
-            UserRegistrationManager userRegistrationManager)
+            UserRegistrationManager userRegistrationManager,
+            UserManager userManager)
         {
             _userRegistrationManager = userRegistrationManager;
+            _userManager = userManager;
         }
 
         public async Task<IsTenantAvailableOutput> IsTenantAvailable(IsTenantAvailableInput input)
@@ -48,6 +53,27 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
             return new RegisterOutput
             {
                 CanLogin = user.IsActive && (user.IsEmailConfirmed || !isEmailConfirmationRequiredForLogin)
+            };
+        }
+
+        public async Task<RegisterOutput> FirstTimeLoginAsync(RegisterEmployeeInput input)
+        {
+            User user;
+
+            try
+            {
+                user = await _userManager.FindByEmployeeNumberAsync(input.EmployeeNumber);
+            } catch(InvalidOperationException)
+            {
+                Logger.Error($"Usuario {input.EmployeeNumber} no encontrado");
+                return new RegisterOutput { CanLogin = false };
+            }
+
+            await _userManager.ChangePasswordAsync(user, input.Password);
+
+            return new RegisterOutput
+            {
+                CanLogin = true
             };
         }
     }

@@ -1,19 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Abp.Authorization;
-using Abp.Authorization.Users;
-using Abp.Configuration;
-using Abp.Domain.Repositories;
-using Abp.Domain.Uow;
-using Abp.Organizations;
-using Abp.Runtime.Caching;
-using Yei3.PersonalEvaluation.Authorization.Roles;
-
-namespace Yei3.PersonalEvaluation.Authorization.Users
+﻿namespace Yei3.PersonalEvaluation.Authorization.Users
 {
+
+    using System;
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
+    using Abp.Authorization;
+    using Abp.Authorization.Users;
+    using Abp.Configuration;
+    using Abp.Domain.Repositories;
+    using Abp.Domain.Uow;
+    using Abp.Organizations;
+    using Abp.Runtime.Caching;
+    using Yei3.PersonalEvaluation.Authorization.Roles;
+    using Microsoft.EntityFrameworkCore;
+    using System.Threading.Tasks;
+
     public class UserManager : AbpUserManager<Role, User>
     {
         public UserManager(
@@ -53,6 +56,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 organizationUnitSettings, 
                 settingManager)
         {
+        }
+
+        public async Task<User> FindByEmployeeNumberAsync(string employeeNumber)
+        {
+            return await this.Users.SingleAsync(users => users.EmployeeNumber == employeeNumber, CancellationToken);
         }
     }
 }

@@ -16109,3 +16109,7 @@ INFO  2018-10-08 22:44:58,785 [19   ] ore.Mvc.Internal.ControllerActionInvoker -
 INFO  2018-10-08 22:44:58,880 [16   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
 INFO  2018-10-08 22:44:58,933 [16   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application) in 1461.7912ms
 INFO  2018-10-08 22:44:58,938 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 1586.1332ms 200 application/json; charset=utf-8
+DEBUG 2018-10-08 22:46:36,696 [5    ] Abp.Modules.AbpModuleManager             - Shutting down has been started
+DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.BackgroundJobs.BackgroundJobManager  - Stop background worker: Abp.BackgroundJobs.BackgroundJobManager
+DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.BackgroundJobs.BackgroundJobManager  - WaitToStop background worker: Abp.BackgroundJobs.BackgroundJobManager
+DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.Modules.AbpModuleManager             - Shutting down completed.
