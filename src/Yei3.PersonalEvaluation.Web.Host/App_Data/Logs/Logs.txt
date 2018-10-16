@@ -16113,3 +16113,441 @@ DEBUG 2018-10-08 22:46:36,696 [5    ] Abp.Modules.AbpModuleManager             -
 DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.BackgroundJobs.BackgroundJobManager  - Stop background worker: Abp.BackgroundJobs.BackgroundJobManager
 DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.BackgroundJobs.BackgroundJobManager  - WaitToStop background worker: Abp.BackgroundJobs.BackgroundJobManager
 DEBUG 2018-10-08 22:46:36,698 [5    ] Abp.Modules.AbpModuleManager             - Shutting down completed.
+DEBUG 2018-10-09 22:33:49,764 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-10-09 22:33:49,786 [1    ] Abp.Modules.AbpModuleManager             - Found 15 ABP modules in total.
+DEBUG 2018-10-09 22:33:49,816 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Web.Host.Startup.PersonalEvaluationWebHostModule, Yei3.PersonalEvaluation.Web.Host, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,818 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationWebCoreModule, Yei3.PersonalEvaluation.Web.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,819 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationApplicationModule, Yei3.PersonalEvaluation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,819 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,820 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,820 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,821 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,821 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AutoMapper.AbpAutoMapperModule, Abp.AutoMapper, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,822 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,822 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,822 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,823 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,823 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.AbpAspNetCoreModule, Abp.AspNetCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,824 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Web.AbpWebCommonModule, Abp.Web.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,824 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.SignalR.AbpAspNetCoreSignalRModule, Abp.AspNetCore.SignalR, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:49,827 [1    ] Abp.Modules.AbpModuleManager             - 15 modules loaded.
+DEBUG 2018-10-09 22:33:49,915 [1    ] o.Configuration.LanguageManagementConfig - Converted Abp (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:33:49,915 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpZero (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:33:49,915 [1    ] o.Configuration.LanguageManagementConfig - Converted PersonalEvaluation (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:33:49,915 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpWeb (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:33:50,411 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:33:50,926 [1    ] Abp.Localization.LocalizationManager     - Initializing 4 localization sources.
+DEBUG 2018-10-09 22:33:50,975 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-10-09 22:33:50,990 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-10-09 22:33:50,999 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+DEBUG 2018-10-09 22:33:51,007 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpWeb
+DEBUG 2018-10-09 22:33:51,049 [1    ] Abp.BackgroundJobs.BackgroundJobManager  - Start background worker: Abp.BackgroundJobs.BackgroundJobManager
+DEBUG 2018-10-09 22:33:51,094 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Found 10 classes define auto mapping attributes
+DEBUG 2018-10-09 22:33:51,094 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Models.TokenAuth.ExternalLoginProviderInfoModel
+DEBUG 2018-10-09 22:33:51,100 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.CreateUserDto
+DEBUG 2018-10-09 22:33:51,100 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.UserDto
+DEBUG 2018-10-09 22:33:51,101 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.TenantLoginInfoDto
+DEBUG 2018-10-09 22:33:51,101 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.UserLoginInfoDto
+DEBUG 2018-10-09 22:33:51,101 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.CreateRoleDto
+DEBUG 2018-10-09 22:33:51,101 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.PermissionDto
+DEBUG 2018-10-09 22:33:51,101 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.RoleDto
+DEBUG 2018-10-09 22:33:51,102 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.CreateTenantDto
+DEBUG 2018-10-09 22:33:51,102 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.TenantDto
+FATAL 2018-10-09 22:33:54,576 [1    ] Abp.AbpBootstrapper                      - MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list' ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list'
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\Core\ResultSet.cs:line 44
+   at MySql.Data.MySqlClient.MySqlDataReader.ActivateResultSet(ResultSet resultSet) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 88
+   at MySql.Data.MySqlClient.MySqlDataReader.ReadFirstResultSetAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 299
+   at MySql.Data.MySqlClient.MySqlDataReader.CreateAsync(MySqlCommand command, CommandBehavior behavior, ResultSetProtocol resultSetProtocol, IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 284
+   at MySqlConnector.Core.TextCommandExecutor.ExecuteReaderAsync(String commandText, MySqlParameterCollection parameterCollection, CommandBehavior behavior, IOBehavior ioBehavior, CancellationToken cancellationToken) in C:\projects\mysqlconnector\src\MySqlConnector\Core\TextCommandExecutor.cs:line 37
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlCommand.cs:line 252
+   at System.Data.Common.DbCommand.ExecuteReader()
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.Execute(IRelationalConnection connection, DbCommandMethod executeMethod, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.ExecuteReader(IRelationalConnection connection, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.BufferlessMoveNext(DbContext _, Boolean buffer)
+   at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at lambda_method(Closure )
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ResultEnumerable`1.GetEnumerator()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider._TrackEntities[TOut,TIn](IEnumerable`1 results, QueryContext queryContext, IList`1 entityTrackingInfos, IList`1 entityAccessors)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ExceptionInterceptor`1.EnumeratorExceptionInterceptor.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass15_1`1.<CompileQueryCore>b__0(QueryContext qc)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.Execute[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.Execute[TResult](Expression expression)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source, Expression`1 predicate)
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.CreateHostRoleAndUsers() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 70
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 26
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.InitialHostDbBuilder.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\InitialHostDbBuilder.cs:line 16
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(PersonalEvaluationDbContext context) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 25
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.WithDbContext[TDbContext](IIocResolver iocResolver, Action`1 contextAction) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 41
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(IIocResolver iocResolver) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 17
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule.PostInitialize() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\PersonalEvaluationEntityFrameworkModule.cs:line 46
+   at Abp.Modules.AbpModuleManager.<>c.<StartModules>b__15_2(AbpModuleInfo module) in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 48
+   at System.Collections.Generic.List`1.ForEach(Action`1 action)
+   at Abp.Modules.AbpModuleManager.StartModules() in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 49
+   at Abp.AbpBootstrapper.Initialize() in D:\Github\aspnetboilerplate\src\Abp\AbpBootstrapper.cs:line 155
+MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list' ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list'
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\Core\ResultSet.cs:line 44
+   at MySql.Data.MySqlClient.MySqlDataReader.ActivateResultSet(ResultSet resultSet) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 88
+   at MySql.Data.MySqlClient.MySqlDataReader.ReadFirstResultSetAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 299
+   at MySql.Data.MySqlClient.MySqlDataReader.CreateAsync(MySqlCommand command, CommandBehavior behavior, ResultSetProtocol resultSetProtocol, IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 284
+   at MySqlConnector.Core.TextCommandExecutor.ExecuteReaderAsync(String commandText, MySqlParameterCollection parameterCollection, CommandBehavior behavior, IOBehavior ioBehavior, CancellationToken cancellationToken) in C:\projects\mysqlconnector\src\MySqlConnector\Core\TextCommandExecutor.cs:line 37
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlCommand.cs:line 252
+   at System.Data.Common.DbCommand.ExecuteReader()
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.Execute(IRelationalConnection connection, DbCommandMethod executeMethod, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.ExecuteReader(IRelationalConnection connection, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.BufferlessMoveNext(DbContext _, Boolean buffer)
+   at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at lambda_method(Closure )
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ResultEnumerable`1.GetEnumerator()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider._TrackEntities[TOut,TIn](IEnumerable`1 results, QueryContext queryContext, IList`1 entityTrackingInfos, IList`1 entityAccessors)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ExceptionInterceptor`1.EnumeratorExceptionInterceptor.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass15_1`1.<CompileQueryCore>b__0(QueryContext qc)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.Execute[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.Execute[TResult](Expression expression)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source, Expression`1 predicate)
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.CreateHostRoleAndUsers() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 70
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 26
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.InitialHostDbBuilder.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\InitialHostDbBuilder.cs:line 16
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(PersonalEvaluationDbContext context) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 25
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.WithDbContext[TDbContext](IIocResolver iocResolver, Action`1 contextAction) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 41
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(IIocResolver iocResolver) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 17
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule.PostInitialize() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\PersonalEvaluationEntityFrameworkModule.cs:line 46
+   at Abp.Modules.AbpModuleManager.<>c.<StartModules>b__15_2(AbpModuleInfo module) in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 48
+   at System.Collections.Generic.List`1.ForEach(Action`1 action)
+   at Abp.Modules.AbpModuleManager.StartModules() in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 49
+   at Abp.AbpBootstrapper.Initialize() in D:\Github\aspnetboilerplate\src\Abp\AbpBootstrapper.cs:line 155
+FATAL 2018-10-09 22:33:54,650 [1    ] soft.AspNetCore.Hosting.Internal.WebHost - Application startup exception
+MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list' ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Unknown column 'u.EmployeeNumber' in 'field list'
+   at System.Threading.Tasks.ValueTask`1.get_Result()
+   at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\Core\ResultSet.cs:line 44
+   at MySql.Data.MySqlClient.MySqlDataReader.ActivateResultSet(ResultSet resultSet) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 88
+   at MySql.Data.MySqlClient.MySqlDataReader.ReadFirstResultSetAsync(IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 299
+   at MySql.Data.MySqlClient.MySqlDataReader.CreateAsync(MySqlCommand command, CommandBehavior behavior, ResultSetProtocol resultSetProtocol, IOBehavior ioBehavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlDataReader.cs:line 284
+   at MySqlConnector.Core.TextCommandExecutor.ExecuteReaderAsync(String commandText, MySqlParameterCollection parameterCollection, CommandBehavior behavior, IOBehavior ioBehavior, CancellationToken cancellationToken) in C:\projects\mysqlconnector\src\MySqlConnector\Core\TextCommandExecutor.cs:line 37
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior) in C:\projects\mysqlconnector\src\MySqlConnector\MySql.Data.MySqlClient\MySqlCommand.cs:line 252
+   at System.Data.Common.DbCommand.ExecuteReader()
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.Execute(IRelationalConnection connection, DbCommandMethod executeMethod, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Storage.Internal.RelationalCommand.ExecuteReader(IRelationalConnection connection, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.BufferlessMoveNext(DbContext _, Boolean buffer)
+   at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at lambda_method(Closure )
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ResultEnumerable`1.GetEnumerator()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider._TrackEntities[TOut,TIn](IEnumerable`1 results, QueryContext queryContext, IList`1 entityTrackingInfos, IList`1 entityAccessors)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider.ExceptionInterceptor`1.EnumeratorExceptionInterceptor.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Boolean& found)
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass15_1`1.<CompileQueryCore>b__0(QueryContext qc)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.Execute[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.Execute[TResult](Expression expression)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source, Expression`1 predicate)
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.CreateHostRoleAndUsers() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 70
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.HostRoleAndUserCreator.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\HostRoleAndUserCreator.cs:line 26
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host.InitialHostDbBuilder.Create() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\Host\InitialHostDbBuilder.cs:line 16
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(PersonalEvaluationDbContext context) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 25
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.WithDbContext[TDbContext](IIocResolver iocResolver, Action`1 contextAction) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 41
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.SeedHelper.SeedHostDb(IIocResolver iocResolver) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\Seed\SeedHelper.cs:line 17
+   at Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule.PostInitialize() in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.EntityFrameworkCore\EntityFrameworkCore\PersonalEvaluationEntityFrameworkModule.cs:line 46
+   at Abp.Modules.AbpModuleManager.<>c.<StartModules>b__15_2(AbpModuleInfo module) in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 48
+   at System.Collections.Generic.List`1.ForEach(Action`1 action)
+   at Abp.Modules.AbpModuleManager.StartModules() in D:\Github\aspnetboilerplate\src\Abp\Modules\AbpModuleManager.cs:line 49
+   at Abp.AbpBootstrapper.Initialize() in D:\Github\aspnetboilerplate\src\Abp\AbpBootstrapper.cs:line 155
+   at Abp.AspNetCore.AbpApplicationBuilderExtensions.InitializeAbp(IApplicationBuilder app) in D:\Github\aspnetboilerplate\src\Abp.AspNetCore\AspNetCore\AbpApplicationBuilderExtensions.cs:line 69
+   at Abp.AspNetCore.AbpApplicationBuilderExtensions.UseAbp(IApplicationBuilder app, Action`1 optionsAction) in D:\Github\aspnetboilerplate\src\Abp.AspNetCore\AspNetCore\AbpApplicationBuilderExtensions.cs:line 40
+   at Yei3.PersonalEvaluation.Web.Host.Startup.Startup.Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) in C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.Web.Host\Startup\Startup.cs:line 93
+--- End of stack trace from previous location where exception was thrown ---
+   at Microsoft.AspNetCore.Hosting.ConventionBasedStartup.Configure(IApplicationBuilder app)
+   at Microsoft.AspNetCore.Mvc.Internal.MiddlewareFilterBuilderStartupFilter.<>c__DisplayClass0_0.<Configure>g__MiddlewareFilterBuilder|0(IApplicationBuilder builder)
+   at Microsoft.AspNetCore.Server.IISIntegration.IISSetupFilter.<>c__DisplayClass4_0.<Configure>b__0(IApplicationBuilder app)
+   at Microsoft.AspNetCore.HostFilteringStartupFilter.<>c__DisplayClass0_0.<Configure>b__0(IApplicationBuilder app)
+   at Microsoft.AspNetCore.Hosting.Internal.AutoRequestServicesStartupFilter.<>c__DisplayClass0_0.<Configure>b__0(IApplicationBuilder builder)
+   at Microsoft.AspNetCore.Hosting.Internal.WebHost.BuildApplication()
+INFO  2018-10-09 22:33:55,371 [8    ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/  
+INFO  2018-10-09 22:33:57,268 [8    ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 1898.5884ms 500 text/html; charset=utf-8
+INFO  2018-10-09 22:33:57,414 [8    ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/favicon.ico  
+INFO  2018-10-09 22:33:57,442 [8    ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 27.7461ms 500 text/html; charset=utf-8
+DEBUG 2018-10-09 22:34:52,227 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-10-09 22:34:52,246 [1    ] Abp.Modules.AbpModuleManager             - Found 15 ABP modules in total.
+DEBUG 2018-10-09 22:34:52,267 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Web.Host.Startup.PersonalEvaluationWebHostModule, Yei3.PersonalEvaluation.Web.Host, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,269 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationWebCoreModule, Yei3.PersonalEvaluation.Web.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,270 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationApplicationModule, Yei3.PersonalEvaluation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,271 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,271 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,271 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,272 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,272 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AutoMapper.AbpAutoMapperModule, Abp.AutoMapper, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,273 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,273 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,273 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,273 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,274 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.AbpAspNetCoreModule, Abp.AspNetCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,274 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Web.AbpWebCommonModule, Abp.Web.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,274 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.SignalR.AbpAspNetCoreSignalRModule, Abp.AspNetCore.SignalR, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:52,277 [1    ] Abp.Modules.AbpModuleManager             - 15 modules loaded.
+DEBUG 2018-10-09 22:34:52,340 [1    ] o.Configuration.LanguageManagementConfig - Converted Abp (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:34:52,340 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpZero (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:34:52,340 [1    ] o.Configuration.LanguageManagementConfig - Converted PersonalEvaluation (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:34:52,340 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpWeb (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-09 22:34:52,663 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-09 22:34:53,090 [1    ] Abp.Localization.LocalizationManager     - Initializing 4 localization sources.
+DEBUG 2018-10-09 22:34:53,138 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-10-09 22:34:53,154 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-10-09 22:34:53,161 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+DEBUG 2018-10-09 22:34:53,169 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpWeb
+DEBUG 2018-10-09 22:34:53,210 [1    ] Abp.BackgroundJobs.BackgroundJobManager  - Start background worker: Abp.BackgroundJobs.BackgroundJobManager
+DEBUG 2018-10-09 22:34:53,255 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Found 10 classes define auto mapping attributes
+DEBUG 2018-10-09 22:34:53,255 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Models.TokenAuth.ExternalLoginProviderInfoModel
+DEBUG 2018-10-09 22:34:53,261 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.CreateUserDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.UserDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.TenantLoginInfoDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.UserLoginInfoDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.CreateRoleDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.PermissionDto
+DEBUG 2018-10-09 22:34:53,262 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.RoleDto
+DEBUG 2018-10-09 22:34:53,263 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.CreateTenantDto
+DEBUG 2018-10-09 22:34:53,263 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.TenantDto
+INFO  2018-10-09 22:34:57,008 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/  
+WARN  2018-10-09 22:34:57,218 [14   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:34:57,219 [14   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:34:58,611 [14   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {action = "Index", controller = "Home", area = ""}. Executing action Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host)
+INFO  2018-10-09 22:34:59,132 [14   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host) - Validation state: Valid
+INFO  2018-10-09 22:34:59,140 [14   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host), returned result Microsoft.AspNetCore.Mvc.RedirectResult in 3.0553ms.
+INFO  2018-10-09 22:34:59,398 [16   ] vc.Infrastructure.RedirectResultExecutor - Executing RedirectResult, redirecting to /swagger.
+INFO  2018-10-09 22:34:59,413 [16   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host) in 797.9643ms
+INFO  2018-10-09 22:34:59,461 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 2458.4859ms 302 
+INFO  2018-10-09 22:34:59,463 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger  
+WARN  2018-10-09 22:34:59,465 [16   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:34:59,465 [16   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:34:59,475 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 11.6063ms 301 
+INFO  2018-10-09 22:34:59,479 [13   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/index.html  
+WARN  2018-10-09 22:34:59,482 [13   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:34:59,482 [13   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:34:59,500 [13   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 20.5715ms 200 text/html
+INFO  2018-10-09 22:34:59,518 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui.css  
+WARN  2018-10-09 22:34:59,519 [16   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:34:59,520 [16   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:34:59,520 [13   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui-bundle.js  
+WARN  2018-10-09 22:34:59,520 [13   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+INFO  2018-10-09 22:34:59,520 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui-standalone-preset.js  
+WARN  2018-10-09 22:34:59,520 [13   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-09 22:34:59,521 [11   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:34:59,522 [11   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:34:59,522 [15   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/ui/abp.swagger.js  
+INFO  2018-10-09 22:34:59,522 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/ui/abp.js  
+INFO  2018-10-09 22:34:59,559 [14   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger/ui/abp.js'. Physical path: 'C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.Web.Host\wwwroot\swagger\ui\abp.js'
+INFO  2018-10-09 22:34:59,559 [15   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger/ui/abp.swagger.js'. Physical path: 'C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.Web.Host\wwwroot\swagger\ui\abp.swagger.js'
+INFO  2018-10-09 22:34:59,559 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 36.8225ms 200 application/javascript
+INFO  2018-10-09 22:34:59,559 [15   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 37.3014ms 200 application/javascript
+INFO  2018-10-09 22:34:59,574 [4    ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+INFO  2018-10-09 22:34:59,579 [10   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 60.1968ms 200 text/css
+INFO  2018-10-09 22:34:59,583 [14   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+INFO  2018-10-09 22:34:59,584 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 63.2018ms 200 application/javascript
+INFO  2018-10-09 22:34:59,615 [12   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+INFO  2018-10-09 22:34:59,615 [12   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 95.4545ms 200 application/javascript
+INFO  2018-10-09 22:35:00,263 [12   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/v1/swagger.json  
+WARN  2018-10-09 22:35:00,267 [12   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 22:35:00,268 [12   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 22:35:00,554 [12   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 290.5782ms 200 application/json;charset=utf-8
+INFO  2018-10-09 23:04:12,721 [59   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 POST http://localhost:21021/api/TokenAuth/Authenticate application/json 50
+WARN  2018-10-09 23:04:12,724 [59   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 23:04:12,724 [59   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 23:04:12,745 [59   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {action = "Authenticate", controller = "TokenAuth", area = ""}. Executing action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core)
+INFO  2018-10-09 23:04:12,747 [59   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:12,747 [59   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:12,975 [59   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) with arguments (Yei3.PersonalEvaluation.Models.TokenAuth.AuthenticateModel) - Validation state: Valid
+INFO  2018-10-09 23:04:13,419 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 443.3981ms.
+INFO  2018-10-09 23:04:13,537 [29   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-09 23:04:13,548 [29   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:13,548 [29   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:13,549 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) in 803.7434ms
+INFO  2018-10-09 23:04:13,550 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 828.6916ms 200 application/json; charset=utf-8
+INFO  2018-10-09 23:04:19,465 [60   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 POST http://localhost:21021/api/services/app/Account/IsTenantAvailable application/json 23
+WARN  2018-10-09 23:04:19,467 [60   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 23:04:19,467 [60   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 23:04:19,475 [60   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "IsTenantAvailable", controller = "Account"}. Executing action Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application)
+INFO  2018-10-09 23:04:19,475 [60   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:19,475 [60   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:19,503 [60   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application) with arguments (Yei3.PersonalEvaluation.Authorization.Accounts.Dto.IsTenantAvailableInput) - Validation state: Valid
+INFO  2018-10-09 23:04:19,520 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 16.8745ms.
+INFO  2018-10-09 23:04:19,530 [29   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-09 23:04:19,532 [29   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:19,532 [29   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:19,532 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application) in 56.9396ms
+INFO  2018-10-09 23:04:19,532 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 67.2709ms 200 application/json; charset=utf-8
+INFO  2018-10-09 23:04:19,540 [60   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 POST http://localhost:21021/api/TokenAuth/Authenticate application/json 50
+WARN  2018-10-09 23:04:19,540 [60   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-09 23:04:19,540 [60   ] calization.RequestLocalizationMiddleware - CookieRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+INFO  2018-10-09 23:04:19,584 [59   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {action = "Authenticate", controller = "TokenAuth", area = ""}. Executing action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core)
+INFO  2018-10-09 23:04:19,584 [59   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:19,584 [59   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:19,588 [59   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) with arguments (Yei3.PersonalEvaluation.Models.TokenAuth.AuthenticateModel) - Validation state: Valid
+INFO  2018-10-09 23:04:19,631 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 43.2958ms.
+INFO  2018-10-09 23:04:19,643 [29   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-09 23:04:19,643 [29   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-09 23:04:19,643 [29   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-09 23:04:19,643 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) in 59.5221ms
+INFO  2018-10-09 23:04:19,643 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 103.9311ms 200 application/json; charset=utf-8
+DEBUG 2018-10-15 20:35:08,095 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-10-15 20:35:08,124 [1    ] Abp.Modules.AbpModuleManager             - Found 15 ABP modules in total.
+DEBUG 2018-10-15 20:35:08,155 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Web.Host.Startup.PersonalEvaluationWebHostModule, Yei3.PersonalEvaluation.Web.Host, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,158 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationWebCoreModule, Yei3.PersonalEvaluation.Web.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,158 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationApplicationModule, Yei3.PersonalEvaluation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,159 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,159 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,160 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,160 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,161 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AutoMapper.AbpAutoMapperModule, Abp.AutoMapper, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,162 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,162 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,162 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,162 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,163 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.AbpAspNetCoreModule, Abp.AspNetCore, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,163 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Web.AbpWebCommonModule, Abp.Web.Common, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,164 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AspNetCore.SignalR.AbpAspNetCoreSignalRModule, Abp.AspNetCore.SignalR, Version=3.8.3.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:08,168 [1    ] Abp.Modules.AbpModuleManager             - 15 modules loaded.
+DEBUG 2018-10-15 20:35:08,254 [1    ] o.Configuration.LanguageManagementConfig - Converted Abp (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-15 20:35:08,254 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpZero (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-15 20:35:08,254 [1    ] o.Configuration.LanguageManagementConfig - Converted PersonalEvaluation (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-15 20:35:08,254 [1    ] o.Configuration.LanguageManagementConfig - Converted AbpWeb (Abp.Localization.Dictionaries.DictionaryBasedLocalizationSource) to MultiTenantLocalizationSource
+DEBUG 2018-10-15 20:35:08,836 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-10-15 20:35:09,628 [1    ] Abp.Localization.LocalizationManager     - Initializing 4 localization sources.
+DEBUG 2018-10-15 20:35:09,719 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-10-15 20:35:09,751 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-10-15 20:35:09,769 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+DEBUG 2018-10-15 20:35:09,786 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpWeb
+DEBUG 2018-10-15 20:35:09,866 [1    ] Abp.BackgroundJobs.BackgroundJobManager  - Start background worker: Abp.BackgroundJobs.BackgroundJobManager
+DEBUG 2018-10-15 20:35:09,939 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Found 10 classes define auto mapping attributes
+DEBUG 2018-10-15 20:35:09,940 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Models.TokenAuth.ExternalLoginProviderInfoModel
+DEBUG 2018-10-15 20:35:09,946 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.CreateUserDto
+DEBUG 2018-10-15 20:35:09,947 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Users.Dto.UserDto
+DEBUG 2018-10-15 20:35:09,947 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.TenantLoginInfoDto
+DEBUG 2018-10-15 20:35:09,948 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Sessions.Dto.UserLoginInfoDto
+DEBUG 2018-10-15 20:35:09,948 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.CreateRoleDto
+DEBUG 2018-10-15 20:35:09,948 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.PermissionDto
+DEBUG 2018-10-15 20:35:09,948 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.Roles.Dto.RoleDto
+DEBUG 2018-10-15 20:35:09,951 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.CreateTenantDto
+DEBUG 2018-10-15 20:35:09,952 [1    ] Abp.AutoMapper.AbpAutoMapperModule       - Yei3.PersonalEvaluation.MultiTenancy.Dto.TenantDto
+INFO  2018-10-15 20:35:16,294 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/  
+INFO  2018-10-15 20:35:18,924 [11   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {action = "Index", controller = "Home", area = ""}. Executing action Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host)
+INFO  2018-10-15 20:35:19,840 [11   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host) - Validation state: Valid
+INFO  2018-10-15 20:35:19,847 [11   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host), returned result Microsoft.AspNetCore.Mvc.RedirectResult in 3.2819ms.
+INFO  2018-10-15 20:35:19,992 [11   ] vc.Infrastructure.RedirectResultExecutor - Executing RedirectResult, redirecting to /swagger.
+INFO  2018-10-15 20:35:20,007 [11   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Web.Host.Controllers.HomeController.Index (Yei3.PersonalEvaluation.Web.Host) in 1077.3307ms
+INFO  2018-10-15 20:35:20,082 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 3793.282ms 302 
+INFO  2018-10-15 20:35:20,086 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger  
+INFO  2018-10-15 20:35:20,102 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 15.7272ms 301 
+INFO  2018-10-15 20:35:20,112 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/index.html  
+INFO  2018-10-15 20:35:20,152 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 39.729ms 200 text/html
+INFO  2018-10-15 20:35:20,199 [4    ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui.css  
+INFO  2018-10-15 20:35:20,206 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui-bundle.js  
+INFO  2018-10-15 20:35:20,206 [11   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/ui/abp.swagger.js  
+INFO  2018-10-15 20:35:20,209 [9    ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/swagger-ui-standalone-preset.js  
+INFO  2018-10-15 20:35:20,209 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/ui/abp.js  
+INFO  2018-10-15 20:35:20,269 [4    ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+INFO  2018-10-15 20:35:20,270 [4    ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 70.8144ms 200 text/css
+INFO  2018-10-15 20:35:20,270 [13   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger/ui/abp.js'. Physical path: 'C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.Web.Host\wwwroot\swagger\ui\abp.js'
+INFO  2018-10-15 20:35:20,270 [8    ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger/ui/abp.swagger.js'. Physical path: 'C:\Users\hackergateII\Desktop\4.1.0\api\3B-Evaluation-API\src\Yei3.PersonalEvaluation.Web.Host\wwwroot\swagger\ui\abp.swagger.js'
+INFO  2018-10-15 20:35:20,283 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 73.9226ms 200 application/javascript
+INFO  2018-10-15 20:35:20,283 [12   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 77.5243ms 200 application/javascript
+INFO  2018-10-15 20:35:20,290 [8    ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+INFO  2018-10-15 20:35:20,297 [8    ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 88.1838ms 200 application/javascript
+INFO  2018-10-15 20:35:20,351 [16   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+INFO  2018-10-15 20:35:20,352 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 146.0155ms 200 application/javascript
+INFO  2018-10-15 20:35:21,275 [4    ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/v1/swagger.json  
+INFO  2018-10-15 20:35:21,382 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/favicon-32x32.png  
+INFO  2018-10-15 20:35:21,392 [14   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/favicon-32x32.png'. Physical path: 'N/A'
+INFO  2018-10-15 20:35:21,393 [14   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 11.3166ms 200 image/png
+INFO  2018-10-15 20:35:21,418 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/swagger/favicon-16x16.png  
+INFO  2018-10-15 20:35:21,421 [16   ] NetCore.StaticFiles.StaticFileMiddleware - Sending file. Request path: '/favicon-16x16.png'. Physical path: 'N/A'
+INFO  2018-10-15 20:35:21,421 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 3.125ms 200 image/png
+INFO  2018-10-15 20:35:21,796 [4    ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 522.0897ms 200 application/json;charset=utf-8
+INFO  2018-10-15 20:36:48,031 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/api/services/app/Role/GetAllPermissions  
+INFO  2018-10-15 20:36:48,100 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "GetAllPermissions", controller = "Role"}. Executing action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application)
+WARN  2018-10-15 20:36:48,474 [29   ] Mvc.Authorization.AbpAuthorizationFilter - Abp.Authorization.AbpAuthorizationException: Current user did not login to the application!
+   at Abp.Authorization.AuthorizationHelper.AuthorizeAsync(IEnumerable`1 authorizeAttributes) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 48
+   at Abp.Authorization.AuthorizationHelper.CheckPermissions(MethodInfo methodInfo, Type type) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 98
+   at Abp.Authorization.AuthorizationHelper.AuthorizeAsync(MethodInfo methodInfo, Type type) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 57
+   at Abp.AspNetCore.Mvc.Authorization.AbpAuthorizationFilter.OnAuthorizationAsync(AuthorizationFilterContext context) in D:\Github\aspnetboilerplate\src\Abp.AspNetCore\AspNetCore\Mvc\Authorization\AbpAuthorizationFilter.cs:line 53
+Abp.Authorization.AbpAuthorizationException: Current user did not login to the application!
+   at Abp.Authorization.AuthorizationHelper.AuthorizeAsync(IEnumerable`1 authorizeAttributes) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 48
+   at Abp.Authorization.AuthorizationHelper.CheckPermissions(MethodInfo methodInfo, Type type) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 98
+   at Abp.Authorization.AuthorizationHelper.AuthorizeAsync(MethodInfo methodInfo, Type type) in D:\Github\aspnetboilerplate\src\Abp\Authorization\AuthorizationHelper.cs:line 57
+   at Abp.AspNetCore.Mvc.Authorization.AbpAuthorizationFilter.OnAuthorizationAsync(AuthorizationFilterContext context) in D:\Github\aspnetboilerplate\src\Abp.AspNetCore\AspNetCore\Mvc\Authorization\AbpAuthorizationFilter.cs:line 53
+INFO  2018-10-15 20:36:48,480 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Authorization failed for the request at filter 'Abp.AspNetCore.Mvc.Authorization.AbpAuthorizationFilter'.
+INFO  2018-10-15 20:36:48,513 [29   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:36:48,544 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application) in 443.9949ms
+INFO  2018-10-15 20:36:48,545 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 513.5882ms 401 application/json; charset=utf-8
+INFO  2018-10-15 20:36:59,478 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 POST http://localhost:21021/api/services/app/Account/IsTenantAvailable application/json 23
+INFO  2018-10-15 20:36:59,513 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "IsTenantAvailable", controller = "Account"}. Executing action Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application)
+INFO  2018-10-15 20:36:59,519 [29   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-15 20:36:59,519 [29   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-15 20:37:00,146 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application) with arguments (Yei3.PersonalEvaluation.Authorization.Accounts.Dto.IsTenantAvailableInput) - Validation state: Valid
+INFO  2018-10-15 20:37:00,270 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 123.3672ms.
+INFO  2018-10-15 20:37:00,343 [28   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:37:00,346 [28   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-15 20:37:00,346 [28   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-15 20:37:00,349 [28   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Authorization.Accounts.AccountAppService.IsTenantAvailable (Yei3.PersonalEvaluation.Application) in 835.3953ms
+INFO  2018-10-15 20:37:00,350 [28   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 872.4787ms 200 application/json; charset=utf-8
+INFO  2018-10-15 20:37:00,357 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 POST http://localhost:21021/api/TokenAuth/Authenticate application/json 50
+INFO  2018-10-15 20:37:00,503 [28   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {action = "Authenticate", controller = "TokenAuth", area = ""}. Executing action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core)
+INFO  2018-10-15 20:37:00,503 [28   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-15 20:37:00,503 [28   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-15 20:37:00,796 [28   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) with arguments (Yei3.PersonalEvaluation.Models.TokenAuth.AuthenticateModel) - Validation state: Valid
+INFO  2018-10-15 20:37:01,944 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 1148.047ms.
+INFO  2018-10-15 20:37:02,348 [20   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:37:02,352 [20   ] pNetCore.Cors.Infrastructure.CorsService - CORS policy execution failed.
+INFO  2018-10-15 20:37:02,353 [20   ] pNetCore.Cors.Infrastructure.CorsService - Request origin http://localhost:21021 does not have permission to access the resource.
+INFO  2018-10-15 20:37:02,353 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Controllers.TokenAuthController.Authenticate (Yei3.PersonalEvaluation.Web.Core) in 1849.7402ms
+INFO  2018-10-15 20:37:02,354 [20   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 1996.6453ms 200 application/json; charset=utf-8
+INFO  2018-10-15 20:37:09,196 [16   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/api/services/app/Role/GetAllPermissions  
+INFO  2018-10-15 20:37:09,283 [16   ] uthentication.JwtBearer.JwtBearerHandler - Successfully validated the token.
+WARN  2018-10-15 20:37:09,374 [17   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:37:09,375 [17   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:37:09,379 [17   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:37:09,380 [17   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:37:09,397 [17   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported cultures 'es-US, es, es-419'.
+WARN  2018-10-15 20:37:09,397 [17   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported UI Cultures 'es-US, es, es-419'.
+INFO  2018-10-15 20:37:09,407 [17   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "GetAllPermissions", controller = "Role"}. Executing action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application)
+INFO  2018-10-15 20:37:09,911 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application) - Validation state: Valid
+INFO  2018-10-15 20:37:09,998 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 86.923ms.
+INFO  2018-10-15 20:37:10,015 [20   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:37:10,025 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAllPermissions (Yei3.PersonalEvaluation.Application) in 617.654ms
+INFO  2018-10-15 20:37:10,025 [20   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 829.8733ms 200 application/json; charset=utf-8
+INFO  2018-10-15 20:37:56,695 [29   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/api/services/app/Role/GetAll?SkipCount=0&MaxResultCount=5  
+INFO  2018-10-15 20:37:56,701 [29   ] uthentication.JwtBearer.JwtBearerHandler - Successfully validated the token.
+WARN  2018-10-15 20:37:56,708 [29   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:37:56,708 [29   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:37:56,708 [29   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:37:56,708 [29   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:37:56,709 [29   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported cultures 'es-US, es, es-419'.
+WARN  2018-10-15 20:37:56,709 [29   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported UI Cultures 'es-US, es, es-419'.
+INFO  2018-10-15 20:37:56,760 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "GetAll", controller = "Role"}. Executing action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application)
+INFO  2018-10-15 20:37:56,805 [29   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application) with arguments (Abp.Application.Services.Dto.PagedResultRequestDto) - Validation state: Valid
+INFO  2018-10-15 20:37:57,255 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 449.9447ms.
+INFO  2018-10-15 20:37:57,275 [20   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:37:57,288 [20   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application) in 527.7419ms
+INFO  2018-10-15 20:37:57,289 [20   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 594.1231ms 200 application/json; charset=utf-8
+INFO  2018-10-15 20:38:46,673 [17   ] soft.AspNetCore.Hosting.Internal.WebHost - Request starting HTTP/1.1 GET http://localhost:21021/api/services/app/Role/GetAll?SkipCount=0&MaxResultCount=10  
+INFO  2018-10-15 20:38:46,681 [17   ] uthentication.JwtBearer.JwtBearerHandler - Successfully validated the token.
+WARN  2018-10-15 20:38:46,683 [17   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:38:46,684 [17   ] calization.RequestLocalizationMiddleware - AbpUserRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:38:46,686 [17   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported cultures 'es'.
+WARN  2018-10-15 20:38:46,687 [17   ] calization.RequestLocalizationMiddleware - AbpDefaultRequestCultureProvider returned the following unsupported UI Cultures 'es'.
+WARN  2018-10-15 20:38:46,689 [17   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported cultures 'es-US, es, es-419'.
+WARN  2018-10-15 20:38:46,691 [17   ] calization.RequestLocalizationMiddleware - AcceptLanguageHeaderRequestCultureProvider returned the following unsupported UI Cultures 'es-US, es, es-419'.
+INFO  2018-10-15 20:38:46,708 [17   ] ore.Mvc.Internal.ControllerActionInvoker - Route matched with {area = "app", action = "GetAll", controller = "Role"}. Executing action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application)
+INFO  2018-10-15 20:38:46,720 [17   ] ore.Mvc.Internal.ControllerActionInvoker - Executing action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application) with arguments (Abp.Application.Services.Dto.PagedResultRequestDto) - Validation state: Valid
+INFO  2018-10-15 20:38:46,787 [22   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action method Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 66.7774ms.
+INFO  2018-10-15 20:38:46,805 [22   ] .Mvc.Infrastructure.ObjectResultExecutor - Executing ObjectResult, writing value of type 'Abp.Web.Models.AjaxResponse'.
+INFO  2018-10-15 20:38:46,807 [22   ] ore.Mvc.Internal.ControllerActionInvoker - Executed action Yei3.PersonalEvaluation.Roles.RoleAppService.GetAll (Yei3.PersonalEvaluation.Application) in 97.956ms
+INFO  2018-10-15 20:38:46,808 [22   ] soft.AspNetCore.Hosting.Internal.WebHost - Request finished in 135.16ms 200 application/json; charset=utf-8
