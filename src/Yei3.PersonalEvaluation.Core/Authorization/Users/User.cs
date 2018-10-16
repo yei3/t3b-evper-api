@@ -9,7 +9,16 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public const string DefaultPassword = "123qwe";
         public const int EmployeeNumberLength = 4;
 
-        public virtual string EmployeeNumber { get; protected set; }
+        public virtual string EmployeeNumber { get; set; }
+        public virtual string JobDescription { get; set; }
+        public virtual string Area { get; set; }
+        public virtual string Region { get; set; }
+        public virtual string ImmediateSupervisor { get; set; }
+        public virtual string SocialReason { get; set; }
+        public virtual string Scholarship { get; set; }
+        public virtual DateTime EntryDate { get; set; }
+        public virtual DateTime? ReassignDate { get; set; }
+        public virtual DateTime BirthDate { get; set; }
 
         public static string CreateRandomPassword()
         {
