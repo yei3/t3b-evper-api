@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Authorization.Users;
 using Abp.Extensions;
+using Yei3.PersonalEvaluation.Evaluations;
+using Yei3.PersonalEvaluation.Evaluations.Capabilities;
+using Yei3.PersonalEvaluation.Evaluations.Objectives;
+using Yei3.PersonalEvaluation.Identity;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
@@ -19,6 +25,17 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public virtual DateTime EntryDate { get; set; }
         public virtual DateTime? ReassignDate { get; set; }
         public virtual DateTime BirthDate { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual ICollection<UserSignature> UserSignatures { get; protected set; }
+        [ForeignKey("UserId")]
+        public virtual ICollection<UserObjective> UserObjectives { get; protected set; }
+        [ForeignKey("UserId")]
+        public virtual ICollection<UserCapability> UserCapabilities { get; protected set; }
+        [ForeignKey("EvaluatorUserId")]
+        public virtual ICollection<Evaluation> EvaluationsPerformed { get; protected set; }
+        [ForeignKey("EvaluatedUserId")]
+        public virtual ICollection<Evaluation> EvaluationsReceived { get; protected set; }
 
         public static string CreateRandomPassword()
         {
