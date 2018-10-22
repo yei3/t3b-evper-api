@@ -12,6 +12,13 @@
 
     public class Evaluation : FullAuditedEntity<long>, ICommented, ISigned
     {
+        public Evaluation(EvaluationTerm term, long evaluatedUserId, long evaluatorUserId)
+        {
+            Term = term;
+            EvaluatedUserId = evaluatedUserId;
+            EvaluatorUserId = evaluatorUserId;
+        }
+
         public virtual EvaluationTerm Term { get; protected set; }
         public virtual long EvaluatedUserId { get; protected set; }
         [ForeignKey("EvaluatedUserId")]

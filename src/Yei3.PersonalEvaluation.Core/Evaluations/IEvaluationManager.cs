@@ -7,7 +7,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
     public interface IEvaluationManager : IDomainService
     {
-        Task CreateEvaluation(NewEvaluationValueObject newEvaluationValueObject);
-        Task AddEvaluationObjective(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject);
+        Task<long> CreateEvaluationAndGetIdAsync(NewEvaluationValueObject newEvaluationValueObject);
+        Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject);
+        Task<long> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityValueObject addEvaluationCapabilityValueObject);
     }
 }

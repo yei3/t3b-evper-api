@@ -8,6 +8,15 @@
 
     public class Objective : FullAuditedEntity<long>, IIndexed, IDescribed, IPassivable, IAccomplished
     {
+        public Objective(byte index, string description, long evaluationId, bool isActive, bool isAccomplished)
+        {
+            Index = index;
+            Description = description;
+            EvaluationId = evaluationId;
+            IsActive = isActive;
+            IsAccomplished = isAccomplished;
+        }
+
         public virtual byte Index { get; set; }
         public virtual string Description { get; set; }
         public virtual long EvaluationId { get; protected set; }
