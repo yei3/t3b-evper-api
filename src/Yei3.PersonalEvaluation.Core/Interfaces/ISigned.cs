@@ -2,6 +2,6 @@
 {
     public interface ISigned
     {
-        long UserSignatureId { get; set; }
+        long? UserSignatureId { get; set; }
     }
 }

@@ -9,6 +9,7 @@
     using Objectives;
     using Identity;
     using Interfaces;
+    using JetBrains.Annotations;
 
     public class Evaluation : FullAuditedEntity<long>, ICommented, ISigned
     {
@@ -30,13 +31,17 @@
         public virtual ICollection<Capability> Capabilities { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual ICollection<Objective> Objectives { get; protected set; }
-        public virtual long UserSignatureId { get; set; }
+        public virtual long? UserSignatureId { get; set; }
+        [CanBeNull]
         [ForeignKey("UserSignatureId")]
         public virtual UserSignature UserSignature { get; protected set; }
-
+        [CanBeNull]
         public virtual string Comment { get; set; }
+        [CanBeNull]
         public virtual string Strengths { get; protected set; }
+        [CanBeNull]
         public virtual string ImprovementsArea { get; protected set; }
+        [CanBeNull]
         public virtual string DevelopmentPlan { get; protected set; }
         [ForeignKey("NextEvaluationId")]
         public virtual ICollection<Objective> NextTermObjectives { get; protected set; }
