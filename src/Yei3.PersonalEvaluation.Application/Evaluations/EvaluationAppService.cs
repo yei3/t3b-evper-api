@@ -5,6 +5,8 @@
     using Dto;
     using Abp.Authorization;
     using Authorization;
+    using Abp.Domain.Entities;
+    using Abp.UI;
 
     public class EvaluationAppService : PersonalEvaluationAppServiceBase, IEvaluationAppService
     {
@@ -19,6 +21,30 @@
         public async Task<EntityDto<long>> CreateEvaluationAndGetIdAsync(CreateEvaluationDto createEvaluationDto)
         {
             return new EntityDto<long>(await EvaluationManager.CreateEvaluationAndGetIdAsync(createEvaluationDto));
+        }
+
+        public async Task<EntityDto<long>> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveDto addEvaluationObjectiveDto)
+        {
+            try
+            {
+                return new EntityDto<long>(await EvaluationManager.AddEvaluationObjectiveAndGetIdAsync(addEvaluationObjectiveDto));
+            }
+            catch (EntityNotFoundException e)
+            {
+                throw new UserFriendlyException(L(e.Message));
+            }
+        }
+
+        public async Task<EntityDto<long>> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityDto addEvaluationCapabilityDto)
+        {
+            try
+            {
+                return new EntityDto<long>(await EvaluationManager.AddEvaluationCapabilityAndGetIdAsync(addEvaluationCapabilityDto));
+            }
+            catch (EntityNotFoundException e)
+            {
+                throw new UserFriendlyException(L(e.Message));
+            }
         }
     }
 }
