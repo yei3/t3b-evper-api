@@ -6,7 +6,7 @@
     using Abp.Domain.Entities;
     using System.Collections.Generic;
 
-    public class Capability : FullAuditedEntity<long>, IIndexed, IDescribed, IPassivable, INamed
+    public class Capability : FullAuditedEntity<long>, IIndexed, IPassivable, IFullyDescribed
     {
         public Capability(long evaluationId, byte index, string description, bool isActive, string name)
         {

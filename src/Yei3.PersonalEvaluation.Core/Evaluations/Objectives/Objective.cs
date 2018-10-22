@@ -6,15 +6,14 @@
     using Abp.Domain.Entities;
     using Interfaces;
 
-    public class Objective : FullAuditedEntity<long>, IIndexed, IDescribed, IPassivable, IAccomplished
+    public class Objective : FullAuditedEntity<long>, IIndexed, IDescribed, IPassivable
     {
-        public Objective(byte index, string description, long evaluationId, bool isActive, bool isAccomplished)
+        public Objective(byte index, string description, long evaluationId, bool isActive)
         {
             Index = index;
             Description = description;
             EvaluationId = evaluationId;
             IsActive = isActive;
-            IsAccomplished = isAccomplished;
         }
 
         public virtual byte Index { get; set; }
@@ -28,6 +27,5 @@
         public virtual long NextEvaluationId { get; protected set; }
         [ForeignKey("NextEvaluationId")]
         public virtual Evaluation NextEvaluation { get; protected set; }
-        public bool IsAccomplished { get; set; }
     }
 }

@@ -1,8 +1,7 @@
-﻿using Yei3.PersonalEvaluation.Interfaces;
-
-namespace Yei3.PersonalEvaluation.Evaluations.ValueObjects
+﻿namespace Yei3.PersonalEvaluation.Evaluations.ValueObjects
 {
     using Abp.Domain.Values;
+    using Interfaces;
 
     public class AddEvaluationCapabilityValueObject : ValueObject<AddEvaluationCapabilityValueObject>, INamed, IDescribed, IIndexed
     {

@@ -32,15 +32,14 @@
 
             if (evaluation.IsNullOrDeleted())
             {
-                throw new UserFriendlyException(404, L("evaluation_not_found"));
+                throw new UserFriendlyException(404, L("EvaluationNotFound"));
             }
 
             evaluation.Objectives.Add(new Objective(
                 addEvaluationObjectiveValueObject.Index,
                 addEvaluationObjectiveValueObject.Description,
                 addEvaluationObjectiveValueObject.EvaluationId,
-                true,
-                false
+                true
                 ));
 
             return await EvaluationRepository.InsertOrUpdateAndGetIdAsync(evaluation);
@@ -52,7 +51,7 @@
 
             if (evaluation.IsNullOrDeleted())
             {
-                throw new UserFriendlyException(404, L("evaluation_not_found"));
+                throw new UserFriendlyException(404, L("EvaluationNotFound"));
             }
 
             evaluation.Capabilities.Add(new Capability(
