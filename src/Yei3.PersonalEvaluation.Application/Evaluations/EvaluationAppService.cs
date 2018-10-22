@@ -23,6 +23,7 @@
             return new EntityDto<long>(await EvaluationManager.CreateEvaluationAndGetIdAsync(createEvaluationDto));
         }
 
+        [AbpAuthorize(PermissionNames.AdministrationEvaluationObjectivesManage)]
         public async Task<EntityDto<long>> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveDto addEvaluationObjectiveDto)
         {
             try
@@ -35,6 +36,7 @@
             }
         }
 
+        [AbpAuthorize(PermissionNames.AdministrationEvaluationCapabilitiesManage)]
         public async Task<EntityDto<long>> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityDto addEvaluationCapabilityDto)
         {
             try
