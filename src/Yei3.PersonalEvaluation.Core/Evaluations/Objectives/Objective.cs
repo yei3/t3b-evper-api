@@ -24,7 +24,7 @@
         public virtual bool IsActive { get; set; }
         [ForeignKey("ObjectiveId")]
         public  virtual ICollection<UserObjective> UserObjectives { get; protected set; }
-        public virtual long NextEvaluationId { get; protected set; }
+        public virtual long? NextEvaluationId { get; protected set; }
         [ForeignKey("NextEvaluationId")]
         public virtual Evaluation NextEvaluation { get; protected set; }
     }
