@@ -5,7 +5,7 @@
     using ValueObjects;
     using Abp.Domain.Entities;
     using Abp.Domain.Repositories;
-    using Abp.UI;
+    using Microsoft.EntityFrameworkCore;
     using Capabilities;
     using Objectives;
 
@@ -13,10 +13,14 @@
     {
 
         private readonly IRepository<Evaluation, long> EvaluationRepository;
+        private readonly IRepository<Objective, long> ObjectiveRepository;
+        private readonly IRepository<Capability, long> CapabilityRepository;
 
-        public EvaluationManager(IRepository<Evaluation, long> evaluationRepository)
+        public EvaluationManager(IRepository<Evaluation, long> evaluationRepository, IRepository<Objective, long> objectiveRepository, IRepository<Capability, long> capabilityRepository)
         {
             EvaluationRepository = evaluationRepository;
+            ObjectiveRepository = objectiveRepository;
+            CapabilityRepository = capabilityRepository;
         }
 
         public async Task<long> CreateEvaluationAndGetIdAsync(NewEvaluationValueObject newEvaluationValueObject)
@@ -28,41 +32,41 @@
 
         public async Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject)
         {
-            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(addEvaluationObjectiveValueObject.EvaluationId);
-
-            if (evaluation.IsNullOrDeleted())
+            try
             {
-                throw new UserFriendlyException(404, L("EvaluationNotFound"));
+                Objective objective = new Objective(
+                    addEvaluationObjectiveValueObject.Index,
+                    addEvaluationObjectiveValueObject.Description,
+                    addEvaluationObjectiveValueObject.EvaluationId,
+                    true
+                );
+
+                return await ObjectiveRepository.InsertAndGetIdAsync(objective);
             }
-
-            evaluation.Objectives.Add(new Objective(
-                addEvaluationObjectiveValueObject.Index,
-                addEvaluationObjectiveValueObject.Description,
-                addEvaluationObjectiveValueObject.EvaluationId,
-                true
-                ));
-
-            return await EvaluationRepository.InsertOrUpdateAndGetIdAsync(evaluation);
+            catch (DbUpdateException)
+            {
+                throw new EntityNotFoundException("EvaluationNotFound"); // most certainly the evaluation does not exist
+            }
         }
 
         public async Task<long> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityValueObject addEvaluationCapabilityValueObject)
         {
-            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(addEvaluationCapabilityValueObject.EvaluationId);
-
-            if (evaluation.IsNullOrDeleted())
+            try
             {
-                throw new UserFriendlyException(404, L("EvaluationNotFound"));
+                Capability capability = new Capability(
+                    addEvaluationCapabilityValueObject.EvaluationId,
+                    addEvaluationCapabilityValueObject.Index,
+                    addEvaluationCapabilityValueObject.Description,
+                    true,
+                    addEvaluationCapabilityValueObject.Name
+                    );
+
+                return await CapabilityRepository.InsertAndGetIdAsync(capability);
             }
-
-            evaluation.Capabilities.Add(new Capability(
-                addEvaluationCapabilityValueObject.EvaluationId,
-                addEvaluationCapabilityValueObject.Index,
-                addEvaluationCapabilityValueObject.Description,
-                true,
-                addEvaluationCapabilityValueObject.Name
-                ));
-
-            return await EvaluationRepository.InsertOrUpdateAndGetIdAsync(evaluation);
+            catch (DbUpdateException)
+            {
+                throw new EntityNotFoundException("EvaluationNotFound"); // most certainly the evaluation does not exist
+            }
         }
     }
 }
