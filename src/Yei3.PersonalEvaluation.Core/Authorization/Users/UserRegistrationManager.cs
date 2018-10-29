@@ -127,7 +127,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
                 }
 
-                _userManager.CreateAsync(user, "F4k3P4ssw0rd.").GetAwaiter().GetResult();
+                _userManager.CreateAsync(user, $"{user.EmployeeNumber}F4k3P4ssw0rd.").GetAwaiter().GetResult();
                 _userManager.AddToRoleAsync(user, ParseRole(role)).GetAwaiter().GetResult();
 
                 unitOfWork.Complete();
