@@ -9,5 +9,7 @@
         public int ExpireInSeconds { get; set; }
 
         public long UserId { get; set; }
+
+        public bool IsFirstTimeLongin {get;set;}
     }
 }

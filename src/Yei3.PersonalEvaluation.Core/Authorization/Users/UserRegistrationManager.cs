@@ -106,9 +106,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     Region = region,
                     ImmediateSupervisor = immediateSupervisor,
                     SocialReason = socialReason,
-                    EntryDate = NormailizeDateTime(entryDate),
-                    ReassignDate = NormailizeDateTime(reassignDate),
-                    BirthDate = NormailizeDateTime(birthDate),
+                    EntryDate = NormalizeDateTime(entryDate),
+                    ReassignDate = NormalizeDateTime(reassignDate),
+                    BirthDate = NormalizeDateTime(birthDate),
                     Scholarship = scholarship,
                     EmailAddress = email,
                     IsEmailConfirmed = false,
@@ -136,7 +136,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
         }
 
-        private DateTime NormailizeDateTime(string dateString)
+        public Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
+        {
+            return Task.FromResult(true);
+        }
+
+        private DateTime NormalizeDateTime(string dateString)
         {
 
             if (dateString.IsNullOrEmpty())
@@ -145,12 +150,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
 
             int firstSlashIndex = dateString.IndexOf('/');
-            int secodSlashIndex = dateString.Substring(firstSlashIndex + 1).IndexOf('/') + firstSlashIndex;
-            int firstSpaceIndex = dateString.Substring(secodSlashIndex + 1).IndexOf(' ') + secodSlashIndex;
+            int secondSlashIndex = dateString.Substring(firstSlashIndex + 1).IndexOf('/') + firstSlashIndex;
+            int firstSpaceIndex = dateString.Substring(secondSlashIndex + 1).IndexOf(' ') + secondSlashIndex;
 
             int months = int.Parse(dateString.Substring(0, firstSlashIndex));
-            int days = int.Parse(dateString.Substring(firstSlashIndex + 1, secodSlashIndex - firstSlashIndex));
-            int years = int.Parse(dateString.Substring(secodSlashIndex + 2, firstSpaceIndex - secodSlashIndex));
+            int days = int.Parse(dateString.Substring(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex));
+            int years = int.Parse(dateString.Substring(secondSlashIndex + 2, firstSpaceIndex - secondSlashIndex));
 
             return new DateTime(years, months, days);
         }

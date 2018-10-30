@@ -65,8 +65,9 @@ namespace Yei3.PersonalEvaluation.Controllers
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
-                UserId = loginResult.User.Id
-            };
+                UserId = loginResult.User.Id,
+                IsFirstTimeLongin = await _userRegistrationManager.IsFirstTimeLogin(model.UserNameOrEmailAddress)
+        };
         }
 
         [HttpGet]
