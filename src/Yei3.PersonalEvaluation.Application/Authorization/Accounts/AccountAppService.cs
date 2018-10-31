@@ -70,6 +70,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
             }
 
             await _userManager.ChangePasswordAsync(user, input.Password);
+            await _userManager.UpdateNormalizedEmailAsync(user);
 
             return new RegisterOutput
             {

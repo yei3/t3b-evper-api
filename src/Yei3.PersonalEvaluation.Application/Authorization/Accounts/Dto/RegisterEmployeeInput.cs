@@ -11,6 +11,9 @@ namespace Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto
         [StringLength(User.EmployeeNumberLength)]
         public string EmployeeNumber {get; set;}
 
+        [Required, EmailAddress]
+        public string Email {get; set;}
+
         [Required]
         [DisableAuditing]
         public string Password { get; set; }
