@@ -8,7 +8,6 @@ namespace Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto
     public class RegisterEmployeeInput : IValidatableObject
     {
         [Required]
-        [StringLength(User.EmployeeNumberLength)]
         public string EmployeeNumber {get; set;}
 
         [Required, EmailAddress]
@@ -23,7 +22,7 @@ namespace Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if(EmployeeNumber.Length != User.EmployeeNumberLength) {
+            if (EmployeeNumber.Length != User.EmployeeNumberLength) {
                 yield return new ValidationResult($"El numero de empleado {EmployeeNumber} no es correcto.");
             }
 

@@ -8,6 +8,9 @@ using Yei3.PersonalEvaluation.Authorization.Users;
 
 namespace Yei3.PersonalEvaluation.Authorization.Accounts
 {
+
+    using Abp.Authorization;
+
     public class AccountAppService : PersonalEvaluationAppServiceBase, IAccountAppService
     {
         private readonly UserRegistrationManager _userRegistrationManager;
@@ -56,6 +59,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
             };
         }
 
+        [AbpAuthorize]
         public async Task<RegisterOutput> FirstTimeLoginAsync(RegisterEmployeeInput input)
         {
             User user;
