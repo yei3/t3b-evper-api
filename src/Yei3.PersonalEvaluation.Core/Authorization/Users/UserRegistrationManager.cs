@@ -24,6 +24,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         private readonly RoleManager _roleManager;
         private readonly IPasswordHasher<User> _passwordHasher;
 
+        private readonly string PasswordSalt = "_t3B";
+
         public UserRegistrationManager(
             TenantManager tenantManager,
             UserManager userManager,
@@ -127,7 +129,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
                 }
 
-                _userManager.CreateAsync(user, $"{user.EmployeeNumber}F4k3P4ssw0rd.").GetAwaiter().GetResult();
+                _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}").GetAwaiter().GetResult();
                 _userManager.AddToRoleAsync(user, ParseRole(role)).GetAwaiter().GetResult();
 
                 unitOfWork.Complete();
