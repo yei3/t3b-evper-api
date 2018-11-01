@@ -138,9 +138,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
         }
 
-        public Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
+        public async Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
         {
-            return Task.FromResult(true);
+            User user = await _userManager.FindByEmployeeNumberAsync(userNameOrEmailAddress);
+            return !(await _userManager.IsEmailConfirmedAsync(user));
         }
 
         private DateTime NormalizeDateTime(string dateString)
