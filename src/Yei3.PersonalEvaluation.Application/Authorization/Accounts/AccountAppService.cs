@@ -75,8 +75,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
 
             await _userManager.ChangePasswordAsync(user, input.Password);
             await _userManager.SetEmailAsync(user, input.Email);
-            string fakeToken = await _userManager.GenerateChangeEmailTokenAsync(user, input.Email);
-            await _userManager.ConfirmEmailAsync(user, fakeToken);
+            user.IsEmailConfirmed = true;
 
             return new RegisterOutput
             {

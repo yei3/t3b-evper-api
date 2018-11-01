@@ -10,6 +10,6 @@
 
         public long UserId { get; set; }
 
-        public bool IsFirstTimeLongin {get;set;}
+        public bool IsFirstTimeLogin {get;set;}
     }
 }
