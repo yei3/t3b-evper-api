@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.Auditing;
+using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Sessions.Dto;
 
 namespace Yei3.PersonalEvaluation.Sessions
@@ -27,7 +28,13 @@ namespace Yei3.PersonalEvaluation.Sessions
 
             if (AbpSession.UserId.HasValue)
             {
-                output.User = ObjectMapper.Map<UserLoginInfoDto>(await GetCurrentUserAsync());
+
+                User user = await GetCurrentUserAsync();
+
+                ;
+
+                output.User = ObjectMapper.Map<UserLoginInfoDto>(user);
+                output.Roles = ObjectMapper.Map<List<string>>(await this.UserManager.GetRolesAsync(user));
             }
 
             return output;
