@@ -73,8 +73,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
             }
             catch (InvalidOperationException)
             {
-                Logger.Error($"Usuario {input.EmployeeNumber} no encontrado");
-                return new RegisterOutput { CanLogin = false, HasErrors = true, Errors = new List<string> { $"Usuario {input.EmployeeNumber} no encontrado" } };
+                string userNotFoundErrorMessage = $"Usuario {input.EmployeeNumber} no encontrado";
+                Logger.Error(userNotFoundErrorMessage);
+                return new RegisterOutput { CanLogin = false, HasErrors = true, Errors = new List<string> { userNotFoundErrorMessage } };
             }
 
             IdentityResult changePasswordIdentityResult = await _userManager.ChangePasswordAsync(user, input.Password);
