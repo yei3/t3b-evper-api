@@ -8,26 +8,21 @@
     using Microsoft.EntityFrameworkCore;
     using Capabilities;
     using Objectives;
+    using System.Collections.Generic;
 
     public class EvaluationManager : DomainService, IEvaluationManager
     {
-
-        private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Objective, long> ObjectiveRepository;
         private readonly IRepository<Capability, long> CapabilityRepository;
+        private readonly IRepository<Evaluation, long> EvaluationRepository;
+        private readonly IRepository<EvaluationUser, long> EvaluationUserRepository;
 
-        public EvaluationManager(IRepository<Evaluation, long> evaluationRepository, IRepository<Objective, long> objectiveRepository, IRepository<Capability, long> capabilityRepository)
+        public EvaluationManager(IRepository<Objective, long> objectiveRepository, IRepository<Capability, long> capabilityRepository, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationUser, long> evaluationUserRepository)
         {
-            EvaluationRepository = evaluationRepository;
             ObjectiveRepository = objectiveRepository;
             CapabilityRepository = capabilityRepository;
-        }
-
-        public async Task<long> CreateEvaluationAndGetIdAsync(NewEvaluationValueObject newEvaluationValueObject)
-        {
-            Evaluation evaluation = new Evaluation(newEvaluationValueObject.Term,
-                newEvaluationValueObject.EvaluatedUserId, newEvaluationValueObject.EvaluatorUserId);
-            return await EvaluationRepository.InsertAndGetIdAsync(evaluation);
+            EvaluationRepository = evaluationRepository;
+            EvaluationUserRepository = evaluationUserRepository;
         }
 
         public async Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject)
@@ -67,6 +62,34 @@
             {
                 throw new EntityNotFoundException("EvaluationNotFound"); // most certainly the evaluation does not exist
             }
+        }
+
+        public async Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds)
+        {
+            Evaluation evaluation = await EvaluationRepository
+                .FirstOrDefaultAsync(evaluationId);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException($"Evaluacion {evaluationId} no encontrada");
+            }
+
+            List<long> evaluationUserIds = new List<long>();
+
+            try
+            {
+                foreach (long userId in userIds)
+                {
+                    evaluationUserIds.Add(
+                        await EvaluationUserRepository.InsertAndGetIdAsync(new EvaluationUser(evaluationId, userId)));
+                }
+            }
+            catch (DbUpdateException)
+            {
+                throw new EntityNotFoundException($"Uno de los usuarios \"{evaluationUserIds.ToString()}\" es no valido");  // most certainly the user does not exist
+            }
+
+            return evaluationUserIds;
         }
     }
 }

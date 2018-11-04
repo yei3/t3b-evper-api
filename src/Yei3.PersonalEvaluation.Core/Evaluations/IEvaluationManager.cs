@@ -3,11 +3,12 @@
     using Abp.Domain.Services;
     using System.Threading.Tasks;
     using ValueObjects;
+    using System.Collections.Generic;
 
     public interface IEvaluationManager : IDomainService
     {
-        Task<long> CreateEvaluationAndGetIdAsync(NewEvaluationValueObject newEvaluationValueObject);
         Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject);
         Task<long> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityValueObject addEvaluationCapabilityValueObject);
+        Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds);
     }
 }

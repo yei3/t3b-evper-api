@@ -1040,7 +1040,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.ToTable("Capabilities");
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Capabilities.UserCapability", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Capabilities.EvaluationUserCapability", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
@@ -1057,6 +1057,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime?>("DeletionTime");
 
+                    b.Property<long>("EvaluationUserId");
+
                     b.Property<bool>("IsDeleted");
 
                     b.Property<DateTime?>("LastModificationTime");
@@ -1065,18 +1067,48 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<float>("Rate");
 
-                    b.Property<long>("UserId");
+                    b.Property<long?>("UserId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CapabilityId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("EvaluationUserId");
 
                     b.ToTable("UserCapabilities");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<long>("EvaluatorUserId");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("Term");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaluatorUserId");
+
+                    b.ToTable("Evaluations");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
@@ -1093,9 +1125,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("DevelopmentPlan");
 
-                    b.Property<long>("EvaluatedUserId");
-
-                    b.Property<long>("EvaluatorUserId");
+                    b.Property<long>("EvaluationId");
 
                     b.Property<string>("ImprovementsArea");
 
@@ -1107,19 +1137,55 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Strengths");
 
-                    b.Property<int>("Term");
+                    b.Property<long>("UserId");
 
                     b.Property<long?>("UserSignatureId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EvaluatedUserId");
+                    b.HasIndex("EvaluationId");
 
-                    b.HasIndex("EvaluatorUserId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("UserSignatureId");
 
-                    b.ToTable("Evaluations");
+                    b.ToTable("EvaluationUsers");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.EvaluationUserObjective", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<long>("EvaluationUserId");
+
+                    b.Property<bool>("IsAccomplished");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<long>("ObjectiveId");
+
+                    b.Property<long?>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaluationUserId");
+
+                    b.HasIndex("ObjectiveId");
+
+                    b.ToTable("UserObjectives");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.Objective", b =>
@@ -1158,40 +1224,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.HasIndex("NextEvaluationId");
 
                     b.ToTable("Objectives");
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.UserObjective", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime>("CreationTime");
-
-                    b.Property<long?>("CreatorUserId");
-
-                    b.Property<long?>("DeleterUserId");
-
-                    b.Property<DateTime?>("DeletionTime");
-
-                    b.Property<bool>("IsAccomplished");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<DateTime?>("LastModificationTime");
-
-                    b.Property<long?>("LastModifierUserId");
-
-                    b.Property<long>("ObjectiveId");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ObjectiveId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserObjectives");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>
@@ -1430,34 +1462,55 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Capabilities.UserCapability", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Capabilities.EvaluationUserCapability", b =>
                 {
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Capabilities.Capability", "Capability")
-                        .WithMany("UserCapabilities")
+                        .WithMany("EvaluationUserCapabilities")
                         .HasForeignKey("CapabilityId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "User")
-                        .WithMany("UserCapabilities")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", "EvaluationUser")
+                        .WithMany("EvaluationUserCapabilities")
+                        .HasForeignKey("EvaluationUserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
                 {
-                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "EvaluatedUser")
-                        .WithMany("EvaluationsReceived")
-                        .HasForeignKey("EvaluatedUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "EvaluatorUser")
                         .WithMany("EvaluationsPerformed")
                         .HasForeignKey("EvaluatorUserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", b =>
+                {
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Evaluation", "Evaluation")
+                        .WithMany("EvaluationUsers")
+                        .HasForeignKey("EvaluationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "User")
+                        .WithMany("EvaluationsReceived")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Yei3.PersonalEvaluation.Identity.UserSignature", "UserSignature")
-                        .WithMany()
+                        .WithMany("EvaluationUsers")
                         .HasForeignKey("UserSignatureId");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.EvaluationUserObjective", b =>
+                {
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", "EvaluationUser")
+                        .WithMany("EvaluationUserObjectives")
+                        .HasForeignKey("EvaluationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Objectives.Objective", "Objective")
+                        .WithMany("EvaluationUserObjectives")
+                        .HasForeignKey("ObjectiveId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.Objective", b =>
@@ -1468,21 +1521,12 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Evaluation", "NextEvaluation")
+                        .WithMany()
+                        .HasForeignKey("NextEvaluationId");
+
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationUser")
                         .WithMany("NextTermObjectives")
                         .HasForeignKey("NextEvaluationId");
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Objectives.UserObjective", b =>
-                {
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Objectives.Objective", "Objective")
-                        .WithMany("UserObjectives")
-                        .HasForeignKey("ObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "User")
-                        .WithMany("UserObjectives")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>

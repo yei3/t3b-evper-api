@@ -23,7 +23,7 @@
         public virtual Evaluation Evaluation { get; protected set; }
         public virtual bool IsActive { get; set; }
         [ForeignKey("ObjectiveId")]
-        public  virtual ICollection<UserObjective> UserObjectives { get; protected set; }
+        public  virtual ICollection<EvaluationUserObjective> EvaluationUserObjectives { get; protected set; }
         public virtual long? NextEvaluationId { get; protected set; }
         [ForeignKey("NextEvaluationId")]
         public virtual Evaluation NextEvaluation { get; protected set; }
