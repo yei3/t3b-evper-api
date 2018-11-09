@@ -16,10 +16,11 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
 
         public virtual DbSet<Evaluation> Evaluations { get; set; }
         public virtual DbSet<Objective> Objectives { get; set; }
-        public virtual DbSet<UserObjective> UserObjectives { get; set; }
+        public virtual DbSet<EvaluationUserObjective> UserObjectives { get; set; }
         public virtual DbSet<Capability> Capabilities { get; set; }
-        public virtual DbSet<UserCapability> UserCapabilities { get; set; }
+        public virtual DbSet<EvaluationUserCapability> UserCapabilities { get; set; }
         public virtual DbSet<UserSignature> UserSignatures { get; set; }
+        public virtual DbSet<EvaluationUser> EvaluationUsers { get; set; }
         
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
             : base(options)
@@ -33,36 +34,44 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
             modelBuilder.Entity<Evaluation>()
                 .HasMany(evaluation => evaluation.Objectives)
                 .WithOne(objective => objective.Evaluation);
+
             modelBuilder.Entity<Evaluation>()
                 .HasMany(evaluation => evaluation.Capabilities)
                 .WithOne(capability => capability.Evaluation);
+
             modelBuilder.Entity<Evaluation>()
-                .HasMany(evaluation => evaluation.NextTermObjectives)
-                .WithOne(objective => objective.NextEvaluation);
+                .HasMany(evaluation => evaluation.EvaluationUsers)
+                .WithOne(evaluationUser => evaluationUser.Evaluation);
 
             modelBuilder.Entity<Objective>()
-                .HasMany(objective => objective.UserObjectives)
-                .WithOne(userObjective => userObjective.Objective);
+                .HasMany(objective => objective.EvaluationUserObjectives)
+                .WithOne(evaluationUserObjective => evaluationUserObjective.Objective);
 
             modelBuilder.Entity<Capability>()
-                .HasMany(capability => capability.UserCapabilities)
-                .WithOne(userCapability => userCapability.Capability);
+                .HasMany(capability => capability.EvaluationUserCapabilities)
+                .WithOne(evaluationUserCapability => evaluationUserCapability.Capability);
+
+            modelBuilder.Entity<EvaluationUser>()
+                .HasMany(evaluationUser => evaluationUser.EvaluationUserObjectives)
+                .WithOne(evaluationUserObjective => evaluationUserObjective.EvaluationUser);
+
+            modelBuilder.Entity<EvaluationUser>()
+                .HasMany(evaluationUser => evaluationUser.EvaluationUserCapabilities)
+                .WithOne(evaluationUserCapability => evaluationUserCapability.EvaluationUser);
 
             modelBuilder.Entity<User>()
                 .HasMany(user => user.UserSignatures)
                 .WithOne(userSignature => userSignature.User);
             modelBuilder.Entity<User>()
-                .HasMany(user => user.UserObjectives)
-                .WithOne(userObjective => userObjective.User);
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserCapabilities)
-                .WithOne(userCapability => userCapability.User);
+                .HasMany(user => user.EvaluationsReceived)
+                .WithOne(evaluationUser => evaluationUser.User);
             modelBuilder.Entity<User>()
                 .HasMany(user => user.EvaluationsPerformed)
                 .WithOne(evaluation => evaluation.EvaluatorUser);
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.EvaluationsReceived)
-                .WithOne(evaluation => evaluation.EvaluatedUser);
+
+            modelBuilder.Entity<UserSignature>()
+                .HasMany(userSignature => userSignature.EvaluationUsers)
+                .WithOne(evaluationUser => evaluationUser.UserSignature);
         }
     }
 }

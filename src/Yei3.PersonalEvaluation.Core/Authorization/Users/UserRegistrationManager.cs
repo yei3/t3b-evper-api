@@ -130,7 +130,22 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 }
 
                 _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}").GetAwaiter().GetResult();
-                _userManager.AddToRoleAsync(user, ParseRole(role)).GetAwaiter().GetResult();
+
+                switch (ParseRole(role))
+                {
+                    case StaticRoleNames.Tenants.Administrator:
+                        {
+                            _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
+                            break;
+                        }
+                    case StaticRoleNames.Tenants.Supervisor:
+                        {
+                            _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult();
+                            break;
+                        }
+                }
+
+                _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult();
 
                 unitOfWork.Complete();
 

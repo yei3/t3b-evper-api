@@ -28,14 +28,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         [ForeignKey("UserId")]
         public virtual ICollection<UserSignature> UserSignatures { get; protected set; }
-        [ForeignKey("UserId")]
-        public virtual ICollection<UserObjective> UserObjectives { get; protected set; }
-        [ForeignKey("UserId")]
-        public virtual ICollection<UserCapability> UserCapabilities { get; protected set; }
         [ForeignKey("EvaluatorUserId")]
         public virtual ICollection<Evaluation> EvaluationsPerformed { get; protected set; }
-        [ForeignKey("EvaluatedUserId")]
-        public virtual ICollection<Evaluation> EvaluationsReceived { get; protected set; }
+        [ForeignKey("UserId")]
+        public virtual ICollection<EvaluationUser> EvaluationsReceived { get; protected set; }
 
         public static string CreateRandomPassword()
         {

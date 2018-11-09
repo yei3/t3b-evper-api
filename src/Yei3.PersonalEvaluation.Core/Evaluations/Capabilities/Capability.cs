@@ -24,7 +24,7 @@
         public virtual string Description { get; set; }
         public virtual bool IsActive { get; set; }
         [ForeignKey("CapabilityId")]
-        public virtual ICollection<UserCapability> UserCapabilities { get; protected set; }
+        public virtual ICollection<EvaluationUserCapability> EvaluationUserCapabilities { get; protected set; }
         public string Name { get; set; }
     }
 }

@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.Configuration;
 using Abp.Zero.Configuration;
+using Microsoft.AspNetCore.Identity;
 using Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -67,20 +70,33 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts
             try
             {
                 user = await _userManager.FindByEmployeeNumberAsync(input.EmployeeNumber);
-            } catch(InvalidOperationException)
+            }
+            catch (InvalidOperationException)
             {
-                Logger.Error($"Usuario {input.EmployeeNumber} no encontrado");
-                return new RegisterOutput { CanLogin = false };
+                string userNotFoundErrorMessage = $"Usuario {input.EmployeeNumber} no encontrado";
+                Logger.Error(userNotFoundErrorMessage);
+                return new RegisterOutput { CanLogin = false, HasErrors = true, Errors = new List<string> { userNotFoundErrorMessage } };
             }
 
-            await _userManager.ChangePasswordAsync(user, input.Password);
-            await _userManager.SetEmailAsync(user, input.Email);
-            user.IsEmailConfirmed = true;
+            IdentityResult changePasswordIdentityResult = await _userManager.ChangePasswordAsync(user, input.Password);
+            IdentityResult setEmailIdentityResult = await _userManager.SetEmailAsync(user, input.Email);
 
-            return new RegisterOutput
+            RegisterOutput output = new RegisterOutput();
+
+            if (!changePasswordIdentityResult.Succeeded || !setEmailIdentityResult.Succeeded)
             {
-                CanLogin = true
-            };
+                output.HasErrors = true;
+                output.CanLogin = false;
+
+                output.Errors = changePasswordIdentityResult.Errors.Select(error => error.Description)
+                    .Concat(setEmailIdentityResult.Errors.Select(error => error.Description)).ToList();
+            }
+            else
+            {
+                user.IsEmailConfirmed = true;
+            }
+
+            return output;
         }
     }
 }
