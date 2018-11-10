@@ -10,7 +10,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Roles
         public static class Tenants
         {
             public const string Admin = "Admin"; // Admin stands for system admin
-            public const string Administrator = "Admnistrator";
+            public const string Administrator = "Administrator";
             public const string Supervisor = "Supervisor";
             public const string Collaborator = "Collaborator";
         }
