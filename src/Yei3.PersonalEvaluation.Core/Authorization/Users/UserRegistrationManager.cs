@@ -127,6 +127,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 {
                     // mostly cause email is not set or repeated
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
+
+                    User existingUser = _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber).GetAwaiter().GetResult();
+                    existingUser = user;
+                    _userManager.UpdateAsync(existingUser).GetAwaiter().GetResult();
+                    return existingUser;
                 }
 
                 _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}").GetAwaiter().GetResult();
@@ -171,8 +176,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             int secondSlashIndex = dateString.Substring(firstSlashIndex + 1).IndexOf('/') + firstSlashIndex;
             int firstSpaceIndex = dateString.Substring(secondSlashIndex + 1).IndexOf(' ') + secondSlashIndex;
 
-            int days = int.Parse(dateString.Substring(0, firstSlashIndex));
-            int months = int.Parse(dateString.Substring(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex));
+            int months = int.Parse(dateString.Substring(0, firstSlashIndex));
+            int days = int.Parse(dateString.Substring(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex));
             int years = int.Parse(dateString.Substring(secondSlashIndex + 2, firstSpaceIndex - secondSlashIndex));
 
             return new DateTime(years, months, days);
