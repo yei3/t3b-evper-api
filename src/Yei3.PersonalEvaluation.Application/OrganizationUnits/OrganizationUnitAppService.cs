@@ -1,12 +1,11 @@
-﻿using Abp.AutoMapper;
-
-namespace Yei3.PersonalEvaluation.OrganizationUnits
+﻿namespace Yei3.PersonalEvaluation.OrganizationUnits
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Abp.Domain.Repositories;
     using Abp.Organizations;
     using Dto;
+    using Abp.AutoMapper;
 
     public class OrganizationUnitAppService : PersonalEvaluationAppServiceBase, IOrganizationUnitAppService
     {

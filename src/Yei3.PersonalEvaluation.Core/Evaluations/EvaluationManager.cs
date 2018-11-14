@@ -33,7 +33,9 @@
                     addEvaluationObjectiveValueObject.Index,
                     addEvaluationObjectiveValueObject.Description,
                     addEvaluationObjectiveValueObject.EvaluationId,
-                    true
+                    true,
+                    addEvaluationObjectiveValueObject.DefinitionOfDone,
+                    addEvaluationObjectiveValueObject.DeliveryDate
                 );
 
                 return await ObjectiveRepository.InsertAndGetIdAsync(objective);

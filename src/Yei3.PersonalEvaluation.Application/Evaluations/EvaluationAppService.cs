@@ -48,7 +48,9 @@
                     {
                         EvaluationId = addEvaluationObjectiveDto.EvaluationId,
                         Index = addEvaluationObjectiveDto.Index,
-                        Description = addEvaluationObjectiveDto.Description
+                        Description = addEvaluationObjectiveDto.Description,
+                        DefinitionOfDone = addEvaluationObjectiveDto.DefinitionOfDone,
+                        DeliveryDate = addEvaluationObjectiveDto.DeliveryDate
                     }));
             }
             catch (DbUpdateException e)

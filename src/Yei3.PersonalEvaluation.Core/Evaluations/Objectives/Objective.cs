@@ -10,12 +10,14 @@ namespace Yei3.PersonalEvaluation.Evaluations.Objectives
 
     public class Objective : FullAuditedEntity<long>, IIndexed, IDescribed, IPassivable
     {
-        public Objective(byte index, string description, long evaluationId, bool isActive)
+        public Objective(byte index, string description, long evaluationId, bool isActive, string definitionOfDone, DateTime deliveryDate)
         {
             Index = index;
             Description = description;
             EvaluationId = evaluationId;
             IsActive = isActive;
+            DefinitionOfDone = definitionOfDone;
+            DeliveryDate = deliveryDate;
         }
 
         public virtual byte Index { get; set; }
