@@ -25,17 +25,17 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
             // Default roles
 
             Role collaboratorRole = _context.Roles.IgnoreQueryFilters().FirstOrDefault(role => role.Name == StaticRoleNames.Tenants.Collaborator);
-            if (collaboratorRole == null)
-            {
-                collaboratorRole = new Role(_tenantId, StaticRoleNames.Tenants.Collaborator, StaticRoleNames.Tenants.Collaborator);
-                Role administratorRole = new Role(_tenantId, StaticRoleNames.Tenants.Administrator, StaticRoleNames.Tenants.Administrator);
-                Role supervisorRole = new Role(_tenantId, StaticRoleNames.Tenants.Supervisor, StaticRoleNames.Tenants.Supervisor);
 
-                _context.Roles.Add(collaboratorRole);
-                _context.Roles.Add(administratorRole);
-                _context.Roles.Add(supervisorRole);
-                _context.SaveChanges();
-            }
+            if (collaboratorRole != null) return;
+
+            collaboratorRole = new Role(_tenantId, StaticRoleNames.Tenants.Collaborator, StaticRoleNames.Tenants.Collaborator);
+            Role administratorRole = new Role(_tenantId, StaticRoleNames.Tenants.Administrator, StaticRoleNames.Tenants.Administrator);
+            Role supervisorRole = new Role(_tenantId, StaticRoleNames.Tenants.Supervisor, StaticRoleNames.Tenants.Supervisor);
+
+            _context.Roles.Add(collaboratorRole);
+            _context.Roles.Add(administratorRole);
+            _context.Roles.Add(supervisorRole);
+            _context.SaveChanges();
         }
     }
 }
