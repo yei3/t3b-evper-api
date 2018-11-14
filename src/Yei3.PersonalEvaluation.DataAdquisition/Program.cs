@@ -23,11 +23,8 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                StringBuilder stringBuilder = new StringBuilder();
                 ExcelWorksheet worksheet = package.Workbook.Worksheets["Hoja1"];
                 int rowCount = worksheet.Dimension.Rows;
-
-                List<User> importedUsers = new List<User>();
 
                 using (var bootstrapper = AbpBootstrapper.Create<PersonalEvaluationDataAdquisitionModule>())
                 {
@@ -50,15 +47,15 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                 region: worksheet.Cells[row, 8].Value.ToString(),
                                 immediateSupervisor: worksheet.Cells[row, 9].Value.ToString(),
                                 socialReason: worksheet.Cells[row, 10].Value.ToString(),
-                                isSupervisor: worksheet.Cells[row, 11].Value.ToString().Contains('X'),
-                                isManager: worksheet.Cells[row, 12].Value.ToString().Contains('X'),
+                                isSupervisor: worksheet.Cells[row, 11].Value != null && worksheet.Cells[row, 11].Value.ToString().Contains('X'),
+                                isManager: worksheet.Cells[row, 12].Value != null && worksheet.Cells[row, 12].Value.ToString().Contains('X'),
                                 entryDate: worksheet.Cells[row, 13].Value.ToString(),
                                 reassignDate: worksheet.Cells[row, 14].Value == null
                                     ? null
-                                    : worksheet.Cells[row, 15].Value.ToString(),
-                                birthDate: worksheet.Cells[row, 16].Value.ToString(),
-                                scholarship: worksheet.Cells[row, 17].Value.ToString(),
-                                email: worksheet.Cells[row, 18].Value.ToString()
+                                    : worksheet.Cells[row, 14].Value.ToString(),
+                                birthDate: worksheet.Cells[row, 15].Value.ToString(),
+                                scholarship: worksheet.Cells[row, 16].Value.ToString(),
+                                email: worksheet.Cells[row, 17].Value.ToString()
                             );
                         }
                         catch (Exception)
