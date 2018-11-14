@@ -50,14 +50,15 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                 region: worksheet.Cells[row, 8].Value.ToString(),
                                 immediateSupervisor: worksheet.Cells[row, 9].Value.ToString(),
                                 socialReason: worksheet.Cells[row, 10].Value.ToString(),
-                                role: worksheet.Cells[row, 11].Value.ToString(),
-                                entryDate: worksheet.Cells[row, 12].Value.ToString(),
-                                reassignDate: worksheet.Cells[row, 13].Value == null
+                                isSupervisor: worksheet.Cells[row, 11].Value.ToString().Contains('X'),
+                                isManager: worksheet.Cells[row, 12].Value.ToString().Contains('X'),
+                                entryDate: worksheet.Cells[row, 13].Value.ToString(),
+                                reassignDate: worksheet.Cells[row, 14].Value == null
                                     ? null
-                                    : worksheet.Cells[row, 13].Value.ToString(),
-                                birthDate: worksheet.Cells[row, 14].Value.ToString(),
-                                scholarship: worksheet.Cells[row, 15].Value.ToString(),
-                                email: worksheet.Cells[row, 16].Value.ToString()
+                                    : worksheet.Cells[row, 15].Value.ToString(),
+                                birthDate: worksheet.Cells[row, 16].Value.ToString(),
+                                scholarship: worksheet.Cells[row, 17].Value.ToString(),
+                                email: worksheet.Cells[row, 18].Value.ToString()
                             );
                         }
                         catch (Exception)

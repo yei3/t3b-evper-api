@@ -1,4 +1,6 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations.Objectives
+﻿using System;
+
+namespace Yei3.PersonalEvaluation.Evaluations.Objectives
 {
     using Abp.Domain.Entities.Auditing;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -18,6 +20,8 @@
 
         public virtual byte Index { get; set; }
         public virtual string Description { get; set; }
+        public virtual string DefinitionOfDone { get; protected set; }
+        public virtual DateTime DeliveryDate { get; protected set; }
         public virtual long EvaluationId { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual Evaluation Evaluation { get; protected set; }

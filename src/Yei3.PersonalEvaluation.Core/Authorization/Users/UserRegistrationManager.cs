@@ -84,7 +84,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             string region,
             string immediateSupervisor,
             string socialReason,
-            string role,
+            bool isManager,
+            bool isSupervisor,
             string entryDate,
             string reassignDate,
             string birthDate,
@@ -136,18 +137,14 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}").GetAwaiter().GetResult();
 
-                switch (ParseRole(role))
+                if (isManager)
                 {
-                    case StaticRoleNames.Tenants.Administrator:
-                        {
-                            _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
-                            break;
-                        }
-                    case StaticRoleNames.Tenants.Supervisor:
-                        {
-                            _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult();
-                            break;
-                        }
+                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
+                }
+
+                if (isSupervisor)
+                {
+                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult();
                 }
 
                 _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult();
