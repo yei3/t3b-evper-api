@@ -75,6 +75,22 @@
             }
         }
 
+        public async Task<EntityDto<long>> AddEvaluationInstructionsAndGetIdAsync(SetEvaluationInstructionsDto evaluationInstructionsDto)
+        {
+            try
+            {
+                return new EntityDto<long>(await EvaluationManager.AddEvaluationInstructionsAndGetIdAsync(new AddEvaluationInstructionsValueObject
+                {
+                    Id = evaluationInstructionsDto.Id,
+                    Instructions = evaluationInstructionsDto.Instructions
+                }));
+            }
+            catch (DbUpdateException e)
+            {
+                throw new UserFriendlyException(L(e.Message));
+            }
+        }
+
         public async Task<ICollection<EntityDto<long>>> EvaluateUsersAndGetIdsAsync(EvaluateUsersInputDto evaluateUsersInputDto)
         {
             try

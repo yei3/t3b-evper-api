@@ -1,5 +1,6 @@
 ﻿namespace Yei3.PersonalEvaluation.Evaluations
 {
+    using Interfaces;
     using System.ComponentModel.DataAnnotations.Schema;
     using Abp.Domain.Entities.Auditing;
     using Authorization.Users;
@@ -8,7 +9,7 @@
     using Capabilities;
     using Objectives;
 
-    public class Evaluation : FullAuditedEntity<long>
+    public class Evaluation : FullAuditedEntity<long>, INamed, IDescribed
     {
         public Evaluation(EvaluationTerm term, long evaluatorUserId)
         {
@@ -26,5 +27,8 @@
         public virtual ICollection<Objective> Objectives { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual ICollection<EvaluationUser> EvaluationUsers { get; protected set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Instructions { get; set; }
     }
 }

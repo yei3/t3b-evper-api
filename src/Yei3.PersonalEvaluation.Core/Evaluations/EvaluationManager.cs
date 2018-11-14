@@ -64,6 +64,22 @@
             }
         }
 
+        public async Task<long> AddEvaluationInstructionsAndGetIdAsync(AddEvaluationInstructionsValueObject addEvaluationInstructionsValueObject)
+        {
+            Evaluation evaluation = await EvaluationRepository
+                .FirstOrDefaultAsync(addEvaluationInstructionsValueObject.Id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException($"Evaluacion {addEvaluationInstructionsValueObject.Id} no encontrada");
+            }
+
+            evaluation.Instructions = addEvaluationInstructionsValueObject.Instructions;
+            await EvaluationRepository.UpdateAsync(evaluation);
+
+            return evaluation.Id;
+        }
+
         public async Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds)
         {
             Evaluation evaluation = await EvaluationRepository
