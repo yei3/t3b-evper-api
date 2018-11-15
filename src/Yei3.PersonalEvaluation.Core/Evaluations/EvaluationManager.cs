@@ -53,6 +53,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             try
             {
+                SectionRepository.Delete(section => section.EvaluationId == addEvaluationSectionValueObject.EvaluationId);
+
                 Section.Section rootSection = new Section.Section(
                     addEvaluationSectionValueObject.Name,
                     addEvaluationSectionValueObject.ShowName,
