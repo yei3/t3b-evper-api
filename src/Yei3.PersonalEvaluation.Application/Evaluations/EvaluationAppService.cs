@@ -1,6 +1,4 @@
-﻿using Abp.AutoMapper;
-
-namespace Yei3.PersonalEvaluation.Evaluations
+﻿namespace Yei3.PersonalEvaluation.Evaluations
 {
     using System.Collections.Generic;
     using Abp.Application.Services;
@@ -13,15 +11,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
     using Abp.Application.Services.Dto;
     using Abp.UI;
     using ValueObjects;
+    using Abp.AutoMapper;
 
     public class EvaluationAppService : AsyncCrudAppService<Evaluation, EvaluationDto, long, GetAllEvaluationsInputDto, CreateEvaluationDto>, IEvaluationAppService
     {
-        private readonly IRepository<Evaluation, long> Repository;
         private readonly IEvaluationManager EvaluationManager;
 
-        public EvaluationAppService(IRepository<Evaluation, long> repository) : base(repository)
+        public EvaluationAppService(IRepository<Evaluation, long> repository, IEvaluationManager evaluationManager) : base(repository)
         {
-            Repository = repository;
+            EvaluationManager = evaluationManager;
         }
 
         protected override IQueryable<Evaluation> CreateFilteredQuery(GetAllEvaluationsInputDto input)
@@ -77,6 +75,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             try
             {
+
                 return new EntityDto<long>(await EvaluationManager.AddEvaluationInstructionsAndGetIdAsync(new AddEvaluationInstructionsValueObject
                 {
                     Id = evaluationInstructionsDto.Id,
