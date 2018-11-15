@@ -4,7 +4,7 @@
     using Abp.AutoMapper;
     using ValueObjects;
 
-    [AutoMap(typeof(SectionValueObject))]
+    [AutoMap(typeof(SectionValueObject), typeof(Section.Section))]
     public class SectionDto
     {
         public string Name { get; set; }

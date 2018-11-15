@@ -36,6 +36,7 @@
         {
             return await Repository
                 .GetAllIncluding(evaluation => evaluation.EvaluatorUser)
+                .Include(evaluation => evaluation.Sections)
                 .FirstAsync(evaluation => evaluation.Id == id);
         }
 
@@ -63,7 +64,9 @@
         {
             try
             {
-                return new EntityDto<long>(await EvaluationManager.AddEvaluationSectionAndGetIdAsync(sectionDto.MapTo<SectionValueObject>()));
+                var x = await EvaluationManager.AddEvaluationSectionAndGetIdAsync(
+                    sectionDto.MapTo<SectionValueObject>());
+                return new EntityDto<long>(x);
             }
             catch (DbUpdateException e)
             {
