@@ -1,5 +1,6 @@
 ﻿namespace Yei3.PersonalEvaluation.Evaluations
 {
+    using System;
     using Interfaces;
     using System.ComponentModel.DataAnnotations.Schema;
     using Abp.Domain.Entities.Auditing;
@@ -14,6 +15,7 @@
         {
             Term = term;
             EvaluatorUserId = evaluatorUserId;
+            Status = EvaluationStatus.NonInitiated;
         }
 
         public virtual EvaluationTerm Term { get; protected set; }
@@ -29,5 +31,7 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public string Instructions { get; set; }
+        public EvaluationStatus Status { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

@@ -26,6 +26,7 @@
         {
             return base.CreateFilteredQuery(input)
                 .Include(evaluation => evaluation.EvaluatorUser)
+                .Include(evaluation => evaluation.Sections)
                 .WhereIf(input.CreatorUserId.HasValue, evaluation => evaluation.CreatorUserId == input.CreatorUserId)
                 .WhereIf(input.EvaluatorUserId.HasValue, evaluation => evaluation.EvaluatorUserId == input.EvaluatorUserId)
                 .WhereIf(input.MinTime.HasValue, evaluation => evaluation.CreationTime >= input.MinTime.Value)

@@ -14,5 +14,9 @@
         public EvaluationTerm Term { get; set; }
 
         public ICollection<SectionDto> Sections { get; set; }
+        public EvaluationStatus Status { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }
