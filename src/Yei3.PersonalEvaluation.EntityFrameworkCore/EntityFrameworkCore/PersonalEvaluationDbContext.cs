@@ -5,6 +5,7 @@ using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.Capabilities;
 using Yei3.PersonalEvaluation.Evaluations.Objectives;
+using Yei3.PersonalEvaluation.Evaluations.Section;
 using Yei3.PersonalEvaluation.Identity;
 using Yei3.PersonalEvaluation.MultiTenancy;
 
@@ -36,7 +37,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
                 .WithOne(objective => objective.Evaluation);
 
             modelBuilder.Entity<Evaluation>()
-                .HasMany(evaluation => evaluation.Capabilities)
+                .HasMany(evaluation => evaluation.Sections)
                 .WithOne(capability => capability.Evaluation);
 
             modelBuilder.Entity<Evaluation>()
@@ -72,6 +73,13 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
             modelBuilder.Entity<UserSignature>()
                 .HasMany(userSignature => userSignature.EvaluationUsers)
                 .WithOne(evaluationUser => evaluationUser.UserSignature);
+
+            modelBuilder.Entity<Section>()
+                .HasMany(section => section.Questions)
+                .WithOne(question => question.Section);
+
+            modelBuilder.Entity<Section>()
+                .HasOne(section => section.ParentSection);
         }
     }
 }

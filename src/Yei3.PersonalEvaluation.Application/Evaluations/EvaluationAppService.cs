@@ -1,4 +1,6 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
+﻿using Abp.AutoMapper;
+
+namespace Yei3.PersonalEvaluation.Evaluations
 {
     using System.Collections.Generic;
     using Abp.Application.Services;
@@ -59,17 +61,11 @@
             }
         }
 
-        public async Task<EntityDto<long>> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityDto addEvaluationCapabilityDto)
+        public async Task<EntityDto<long>> AddEvaluationSectionAndGetIdAsync(SectionDto sectionDto)
         {
             try
             {
-                return new EntityDto<long>(await EvaluationManager.AddEvaluationCapabilityAndGetIdAsync(
-                    new AddEvaluationCapabilityValueObject
-                    {
-                        EvaluationId = addEvaluationCapabilityDto.EvaluationId,
-                        Index = addEvaluationCapabilityDto.Index,
-                        Description = addEvaluationCapabilityDto.Description
-                    }));
+                return new EntityDto<long>(await EvaluationManager.AddEvaluationSectionAndGetIdAsync(sectionDto.MapTo<SectionValueObject>()));
             }
             catch (DbUpdateException e)
             {

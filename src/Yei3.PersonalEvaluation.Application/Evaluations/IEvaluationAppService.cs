@@ -9,7 +9,7 @@
     public interface IEvaluationAppService : IAsyncCrudAppService<EvaluationDto, long, GetAllEvaluationsInputDto, CreateEvaluationDto>
     {
         Task<EntityDto<long>> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveDto addEvaluationObjectiveDto);
-        Task<EntityDto<long>> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityDto addEvaluationCapabilityDto);
+        Task<EntityDto<long>> AddEvaluationSectionAndGetIdAsync(SectionDto sectionDto);
         Task<EntityDto<long>> AddEvaluationInstructionsAndGetIdAsync(SetEvaluationInstructionsDto evaluationInstructionsDto);
 
         Task<ICollection<EntityDto<long>>> EvaluateUsersAndGetIdsAsync(EvaluateUsersInputDto evaluateUsersInputDto);

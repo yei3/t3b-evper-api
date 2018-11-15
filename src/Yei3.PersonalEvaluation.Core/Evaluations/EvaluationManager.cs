@@ -1,4 +1,6 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
+﻿using Abp.Collections.Extensions;
+
+namespace Yei3.PersonalEvaluation.Evaluations
 {
     using Abp.Domain.Services;
     using System.Threading.Tasks;
@@ -6,23 +8,24 @@
     using Abp.Domain.Entities;
     using Abp.Domain.Repositories;
     using Microsoft.EntityFrameworkCore;
-    using Capabilities;
     using Objectives;
     using System.Collections.Generic;
 
     public class EvaluationManager : DomainService, IEvaluationManager
     {
         private readonly IRepository<Objective, long> ObjectiveRepository;
-        private readonly IRepository<Capability, long> CapabilityRepository;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<EvaluationUser, long> EvaluationUserRepository;
+        private readonly IRepository<Section.Section, long> SectionRepository;
+        private readonly IRepository<Question.Question, long> QuestionRepository;
 
-        public EvaluationManager(IRepository<Objective, long> objectiveRepository, IRepository<Capability, long> capabilityRepository, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationUser, long> evaluationUserRepository)
+        public EvaluationManager(IRepository<Objective, long> objectiveRepository, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationUser, long> evaluationUserRepository, IRepository<Section.Section, long> sectionRepository, IRepository<Question.Question, long> questionRepository)
         {
             ObjectiveRepository = objectiveRepository;
-            CapabilityRepository = capabilityRepository;
             EvaluationRepository = evaluationRepository;
             EvaluationUserRepository = evaluationUserRepository;
+            SectionRepository = sectionRepository;
+            QuestionRepository = questionRepository;
         }
 
         public async Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject)
@@ -46,19 +49,52 @@
             }
         }
 
-        public async Task<long> AddEvaluationCapabilityAndGetIdAsync(AddEvaluationCapabilityValueObject addEvaluationCapabilityValueObject)
+        public async Task<long> AddEvaluationSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject)
         {
             try
             {
-                Capability capability = new Capability(
-                    addEvaluationCapabilityValueObject.EvaluationId,
-                    addEvaluationCapabilityValueObject.Index,
-                    addEvaluationCapabilityValueObject.Description,
-                    true,
-                    addEvaluationCapabilityValueObject.Name
-                    );
+                Section.Section rootSection = new Section.Section(
+                    addEvaluationSectionValueObject.Name,
+                    addEvaluationSectionValueObject.ShowName,
+                    addEvaluationSectionValueObject.EvaluationId,
+                    null,
+                    true);
 
-                return await CapabilityRepository.InsertAndGetIdAsync(capability);
+                long rootSectionId = await SectionRepository.InsertAndGetIdAsync(rootSection);
+
+                foreach (QuestionValueObject questionValueObject in addEvaluationSectionValueObject.Questions)
+                {
+                    Question.Question question = new Question.Question(
+                        questionValueObject.Text,
+                        questionValueObject.QuestionType,
+                        rootSectionId);
+
+                    await QuestionRepository.InsertAsync(question);
+                }
+
+                foreach (SectionValueObject sectionValueObject in addEvaluationSectionValueObject.SubSections)
+                {
+                    Section.Section currentSection = new Section.Section(
+                        sectionValueObject.Name,
+                        sectionValueObject.ShowName,
+                        sectionValueObject.EvaluationId,
+                        rootSectionId,
+                        true);
+
+                    long currentSectionId = await SectionRepository.InsertAndGetIdAsync(currentSection);
+
+                    foreach (QuestionValueObject questionValueObject in sectionValueObject.Questions)
+                    {
+                        Question.Question question = new Question.Question(
+                            questionValueObject.Text,
+                            questionValueObject.QuestionType,
+                            currentSectionId);
+
+                        await QuestionRepository.InsertAsync(question);
+                    }
+                }
+
+                return rootSectionId;
             }
             catch (DbUpdateException)
             {

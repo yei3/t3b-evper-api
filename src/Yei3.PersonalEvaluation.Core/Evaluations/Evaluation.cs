@@ -6,7 +6,6 @@
     using Authorization.Users;
     using Term;
     using System.Collections.Generic;
-    using Capabilities;
     using Objectives;
 
     public class Evaluation : FullAuditedEntity<long>, INamed, IDescribed
@@ -22,7 +21,7 @@
         [ForeignKey("EvaluatorUserId")]
         public virtual User EvaluatorUser { get; protected set; }
         [ForeignKey("EvaluationId")]
-        public virtual ICollection<Capability> Capabilities { get; protected set; }
+        public virtual ICollection<Section.Section> Sections { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual ICollection<Objective> Objectives { get; protected set; }
         [ForeignKey("EvaluationId")]

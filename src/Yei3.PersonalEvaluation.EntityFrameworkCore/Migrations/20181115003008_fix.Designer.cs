@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Yei3.PersonalEvaluation.EntityFrameworkCore;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    partial class PersonalEvaluationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181115003008_fix")]
+    partial class fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1295,7 +1297,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<long?>("ParentId");
+                    b.Property<long>("ParentId");
 
                     b.Property<bool>("ShowName");
 
@@ -1628,7 +1630,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Section.Section", "ParentSection")
                         .WithMany()
-                        .HasForeignKey("ParentId");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>

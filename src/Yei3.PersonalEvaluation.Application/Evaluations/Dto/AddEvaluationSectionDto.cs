@@ -2,7 +2,7 @@
 {
     using ValueObjects;
 
-    public class AddEvaluationCapabilityDto : AddEvaluationCapabilityValueObject
+    public class AddEvaluationSectionDto : SectionValueObject
     {
         
     }

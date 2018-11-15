@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Yei3.PersonalEvaluation.EntityFrameworkCore;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    partial class PersonalEvaluationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181114230945_AddSectionConcept")]
+    partial class AddSectionConcept
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1283,6 +1285,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime?>("DeletionTime");
 
+                    b.Property<string>("DisplayName");
+
                     b.Property<long>("EvaluationId");
 
                     b.Property<bool>("IsActive");
@@ -1295,9 +1299,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<long?>("ParentId");
-
-                    b.Property<bool>("ShowName");
+                    b.Property<long>("ParentId");
 
                     b.HasKey("Id");
 
@@ -1628,7 +1630,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Section.Section", "ParentSection")
                         .WithMany()
-                        .HasForeignKey("ParentId");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>
