@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Abp.Authorization.Users;
@@ -22,20 +23,19 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         private readonly TenantManager _tenantManager;
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPermissionManager _permissionManager;
 
         private readonly string PasswordSalt = "_t3B";
 
         public UserRegistrationManager(
             TenantManager tenantManager,
             UserManager userManager,
-            RoleManager roleManager,
-            IPasswordHasher<User> passwordHasher)
+            RoleManager roleManager, IPermissionManager permissionManager)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
-            _passwordHasher = passwordHasher;
+            _permissionManager = permissionManager;
 
             AbpSession = NullAbpSession.Instance;
         }
@@ -139,6 +139,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 if (isManager)
                 {
                     _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
+
+                    Permission permission = _permissionManager.GetPermission(PermissionNames.Pages_Tenants);
+                    _userManager.GrantPermissionAsync(user, permission).GetAwaiter().GetResult();
                 }
 
                 if (isSupervisor)
