@@ -7,13 +7,25 @@
     using Interfaces;
     public class Section : FullAuditedEntity<long>, INamed, IPassivable
     {
-        public Section(string name, bool showName, long evaluationId, long? parentId, bool isActive)
+        public Section()
+        {
+        }
+
+        public Section(string name, long evaluationId, bool isActive, long? id)
         {
             Name = name;
-            ShowName = showName;
+            EvaluationId = evaluationId;
+            IsActive = isActive;
+            Id = id ?? 0;
+        }
+
+        public Section(string name, long evaluationId, long? parentId, bool isActive, long? id)
+        {
+            Name = name;
             EvaluationId = evaluationId;
             ParentId = parentId;
             IsActive = isActive;
+            Id = id ?? 0;
         }
 
         public string Name { get; protected set; }

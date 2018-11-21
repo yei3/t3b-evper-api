@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Authorization.Users;
 using Abp.Extensions;
 using Yei3.PersonalEvaluation.Evaluations;
-using Yei3.PersonalEvaluation.Evaluations.Capabilities;
-using Yei3.PersonalEvaluation.Evaluations.Objectives;
 using Yei3.PersonalEvaluation.Identity;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
@@ -28,8 +26,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         [ForeignKey("UserId")]
         public virtual ICollection<UserSignature> UserSignatures { get; protected set; }
-        [ForeignKey("EvaluatorUserId")]
-        public virtual ICollection<Evaluation> EvaluationsPerformed { get; protected set; }
         [ForeignKey("UserId")]
         public virtual ICollection<EvaluationUser> EvaluationsReceived { get; protected set; }
 

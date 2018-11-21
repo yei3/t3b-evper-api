@@ -25,7 +25,6 @@
         protected override IQueryable<Evaluation> CreateFilteredQuery(GetAllEvaluationsInputDto input)
         {
             return base.CreateFilteredQuery(input)
-                .Include(evaluation => evaluation.EvaluatorUser)
                 .Include(evaluation => evaluation.Sections)
                 .WhereIf(input.CreatorUserId.HasValue, evaluation => evaluation.CreatorUserId == input.CreatorUserId)
                 .WhereIf(input.EvaluatorUserId.HasValue, evaluation => evaluation.EvaluatorUserId == input.EvaluatorUserId)
@@ -36,8 +35,7 @@
         protected override async Task<Evaluation> GetEntityByIdAsync(long id)
         {
             return await Repository
-                .GetAllIncluding(evaluation => evaluation.EvaluatorUser)
-                .Include(evaluation => evaluation.Sections)
+                .GetAllIncluding(evaluation => evaluation.Sections)
                 .FirstAsync(evaluation => evaluation.Id == id);
         }
 
@@ -61,13 +59,25 @@
             }
         }
 
-        public async Task<EntityDto<long>> AddEvaluationSectionAndGetIdAsync(SectionDto sectionDto)
+        public async Task<EntityDto<long>> InsertOrUpdateSectionAndGetIdAsync(SectionDto sectionDto)
         {
             try
             {
-                var x = await EvaluationManager.AddEvaluationSectionAndGetIdAsync(
-                    sectionDto.MapTo<SectionValueObject>());
-                return new EntityDto<long>(x);
+                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateSectionAndGetIdAsync(
+                    sectionDto.MapTo<SectionValueObject>()));
+            }
+            catch (DbUpdateException e)
+            {
+                throw new UserFriendlyException(L(e.Message));
+            }
+        }
+
+        public async Task<EntityDto<long>> InsertOrUpdateSubsectionAndGetIdAsync(SectionDto sectionDto)
+        {
+            try
+            {
+                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateSubsectionAndGetIdAsync(
+                    sectionDto.MapTo<SubsectionValueObject>()));
             }
             catch (DbUpdateException e)
             {
@@ -85,6 +95,20 @@
                     Id = evaluationInstructionsDto.Id,
                     Instructions = evaluationInstructionsDto.Instructions
                 }));
+            }
+            catch (DbUpdateException e)
+            {
+                throw new UserFriendlyException(L(e.Message));
+            }
+        }
+
+        public async Task<EntityDto<long>> InsertOrUpdateQuestionAndGetIdAsync(QuestionDto questionDto)
+        {
+            try
+            {
+
+                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateQuestionAndGetIdAsync(
+                    questionDto.MapTo<QuestionValueObject>()));
             }
             catch (DbUpdateException e)
             {

@@ -8,7 +8,9 @@
     public interface IEvaluationManager : IDomainService
     {
         Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject);
-        Task<long> AddEvaluationSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject);
+        Task<long> InsertOrUpdateSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject);
+        Task<long> InsertOrUpdateSubsectionAndGetIdAsync(SubsectionValueObject addSubsectionValueObject);
+        Task<long> InsertOrUpdateQuestionAndGetIdAsync(QuestionValueObject questionValueObject);
 
         Task<long> AddEvaluationInstructionsAndGetIdAsync(AddEvaluationInstructionsValueObject addEvaluationInstructionsValueObject);
         Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds);

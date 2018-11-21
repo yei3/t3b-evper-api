@@ -6,10 +6,8 @@
 
     public class NewEvaluationValueObject : ValueObject<NewEvaluationValueObject>, INamed, IDescribed
     {
-        public long EvaluatorUserId { get; set; }
-        public EvaluationTerm Term { get; set; }
-
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Instructions { get; set; }
     }
 }

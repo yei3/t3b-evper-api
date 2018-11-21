@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
-    public partial class InitialModel : Migration
+    public partial class InitiaModl : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -385,6 +385,32 @@ namespace Yei3.PersonalEvaluation.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Evaluations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    Term = table.Column<int>(nullable: false),
+                    EvaluatorUserId = table.Column<long>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Instructions = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: false),
+                    EndDate = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Evaluations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AbpFeatures",
                 columns: table => new
                 {
@@ -496,12 +522,12 @@ namespace Yei3.PersonalEvaluation.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AbpSettings", x => x.Id);
-                    // table.ForeignKey(
-                    //     name: "FK_AbpSettings_AbpUsers_UserId",
-                    //     column: x => x.UserId,
-                    //     principalTable: "AbpUsers",
-                    //     principalColumn: "Id",
-                    //     onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AbpSettings_AbpUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AbpUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -646,33 +672,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Evaluations",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CreationTime = table.Column<DateTime>(nullable: false),
-                    CreatorUserId = table.Column<long>(nullable: true),
-                    LastModificationTime = table.Column<DateTime>(nullable: true),
-                    LastModifierUserId = table.Column<long>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    DeleterUserId = table.Column<long>(nullable: true),
-                    DeletionTime = table.Column<DateTime>(nullable: true),
-                    Term = table.Column<int>(nullable: false),
-                    EvaluatorUserId = table.Column<long>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Evaluations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Evaluations_AbpUsers_EvaluatorUserId",
-                        column: x => x.EvaluatorUserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserSignatures",
                 columns: table => new
                 {
@@ -696,6 +695,72 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalTable: "AbpUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Capabilities",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    EvaluationId = table.Column<long>(nullable: false),
+                    Index = table.Column<byte>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Capabilities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Capabilities_Evaluations_EvaluationId",
+                        column: x => x.EvaluationId,
+                        principalTable: "Evaluations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sections",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    ShowName = table.Column<bool>(nullable: false),
+                    EvaluationId = table.Column<long>(nullable: false),
+                    ParentId = table.Column<long>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Sections_Evaluations_EvaluationId",
+                        column: x => x.EvaluationId,
+                        principalTable: "Evaluations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Sections_Sections_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -779,36 +844,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Capabilities",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CreationTime = table.Column<DateTime>(nullable: false),
-                    CreatorUserId = table.Column<long>(nullable: true),
-                    LastModificationTime = table.Column<DateTime>(nullable: true),
-                    LastModifierUserId = table.Column<long>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    DeleterUserId = table.Column<long>(nullable: true),
-                    DeletionTime = table.Column<DateTime>(nullable: true),
-                    EvaluationId = table.Column<long>(nullable: false),
-                    Index = table.Column<byte>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    IsActive = table.Column<bool>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Capabilities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Capabilities_Evaluations_EvaluationId",
-                        column: x => x.EvaluationId,
-                        principalTable: "Evaluations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EvaluationUsers",
                 columns: table => new
                 {
@@ -853,6 +888,35 @@ namespace Yei3.PersonalEvaluation.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    Text = table.Column<string>(nullable: true),
+                    QuestionType = table.Column<int>(nullable: false),
+                    Answer = table.Column<string>(nullable: true),
+                    SectionId = table.Column<long>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Objectives",
                 columns: table => new
                 {
@@ -867,6 +931,8 @@ namespace Yei3.PersonalEvaluation.Migrations
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     Index = table.Column<byte>(nullable: false),
                     Description = table.Column<string>(nullable: true),
+                    DefinitionOfDone = table.Column<string>(nullable: true),
+                    DeliveryDate = table.Column<DateTime>(nullable: false),
                     EvaluationId = table.Column<long>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     NextEvaluationId = table.Column<long>(nullable: true)
@@ -928,12 +994,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalTable: "EvaluationUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserCapabilities_EvaluationUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "EvaluationUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -969,12 +1029,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalTable: "Objectives",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserObjectives_EvaluationUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "EvaluationUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -1283,11 +1337,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "EvaluationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Evaluations_EvaluatorUserId",
-                table: "Evaluations",
-                column: "EvaluatorUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EvaluationUsers_EvaluationId",
                 table: "EvaluationUsers",
                 column: "EvaluationId");
@@ -1313,6 +1362,21 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "NextEvaluationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Questions_SectionId",
+                table: "Questions",
+                column: "SectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sections_EvaluationId",
+                table: "Sections",
+                column: "EvaluationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sections_ParentId",
+                table: "Sections",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserCapabilities_CapabilityId",
                 table: "UserCapabilities",
                 column: "CapabilityId");
@@ -1323,11 +1387,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "EvaluationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserCapabilities_UserId",
-                table: "UserCapabilities",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserObjectives_EvaluationUserId",
                 table: "UserObjectives",
                 column: "EvaluationUserId");
@@ -1336,11 +1395,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                 name: "IX_UserObjectives_ObjectiveId",
                 table: "UserObjectives",
                 column: "ObjectiveId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserObjectives_UserId",
-                table: "UserObjectives",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSignatures_UserId",
@@ -1417,6 +1471,9 @@ namespace Yei3.PersonalEvaluation.Migrations
                 name: "AbpUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Questions");
+
+            migrationBuilder.DropTable(
                 name: "UserCapabilities");
 
             migrationBuilder.DropTable(
@@ -1430,6 +1487,9 @@ namespace Yei3.PersonalEvaluation.Migrations
 
             migrationBuilder.DropTable(
                 name: "AbpEditions");
+
+            migrationBuilder.DropTable(
+                name: "Sections");
 
             migrationBuilder.DropTable(
                 name: "Capabilities");

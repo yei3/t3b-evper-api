@@ -9,8 +9,8 @@ using Yei3.PersonalEvaluation.EntityFrameworkCore;
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    [Migration("20181114230945_AddSectionConcept")]
-    partial class AddSectionConcept
+    [Migration("20181121031843_InitiaModl")]
+    partial class InitiaModl
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1095,6 +1095,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<DateTime>("EndDate");
+
                     b.Property<long>("EvaluatorUserId");
 
                     b.Property<string>("Instructions");
@@ -1107,11 +1109,11 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<int>("Status");
+
                     b.Property<int>("Term");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EvaluatorUserId");
 
                     b.ToTable("Evaluations");
                 });
@@ -1269,7 +1271,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Section.Section", b =>
@@ -1285,8 +1287,6 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime?>("DeletionTime");
 
-                    b.Property<string>("DisplayName");
-
                     b.Property<long>("EvaluationId");
 
                     b.Property<bool>("IsActive");
@@ -1299,7 +1299,9 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<long>("ParentId");
+                    b.Property<long?>("ParentId");
+
+                    b.Property<bool>("ShowName");
 
                     b.HasKey("Id");
 
@@ -1307,7 +1309,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Section");
+                    b.ToTable("Sections");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>
@@ -1559,14 +1561,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
-                {
-                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "EvaluatorUser")
-                        .WithMany("EvaluationsPerformed")
-                        .HasForeignKey("EvaluatorUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", b =>
                 {
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Evaluation", "Evaluation")
@@ -1630,8 +1624,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Section.Section", "ParentSection")
                         .WithMany()
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ParentId");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Identity.UserSignature", b =>

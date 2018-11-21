@@ -1,4 +1,5 @@
-﻿using Abp.Collections.Extensions;
+﻿using System;
+using Abp.Collections.Extensions;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -49,59 +50,49 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
         }
 
-        public async Task<long> AddEvaluationSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject)
+        public async Task<long> InsertOrUpdateSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject)
         {
-            try
-            {
-                SectionRepository.Delete(section => section.EvaluationId == addEvaluationSectionValueObject.EvaluationId);
-
                 Section.Section rootSection = new Section.Section(
                     addEvaluationSectionValueObject.Name,
-                    addEvaluationSectionValueObject.ShowName,
                     addEvaluationSectionValueObject.EvaluationId,
-                    null,
-                    true);
+                    true,
+                    addEvaluationSectionValueObject.Id);
 
-                long rootSectionId = await SectionRepository.InsertAndGetIdAsync(rootSection);
+                return await SectionRepository.InsertOrUpdateAndGetIdAsync(rootSection);
+        }
 
-                foreach (QuestionValueObject questionValueObject in addEvaluationSectionValueObject.Questions)
-                {
-                    Question.Question question = new Question.Question(
-                        questionValueObject.Text,
-                        questionValueObject.QuestionType,
-                        rootSectionId);
-
-                    await QuestionRepository.InsertAsync(question);
-                }
-
-                foreach (SectionValueObject sectionValueObject in addEvaluationSectionValueObject.SubSections)
-                {
-                    Section.Section currentSection = new Section.Section(
-                        sectionValueObject.Name,
-                        sectionValueObject.ShowName,
-                        sectionValueObject.EvaluationId,
-                        rootSectionId,
-                        true);
-
-                    long currentSectionId = await SectionRepository.InsertAndGetIdAsync(currentSection);
-
-                    foreach (QuestionValueObject questionValueObject in sectionValueObject.Questions)
-                    {
-                        Question.Question question = new Question.Question(
-                            questionValueObject.Text,
-                            questionValueObject.QuestionType,
-                            currentSectionId);
-
-                        await QuestionRepository.InsertAsync(question);
-                    }
-                }
-
-                return rootSectionId;
-            }
-            catch (DbUpdateException)
+        public async Task<long> InsertOrUpdateSubsectionAndGetIdAsync(SubsectionValueObject addSubsectionValueObject)
+        {
+            Section.Section rootSection = null;
+            try
             {
-                throw new EntityNotFoundException("EvaluationNotFound"); // most certainly the evaluation does not exist
+                rootSection =
+                    await SectionRepository.SingleAsync(section => section.Id == addSubsectionValueObject.ParentId);
             }
+            catch (InvalidOperationException)
+            {
+                throw new Exception($"Seccion {addSubsectionValueObject.ParentId} no encontrada");
+            }
+
+            Section.Section subSection = new Section.Section(
+                addSubsectionValueObject.Name,
+                rootSection.EvaluationId,
+                addSubsectionValueObject.ParentId,
+                true,
+                addSubsectionValueObject.Id);
+
+            return await SectionRepository.InsertOrUpdateAndGetIdAsync(subSection);
+        }
+
+        public async Task<long> InsertOrUpdateQuestionAndGetIdAsync(QuestionValueObject questionValueObject)
+        {
+            Question.Question question = new Question.Question(
+                questionValueObject.Text,
+                questionValueObject.QuestionType,
+                questionValueObject.SectionId,
+                questionValueObject.Id);
+
+            return await QuestionRepository.InsertOrUpdateAndGetIdAsync(question);
         }
 
         public async Task<long> AddEvaluationInstructionsAndGetIdAsync(AddEvaluationInstructionsValueObject addEvaluationInstructionsValueObject)

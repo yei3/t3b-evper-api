@@ -1113,8 +1113,6 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EvaluatorUserId");
-
                     b.ToTable("Evaluations");
                 });
 
@@ -1558,14 +1556,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationUser", "EvaluationUser")
                         .WithMany("EvaluationUserCapabilities")
                         .HasForeignKey("EvaluationUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
-                {
-                    b.HasOne("Yei3.PersonalEvaluation.Authorization.Users.User", "EvaluatorUser")
-                        .WithMany("EvaluationsPerformed")
-                        .HasForeignKey("EvaluatorUserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -69,9 +69,6 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
             modelBuilder.Entity<User>()
                 .HasMany(user => user.EvaluationsReceived)
                 .WithOne(evaluationUser => evaluationUser.User);
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.EvaluationsPerformed)
-                .WithOne(evaluation => evaluation.EvaluatorUser);
 
             modelBuilder.Entity<UserSignature>()
                 .HasMany(userSignature => userSignature.EvaluationUsers)

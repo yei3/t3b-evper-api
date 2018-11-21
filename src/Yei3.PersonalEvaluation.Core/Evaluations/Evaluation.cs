@@ -4,13 +4,16 @@
     using Interfaces;
     using System.ComponentModel.DataAnnotations.Schema;
     using Abp.Domain.Entities.Auditing;
-    using Authorization.Users;
     using Term;
     using System.Collections.Generic;
     using Objectives;
 
     public class Evaluation : FullAuditedEntity<long>, INamed, IDescribed
     {
+        public Evaluation()
+        {
+        }
+
         public Evaluation(EvaluationTerm term, long evaluatorUserId)
         {
             Term = term;
@@ -20,8 +23,6 @@
 
         public virtual EvaluationTerm Term { get; protected set; }
         public virtual long EvaluatorUserId { get; protected set; }
-        [ForeignKey("EvaluatorUserId")]
-        public virtual User EvaluatorUser { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual ICollection<Section.Section> Sections { get; protected set; }
         [ForeignKey("EvaluationId")]
