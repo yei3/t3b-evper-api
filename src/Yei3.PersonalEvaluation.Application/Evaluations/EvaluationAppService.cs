@@ -38,27 +38,7 @@
                 .GetAllIncluding(evaluation => evaluation.Sections)
                 .FirstAsync(evaluation => evaluation.Id == id);
         }
-
-        public async Task<EntityDto<long>> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveDto addEvaluationObjectiveDto)
-        {
-            try
-            {
-                return new EntityDto<long>(await EvaluationManager.AddEvaluationObjectiveAndGetIdAsync(
-                    new AddEvaluationObjectiveValueObject
-                    {
-                        EvaluationId = addEvaluationObjectiveDto.EvaluationId,
-                        Index = addEvaluationObjectiveDto.Index,
-                        Description = addEvaluationObjectiveDto.Description,
-                        DefinitionOfDone = addEvaluationObjectiveDto.DefinitionOfDone,
-                        DeliveryDate = addEvaluationObjectiveDto.DeliveryDate
-                    }));
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
-        }
-
+        
         public async Task<EntityDto<long>> InsertOrUpdateSectionAndGetIdAsync(SectionDto sectionDto)
         {
             try
@@ -84,24 +64,7 @@
                 throw new UserFriendlyException(L(e.Message));
             }
         }
-
-        public async Task<EntityDto<long>> AddEvaluationInstructionsAndGetIdAsync(SetEvaluationInstructionsDto evaluationInstructionsDto)
-        {
-            try
-            {
-
-                return new EntityDto<long>(await EvaluationManager.AddEvaluationInstructionsAndGetIdAsync(new AddEvaluationInstructionsValueObject
-                {
-                    Id = evaluationInstructionsDto.Id,
-                    Instructions = evaluationInstructionsDto.Instructions
-                }));
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
-        }
-
+        
         public async Task<EntityDto<long>> InsertOrUpdateQuestionAndGetIdAsync(QuestionDto questionDto)
         {
             try
