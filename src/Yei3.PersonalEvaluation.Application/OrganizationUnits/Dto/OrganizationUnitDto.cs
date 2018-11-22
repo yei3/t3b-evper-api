@@ -1,7 +1,10 @@
 ﻿namespace Yei3.PersonalEvaluation.OrganizationUnits.Dto
 {
-    using Abp.Domain.Entities;
+    using Abp.AutoMapper;
+    using OrganizationUnit;
 
+    using Abp.Domain.Entities;
+    [AutoMap(typeof(Abp.Organizations.OrganizationUnit), typeof(AreaOrganizationUnit), typeof(RegionOrganizationUnit))]
     public class OrganizationUnitDto : Entity<long>
     {
         public string DisplayName { get; set; }

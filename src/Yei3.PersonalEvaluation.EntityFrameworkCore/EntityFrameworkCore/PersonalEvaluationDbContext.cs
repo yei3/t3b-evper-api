@@ -9,6 +9,7 @@ using Yei3.PersonalEvaluation.Evaluations.Question;
 using Yei3.PersonalEvaluation.Evaluations.Section;
 using Yei3.PersonalEvaluation.Identity;
 using Yei3.PersonalEvaluation.MultiTenancy;
+using Yei3.PersonalEvaluation.OrganizationUnit;
 
 namespace Yei3.PersonalEvaluation.EntityFrameworkCore
 {
@@ -25,6 +26,8 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<EvaluationUser> EvaluationUsers { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<AreaOrganizationUnit> AreaOrganizationUnits { get; set; }
+        public virtual DbSet<RegionOrganizationUnit> RegionOrganizationUnits { get; set; }
         
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
             : base(options)

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Abp.Organizations;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.OrganizationUnit;
 
 namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
 {
@@ -22,39 +23,41 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
 
         private void CreateDefaultOrganizationUnits()
         {
-            OrganizationUnit organizationUnitRegion = _context.OrganizationUnits.IgnoreQueryFilters()
+            RegionOrganizationUnit organizationUnitRegion = _context.RegionOrganizationUnits.IgnoreQueryFilters()
                 .FirstOrDefault(organizationUnit => organizationUnit.Code.Equals("00001"));
 
             if (organizationUnitRegion != null) return;
 
-            organizationUnitRegion = new OrganizationUnit(_tenantId, "Region");
-            organizationUnitRegion.Code = OrganizationUnit.CreateCode(new[] {1});
-            _context.OrganizationUnits.Add(organizationUnitRegion);
+            organizationUnitRegion = new RegionOrganizationUnit(_tenantId, "Region")
+            {
+                Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1})
+            };
+            _context.RegionOrganizationUnits.Add(organizationUnitRegion);
             _context.SaveChanges();
 
-            OrganizationUnit organizationUnitAreaFinances = new OrganizationUnit(_tenantId, "Finanzas", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaPurchases = new OrganizationUnit(_tenantId, "Compras", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaPurchasesInAndOut = new OrganizationUnit(_tenantId, "Compras In & Out", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaSystemsAndLogistics = new OrganizationUnit(_tenantId, "Sistemas y Logistica", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaSellsAndOperations = new OrganizationUnit(_tenantId, "Ventas y Operaciones", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaHumanResources = new OrganizationUnit(_tenantId, "RRHH", organizationUnitRegion.Id);
-            OrganizationUnit organizationUnitAreaExpansion = new OrganizationUnit(_tenantId, "Expansion", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaFinances = new AreaOrganizationUnit(_tenantId, "Finanzas", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaPurchases = new AreaOrganizationUnit(_tenantId, "Compras", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaPurchasesInAndOut = new AreaOrganizationUnit(_tenantId, "Compras In & Out", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaSystemsAndLogistics = new AreaOrganizationUnit(_tenantId, "Sistemas y Logistica", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaSellsAndOperations = new AreaOrganizationUnit(_tenantId, "Ventas y Operaciones", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaHumanResources = new AreaOrganizationUnit(_tenantId, "RRHH", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaExpansion = new AreaOrganizationUnit(_tenantId, "Expansion", organizationUnitRegion.Id);
 
-            organizationUnitAreaFinances.Code = OrganizationUnit.CreateCode(new[] {1, 1});
-            organizationUnitAreaPurchases.Code = OrganizationUnit.CreateCode(new[] {1, 2});
-            organizationUnitAreaPurchasesInAndOut.Code = OrganizationUnit.CreateCode(new[] {1, 3});
-            organizationUnitAreaSystemsAndLogistics.Code = OrganizationUnit.CreateCode(new[] {1, 4});
-            organizationUnitAreaSellsAndOperations.Code = OrganizationUnit.CreateCode(new[] {1, 5});
-            organizationUnitAreaHumanResources.Code = OrganizationUnit.CreateCode(new[] {1, 6});
-            organizationUnitAreaExpansion.Code = OrganizationUnit.CreateCode(new[] {1, 7});
+            organizationUnitAreaFinances.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 1});
+            organizationUnitAreaPurchases.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 2});
+            organizationUnitAreaPurchasesInAndOut.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 3});
+            organizationUnitAreaSystemsAndLogistics.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 4});
+            organizationUnitAreaSellsAndOperations.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 5});
+            organizationUnitAreaHumanResources.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 6});
+            organizationUnitAreaExpansion.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 7});
 
-            _context.OrganizationUnits.Add(organizationUnitAreaFinances);
-            _context.OrganizationUnits.Add(organizationUnitAreaPurchases);
-            _context.OrganizationUnits.Add(organizationUnitAreaPurchasesInAndOut);
-            _context.OrganizationUnits.Add(organizationUnitAreaSystemsAndLogistics);
-            _context.OrganizationUnits.Add(organizationUnitAreaSellsAndOperations);
-            _context.OrganizationUnits.Add(organizationUnitAreaHumanResources);
-            _context.OrganizationUnits.Add(organizationUnitAreaExpansion);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaFinances);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaPurchases);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaPurchasesInAndOut);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaSystemsAndLogistics);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaSellsAndOperations);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaHumanResources);
+            _context.AreaOrganizationUnits.Add(organizationUnitAreaExpansion);
 
             _context.SaveChanges();
         }
