@@ -138,7 +138,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 if (isManager)
                 {
-                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();q
+                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
                 }
 
                 if (isSupervisor)
