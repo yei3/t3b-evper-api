@@ -1,5 +1,4 @@
 ﻿using System;
-using Abp.Collections.Extensions;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -95,20 +94,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await QuestionRepository.InsertOrUpdateAndGetIdAsync(question);
         }
 
-        public async Task<long> AddEvaluationInstructionsAndGetIdAsync(AddEvaluationInstructionsValueObject addEvaluationInstructionsValueObject)
+        public async Task RemoveEvaluationSectionAsync(long id)
         {
-            Evaluation evaluation = await EvaluationRepository
-                .FirstOrDefaultAsync(addEvaluationInstructionsValueObject.Id);
+            await SectionRepository.DeleteAsync(id);
+        }
 
-            if (evaluation.IsNullOrDeleted())
-            {
-                throw new EntityNotFoundException($"Evaluacion {addEvaluationInstructionsValueObject.Id} no encontrada");
-            }
-
-            evaluation.Instructions = addEvaluationInstructionsValueObject.Instructions;
-            await EvaluationRepository.UpdateAsync(evaluation);
-
-            return evaluation.Id;
+        public async Task RemoveEvaluationQuestionAsync(long id)
+        {
+            await QuestionRepository.DeleteAsync(id);
         }
 
         public async Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds)

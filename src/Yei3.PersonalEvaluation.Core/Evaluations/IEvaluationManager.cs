@@ -12,7 +12,9 @@
         Task<long> InsertOrUpdateSubsectionAndGetIdAsync(SubsectionValueObject addSubsectionValueObject);
         Task<long> InsertOrUpdateQuestionAndGetIdAsync(QuestionValueObject questionValueObject);
 
-        Task<long> AddEvaluationInstructionsAndGetIdAsync(AddEvaluationInstructionsValueObject addEvaluationInstructionsValueObject);
+        Task RemoveEvaluationSectionAsync(long id);
+        Task RemoveEvaluationQuestionAsync(long id);
+
         Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds);
     }
 }

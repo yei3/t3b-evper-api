@@ -1,4 +1,6 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
+﻿using System;
+
+namespace Yei3.PersonalEvaluation.Evaluations
 {
     using System.Collections.Generic;
     using Abp.Application.Services;
@@ -26,6 +28,7 @@
         {
             return base.CreateFilteredQuery(input)
                 .Include(evaluation => evaluation.Sections)
+                .ThenInclude(section => section.Questions)
                 .WhereIf(input.CreatorUserId.HasValue, evaluation => evaluation.CreatorUserId == input.CreatorUserId)
                 .WhereIf(input.EvaluatorUserId.HasValue, evaluation => evaluation.EvaluatorUserId == input.EvaluatorUserId)
                 .WhereIf(input.MinTime.HasValue, evaluation => evaluation.CreationTime >= input.MinTime.Value)
@@ -76,6 +79,30 @@
             catch (DbUpdateException e)
             {
                 throw new UserFriendlyException(L(e.Message));
+            }
+        }
+
+        public async Task RemoveEvaluationSection(long sectionId)
+        {
+            try
+            {
+                await EvaluationManager.RemoveEvaluationSectionAsync(sectionId);
+            }
+            catch (Exception exception)
+            {
+                throw new UserFriendlyException($"Error eliminando seccion {sectionId}", exception);
+            }
+        }
+
+        public async Task RemoveEvaluationQuestion(long questionId)
+        {
+            try
+            {
+                await EvaluationManager.RemoveEvaluationQuestionAsync(questionId);
+            }
+            catch (Exception exception)
+            {
+                throw new UserFriendlyException($"Error eliminando pregunta {questionId}", exception);
             }
         }
 

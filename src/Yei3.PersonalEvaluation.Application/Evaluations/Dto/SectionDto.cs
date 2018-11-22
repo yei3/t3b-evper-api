@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
@@ -12,5 +13,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         [CanBeNull] public string Name { get; set; }
         public long? EvaluationId { get; set; }
         public long? ParentId { get; set; }
+        [CanBeNull] public ICollection<QuestionDto> Questions { get; set; }
     }
 }
