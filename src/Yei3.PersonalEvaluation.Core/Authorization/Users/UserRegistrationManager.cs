@@ -138,10 +138,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 if (isManager)
                 {
-                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
-
-                    Permission permission = _permissionManager.GetPermission(PermissionNames.Pages_Tenants);
-                    _userManager.GrantPermissionAsync(user, permission).GetAwaiter().GetResult();
+                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();q
                 }
 
                 if (isSupervisor)

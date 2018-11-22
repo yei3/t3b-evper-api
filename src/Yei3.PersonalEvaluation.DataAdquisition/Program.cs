@@ -35,7 +35,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                     for (int row = 3; row < rowCount; row++) // start in row 3 cause data starts there, any template change can break this, is better if we provide the template
                     {
                         try
-                        {
+                         {
                             User currentUser = userRegistrationManager.ImportUser(
                                 employeeNumber: worksheet.Cells[row, 1].Value.ToString(),
                                 status: worksheet.Cells[row, 2].Value.ToString() == AppConst.IsActiveImportValue,
