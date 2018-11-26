@@ -1,20 +1,20 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Abp.Domain.Services;
+using Yei3.PersonalEvaluation.Evaluations.Terms;
+using Yei3.PersonalEvaluation.Evaluations.ValueObject;
+
+namespace Yei3.PersonalEvaluation.Evaluations
 {
-    using Abp.Domain.Services;
-    using System.Threading.Tasks;
-    using ValueObjects;
-    using System.Collections.Generic;
 
     public interface IEvaluationManager : IDomainService
     {
-        Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject);
-        Task<long> InsertOrUpdateSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject);
-        Task<long> InsertOrUpdateSubsectionAndGetIdAsync(SubsectionValueObject addSubsectionValueObject);
-        Task<long> InsertOrUpdateQuestionAndGetIdAsync(QuestionValueObject questionValueObject);
-
-        Task RemoveEvaluationSectionAsync(long id);
-        Task RemoveEvaluationQuestionAsync(long id);
-
-        Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds);
+        Task<EvaluationTerm> GetUserNextEvaluationTermAsync();
+        Task<ToDoesSummaryValueObject> GetUserToDoesSummary();
+        Task<int> GetUserPendingAutoEvaluationsCountAsync();
+        Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync();
+        Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync();
+        Task<int> GetUserPendingEvaluationsCountAsync();
+        Task<int> GetUserPendingObjectivesCountAsync();
     }
 }

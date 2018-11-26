@@ -1,38 +1,28 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities.Auditing;
+using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationTemplates;
+using Yei3.PersonalEvaluation.Evaluations.Terms;
+
+namespace Yei3.PersonalEvaluation.Evaluations
 {
-    using System;
-    using Interfaces;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using Abp.Domain.Entities.Auditing;
-    using Term;
-    using System.Collections.Generic;
-    using Objectives;
-
-    public class Evaluation : FullAuditedEntity<long>, INamed, IDescribed
+    public class Evaluation : FullAuditedEntity<long>
     {
-        public Evaluation()
-        {
-        }
-
-        public Evaluation(EvaluationTerm term, long evaluatorUserId)
-        {
-            Term = term;
-            EvaluatorUserId = evaluatorUserId;
-            Status = EvaluationStatus.NonInitiated;
-        }
-
+        public virtual long EvaluationId { get; protected set; }
+        [ForeignKey("EvaluationId")]
+        public virtual EvaluationTemplate Template { get; protected set; }
+        [ForeignKey("EvaluationId")]
+        public virtual EvaluationRevision Revision { get; protected set; }
+        public virtual long UserId { get; protected set; }
+        [ForeignKey("UserId")]
+        public virtual User User { get; protected set; }
+        public virtual EvaluationStatus Status { get; protected set; }
         public virtual EvaluationTerm Term { get; protected set; }
-        public virtual long EvaluatorUserId { get; protected set; }
-        [ForeignKey("EvaluationId")]
-        public virtual ICollection<Section.Section> Sections { get; protected set; }
-        [ForeignKey("EvaluationId")]
-        public virtual ICollection<Objective> Objectives { get; protected set; }
-        [ForeignKey("EvaluationId")]
-        public virtual ICollection<EvaluationUser> EvaluationUsers { get; protected set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Instructions { get; set; }
-        public EvaluationStatus Status { get; set; }
-        public DateTime EndDate { get; set; }
+        public virtual DateTime EndDateTime { get; protected set; }
+        public virtual ICollection<EvaluationQuestion> Questions { get; protected set; }
     }
 }

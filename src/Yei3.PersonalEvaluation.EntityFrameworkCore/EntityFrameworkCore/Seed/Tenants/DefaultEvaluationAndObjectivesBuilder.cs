@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
-using Yei3.PersonalEvaluation.Evaluations.Term;
 
 namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
 {
@@ -24,16 +23,16 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
 
         private void CreateDefaultObjectives()
         {
-            Evaluation defaultEvaluation = _context.Evaluations.IgnoreQueryFilters().FirstOrDefault();
+            //Evaluation defaultEvaluation = _context.Evaluations.IgnoreQueryFilters().FirstOrDefault();
 
-            if (defaultEvaluation != null) return;
+            //if (defaultEvaluation != null) return;
 
-            User evaluatorUser = _context.Users.FirstOrDefault(user => user.UserName == "50328");
-            User evaluatedUser = _context.Users.FirstOrDefault(user => user.UserName == "50885");
+            //User evaluatorUser = _context.Users.FirstOrDefault(user => user.UserName == "50328");
+            //User evaluatedUser = _context.Users.FirstOrDefault(user => user.UserName == "50885");
 
-            if(evaluatorUser == null) return;
+            //if(evaluatorUser == null) return;
             
-            defaultEvaluation = new Evaluation(EvaluationTerm.FirstSemester, evaluatorUser.Id);
+            //defaultEvaluation = new Evaluation();
 
         }
     }

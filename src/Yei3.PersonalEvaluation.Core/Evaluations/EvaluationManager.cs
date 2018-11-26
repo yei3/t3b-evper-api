@@ -1,135 +1,121 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Abp.Domain.Repositories;
+using Abp.Domain.Services;
+using Abp.Runtime.Session;
+using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
+using Yei3.PersonalEvaluation.Evaluations.Terms;
+using Yei3.PersonalEvaluation.Evaluations.ValueObject;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
-    using Abp.Domain.Services;
-    using System.Threading.Tasks;
-    using ValueObjects;
-    using Abp.Domain.Entities;
-    using Abp.Domain.Repositories;
-    using Microsoft.EntityFrameworkCore;
-    using Objectives;
-    using System.Collections.Generic;
-
+    
     public class EvaluationManager : DomainService, IEvaluationManager
     {
-        private readonly IRepository<Objective, long> ObjectiveRepository;
+
+        private readonly IAbpSession AbpSession;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
-        private readonly IRepository<EvaluationUser, long> EvaluationUserRepository;
-        private readonly IRepository<Section.Section, long> SectionRepository;
-        private readonly IRepository<Question.Question, long> QuestionRepository;
+        private readonly IRepository<EvaluationRevision, long> EvaluationRevisionRepository;
 
-        public EvaluationManager(IRepository<Objective, long> objectiveRepository, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationUser, long> evaluationUserRepository, IRepository<Section.Section, long> sectionRepository, IRepository<Question.Question, long> questionRepository)
+        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationRevision, long> evaluationRevisionRepository)
         {
-            ObjectiveRepository = objectiveRepository;
+            AbpSession = abpSession;
             EvaluationRepository = evaluationRepository;
-            EvaluationUserRepository = evaluationUserRepository;
-            SectionRepository = sectionRepository;
-            QuestionRepository = questionRepository;
+            EvaluationRevisionRepository = evaluationRevisionRepository;
         }
 
-        public async Task<long> AddEvaluationObjectiveAndGetIdAsync(AddEvaluationObjectiveValueObject addEvaluationObjectiveValueObject)
+        public async Task<EvaluationTerm> GetUserNextEvaluationTermAsync()
         {
-            try
+            var nextEvaluation = await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .OrderBy(evaluation => evaluation.CreationTime)
+                .FirstOrDefaultAsync(evaluation => evaluation.UserId == AbpSession.GetUserId());
+
+            return nextEvaluation == null ? EvaluationTerm.NoTerm : nextEvaluation.Term;
+        }
+
+        public async Task<ToDoesSummaryValueObject> GetUserToDoesSummary()
+        {
+            return new ToDoesSummaryValueObject
             {
-                Objective objective = new Objective(
-                    addEvaluationObjectiveValueObject.Index,
-                    addEvaluationObjectiveValueObject.Description,
-                    addEvaluationObjectiveValueObject.EvaluationId,
-                    true,
-                    addEvaluationObjectiveValueObject.DefinitionOfDone,
-                    addEvaluationObjectiveValueObject.DeliveryDate
-                );
-
-                return await ObjectiveRepository.InsertAndGetIdAsync(objective);
-            }
-            catch (DbUpdateException)
-            {
-                throw new EntityNotFoundException("EvaluationNotFound"); // most certainly the evaluation does not exist
-            }
+                Evaluations = await GetUserPendingEvaluationsCountAsync(),
+                AutoEvaluations = await GetUserPendingAutoEvaluationsCountAsync(),
+                Objectives = await GetUserPendingObjectivesCountAsync()
+            };
         }
 
-        public async Task<long> InsertOrUpdateSectionAndGetIdAsync(SectionValueObject addEvaluationSectionValueObject)
+        public async Task<int> GetUserPendingAutoEvaluationsCountAsync()
         {
-                Section.Section rootSection = new Section.Section(
-                    addEvaluationSectionValueObject.Name,
-                    addEvaluationSectionValueObject.EvaluationId,
-                    true,
-                    addEvaluationSectionValueObject.Id);
-
-                return await SectionRepository.InsertOrUpdateAndGetIdAsync(rootSection);
+            return await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.CreatorUserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .CountAsync();
         }
 
-        public async Task<long> InsertOrUpdateSubsectionAndGetIdAsync(SubsectionValueObject addSubsectionValueObject)
+        public async Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync()
         {
-            Section.Section rootSection = null;
-            try
-            {
-                rootSection =
-                    await SectionRepository.SingleAsync(section => section.Id == addSubsectionValueObject.ParentId);
-            }
-            catch (InvalidOperationException)
-            {
-                throw new Exception($"Seccion {addSubsectionValueObject.ParentId} no encontrada");
-            }
-
-            Section.Section subSection = new Section.Section(
-                addSubsectionValueObject.Name,
-                rootSection.EvaluationId,
-                addSubsectionValueObject.ParentId,
-                true,
-                addSubsectionValueObject.Id);
-
-            return await SectionRepository.InsertOrUpdateAndGetIdAsync(subSection);
-        }
-
-        public async Task<long> InsertOrUpdateQuestionAndGetIdAsync(QuestionValueObject questionValueObject)
-        {
-            Question.Question question = new Question.Question(
-                questionValueObject.Text,
-                questionValueObject.QuestionType,
-                questionValueObject.SectionId,
-                questionValueObject.Id);
-
-            return await QuestionRepository.InsertOrUpdateAndGetIdAsync(question);
-        }
-
-        public async Task RemoveEvaluationSectionAsync(long id)
-        {
-            await SectionRepository.DeleteAsync(id);
-        }
-
-        public async Task RemoveEvaluationQuestionAsync(long id)
-        {
-            await QuestionRepository.DeleteAsync(id);
-        }
-
-        public async Task<ICollection<long>> EvaluateUsers(long evaluationId, ICollection<long> userIds)
-        {
-            Evaluation evaluation = await EvaluationRepository
-                .FirstOrDefaultAsync(evaluationId);
-
-            if (evaluation.IsNullOrDeleted())
-            {
-                throw new EntityNotFoundException($"Evaluacion {evaluationId} no encontrada");
-            }
-
-            List<long> evaluationUserIds = new List<long>();
-
-            try
-            {
-                foreach (long userId in userIds)
+            return await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.CreatorUserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .Select(evaluation => new EvaluationSummaryValueObject
                 {
-                    evaluationUserIds.Add(
-                        await EvaluationUserRepository.InsertAndGetIdAsync(new EvaluationUser(evaluationId, userId)));
-                }
-            }
-            catch (DbUpdateException)
+                    Term = evaluation.Term,
+                    Id = evaluation.Id,
+                    Name = evaluation.Template.Name,
+                    Status = evaluation.Status,
+                    EndDateTime = evaluation.EndDateTime
+                }).ToListAsync();
+        }
+
+        public async Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync()
+        {
+            return await EvaluationRevisionRepository
+                .GetAll()
+                .Where(revision => revision.Status == EvaluationRevisionStatus.Pending)
+                .Where(revision => revision.Evaluation.UserId == AbpSession.GetUserId())
+                .Select(revision => new RevisionSummaryValueObject
+                {
+                    Term = revision.Evaluation.Term,
+                    Status = revision.Status,
+                    EndDateTime = revision.Evaluation.EndDateTime,
+                    Name = revision.Evaluation.Template.Name,
+                    RevisionDateTime = revision.RevisionDateTime
+                }).ToListAsync();
+        }
+
+
+        public async Task<int> GetUserPendingEvaluationsCountAsync()
+        {
+            return await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .CountAsync();
+        }
+
+        public Task<int> GetUserPendingObjectivesCountAsync()
+        {
+            int pendingObjectivesCountAsync = 0;
+
+            IQueryable<Evaluation> pendingEvaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending);
+
+            foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
-                throw new EntityNotFoundException($"Uno de los usuarios \"{evaluationUserIds.ToString()}\" es no valido");  // most certainly the user does not exist
+                pendingObjectivesCountAsync += pendingEvaluation.Questions.Count(question => question.Status == EvaluationQuestionStatus.Unanswered);
             }
 
-            return evaluationUserIds;
+            return Task.FromResult(pendingObjectivesCountAsync);
         }
     }
 }

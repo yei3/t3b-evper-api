@@ -1,0 +1,36 @@
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Abp.Application.Services;
+using Abp.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.EvaluationTemplate.Dto;
+using Yei3.PersonalEvaluation.Section.Dto;
+
+namespace Yei3.PersonalEvaluation.Section
+{
+    public class SectionAppService : AsyncCrudAppService<Evaluations.Sections.Section, SectionDto, long, SectionGetAllInputDto, SectionCreateInputDto>, ISectionAppService
+    {
+        public SectionAppService(IRepository<Evaluations.Sections.Section, long> repository) : base(repository)
+        {
+        }
+
+        protected override IQueryable<Evaluations.Sections.Section> CreateFilteredQuery(SectionGetAllInputDto input)
+        {
+            return Repository.GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.Questions)
+                .Include(section => section.Questions)
+                .Where(section => !section.ParentId.HasValue);
+        }
+
+        protected override async Task<Evaluations.Sections.Section> GetEntityByIdAsync(long id)
+        {
+            return await Repository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.Questions)
+                .Include(section => section.Questions)
+                .FirstOrDefaultAsync(section => section.Id == id);
+        }
+    }
+}

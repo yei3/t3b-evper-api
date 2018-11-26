@@ -1,125 +1,24 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Abp.Application.Services;
+using Abp.Application.Services.Dto;
+using Abp.Domain.Repositories;
+using Yei3.PersonalEvaluation.Evaluations.Dto;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
-    using System.Collections.Generic;
-    using Abp.Application.Services;
-    using Abp.Domain.Repositories;
-    using Dto;
-    using System.Linq;
-    using Microsoft.EntityFrameworkCore;
-    using Abp.Linq.Extensions;
-    using System.Threading.Tasks;
-    using Abp.Application.Services.Dto;
-    using Abp.UI;
-    using ValueObjects;
-    using Abp.AutoMapper;
 
     public class EvaluationAppService : AsyncCrudAppService<Evaluation, EvaluationDto, long, GetAllEvaluationsInputDto, CreateEvaluationDto>, IEvaluationAppService
     {
         private readonly IEvaluationManager EvaluationManager;
 
-        public EvaluationAppService(IRepository<Evaluation, long> repository, IEvaluationManager evaluationManager) : base(repository)
+        public EvaluationAppService(IRepository<Evaluation, long> repository) : base(repository)
         {
-            EvaluationManager = evaluationManager;
         }
 
-        protected override IQueryable<Evaluation> CreateFilteredQuery(GetAllEvaluationsInputDto input)
+        public Task<ICollection<EntityDto<long>>> EvaluateUsersAndGetIdsAsync(EvaluateUsersInputDto evaluateUsersInputDto)
         {
-            return base.CreateFilteredQuery(input)
-                .Include(evaluation => evaluation.Sections)
-                .ThenInclude(section => section.Questions)
-                .WhereIf(input.CreatorUserId.HasValue, evaluation => evaluation.CreatorUserId == input.CreatorUserId)
-                .WhereIf(input.EvaluatorUserId.HasValue, evaluation => evaluation.EvaluatorUserId == input.EvaluatorUserId)
-                .WhereIf(input.MinTime.HasValue, evaluation => evaluation.CreationTime >= input.MinTime.Value)
-                .WhereIf(input.MaxTime.HasValue, evaluation => evaluation.CreationTime >= input.MaxTime.Value);
-        }
-
-        protected override async Task<Evaluation> GetEntityByIdAsync(long id)
-        {
-            return await Repository
-                .GetAllIncluding(evaluation => evaluation.Sections)
-                .FirstAsync(evaluation => evaluation.Id == id);
-        }
-        
-        public async Task<EntityDto<long>> InsertOrUpdateSectionAndGetIdAsync(SectionDto sectionDto)
-        {
-            try
-            {
-                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateSectionAndGetIdAsync(
-                    sectionDto.MapTo<SectionValueObject>()));
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
-        }
-
-        public async Task<EntityDto<long>> InsertOrUpdateSubsectionAndGetIdAsync(SectionDto sectionDto)
-        {
-            try
-            {
-                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateSubsectionAndGetIdAsync(
-                    sectionDto.MapTo<SubsectionValueObject>()));
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
-        }
-        
-        public async Task<EntityDto<long>> InsertOrUpdateQuestionAndGetIdAsync(QuestionDto questionDto)
-        {
-            try
-            {
-
-                return new EntityDto<long>(await EvaluationManager.InsertOrUpdateQuestionAndGetIdAsync(
-                    questionDto.MapTo<QuestionValueObject>()));
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
-        }
-
-        public async Task RemoveEvaluationSection(long sectionId)
-        {
-            try
-            {
-                await EvaluationManager.RemoveEvaluationSectionAsync(sectionId);
-            }
-            catch (Exception exception)
-            {
-                throw new UserFriendlyException($"Error eliminando seccion {sectionId}", exception);
-            }
-        }
-
-        public async Task RemoveEvaluationQuestion(long questionId)
-        {
-            try
-            {
-                await EvaluationManager.RemoveEvaluationQuestionAsync(questionId);
-            }
-            catch (Exception exception)
-            {
-                throw new UserFriendlyException($"Error eliminando pregunta {questionId}", exception);
-            }
-        }
-
-        public async Task<ICollection<EntityDto<long>>> EvaluateUsersAndGetIdsAsync(EvaluateUsersInputDto evaluateUsersInputDto)
-        {
-            try
-            {
-                List<long> userEvaluationIds = new List<long>(
-                    await EvaluationManager.EvaluateUsers(evaluateUsersInputDto.EvaluationId,
-                        evaluateUsersInputDto.EvaluatedUserIds));
-
-                return userEvaluationIds.Select(userEvaluationId => new EntityDto<long>(userEvaluationId)).ToList();
-            }
-            catch (DbUpdateException e)
-            {
-                throw new UserFriendlyException(L(e.Message));
-            }
+            throw new System.NotImplementedException();
         }
     }
 }

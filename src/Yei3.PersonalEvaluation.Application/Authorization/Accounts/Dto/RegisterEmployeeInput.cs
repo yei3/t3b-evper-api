@@ -1,9 +1,9 @@
-using Abp.Auditing;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Abp.Auditing;
 using Yei3.PersonalEvaluation.Authorization.Users;
 
-namespace Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto
+namespace Yei3.PersonalEvaluation.Authorization.Accounts.Dto
 {
     public class RegisterEmployeeInput : IValidatableObject
     {

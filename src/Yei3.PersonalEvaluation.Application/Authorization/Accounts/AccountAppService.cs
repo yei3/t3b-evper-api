@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Abp.Configuration;
 using Abp.Zero.Configuration;
 using Microsoft.AspNetCore.Identity;
-using Yei3.PersonalEvaluation.Application.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Accounts.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
 

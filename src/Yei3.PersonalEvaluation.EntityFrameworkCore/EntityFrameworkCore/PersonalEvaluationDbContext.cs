@@ -3,11 +3,11 @@ using Abp.Zero.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
-using Yei3.PersonalEvaluation.Evaluations.Capabilities;
-using Yei3.PersonalEvaluation.Evaluations.Objectives;
-using Yei3.PersonalEvaluation.Evaluations.Question;
-using Yei3.PersonalEvaluation.Evaluations.Section;
-using Yei3.PersonalEvaluation.Identity;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationTemplates;
+using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Yei3.PersonalEvaluation.Evaluations.Sections;
 using Yei3.PersonalEvaluation.MultiTenancy;
 using Yei3.PersonalEvaluation.OrganizationUnit;
 
@@ -17,17 +17,15 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
     {
         /* Define a DbSet for each entity of the application */
 
-        public virtual DbSet<Evaluation> Evaluations { get; set; }
-        public virtual DbSet<Objective> Objectives { get; set; }
-        public virtual DbSet<EvaluationUserObjective> UserObjectives { get; set; }
-        public virtual DbSet<Capability> Capabilities { get; set; }
-        public virtual DbSet<EvaluationUserCapability> UserCapabilities { get; set; }
-        public virtual DbSet<UserSignature> UserSignatures { get; set; }
-        public virtual DbSet<EvaluationUser> EvaluationUsers { get; set; }
+        public virtual DbSet<EvaluationTemplate> EvaluationTemplates { get; set; }
+        public virtual DbSet<Evaluation> Evaluation { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<FrequentQuestion> FrequentQuestions { get; set; }
+        public virtual DbSet<EvaluationQuestion> EvaluationQuestions { get; set; }
         public virtual DbSet<AreaOrganizationUnit> AreaOrganizationUnits { get; set; }
         public virtual DbSet<RegionOrganizationUnit> RegionOrganizationUnits { get; set; }
+        public virtual DbSet<EvaluationRevision> EvaluationRevisions{ get; set; }
         
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
             : base(options)
@@ -38,51 +36,53 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Evaluation>()
-                .HasMany(evaluation => evaluation.Objectives)
-                .WithOne(objective => objective.Evaluation);
+            modelBuilder.Entity<EvaluationTemplate>()
+                .HasMany(evaluationTemplate => evaluationTemplate.Evaluations)
+                .WithOne(evaluation => evaluation.Template);
 
-            modelBuilder.Entity<Evaluation>()
-                .HasMany(evaluation => evaluation.Sections)
-                .WithOne(capability => capability.Evaluation);
+            modelBuilder.Entity<EvaluationTemplate>()
+                .HasMany(evaluationTemplate => evaluationTemplate.Sections)
+                .WithOne(section => section.Template);
 
-            modelBuilder.Entity<Evaluation>()
-                .HasMany(evaluation => evaluation.EvaluationUsers)
-                .WithOne(evaluationUser => evaluationUser.Evaluation);
+            modelBuilder.Entity<Section>()
+                .HasMany(section => section.Questions)
+                .WithOne(question => question.Section);
 
-            modelBuilder.Entity<Objective>()
-                .HasMany(objective => objective.EvaluationUserObjectives)
-                .WithOne(evaluationUserObjective => evaluationUserObjective.Objective);
-
-            modelBuilder.Entity<Capability>()
-                .HasMany(capability => capability.EvaluationUserCapabilities)
-                .WithOne(evaluationUserCapability => evaluationUserCapability.Capability);
-
-            modelBuilder.Entity<EvaluationUser>()
-                .HasMany(evaluationUser => evaluationUser.EvaluationUserObjectives)
-                .WithOne(evaluationUserObjective => evaluationUserObjective.EvaluationUser);
-
-            modelBuilder.Entity<EvaluationUser>()
-                .HasMany(evaluationUser => evaluationUser.EvaluationUserCapabilities)
-                .WithOne(evaluationUserCapability => evaluationUserCapability.EvaluationUser);
-
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserSignatures)
-                .WithOne(userSignature => userSignature.User);
             modelBuilder.Entity<User>()
                 .HasMany(user => user.EvaluationsReceived)
                 .WithOne(evaluationUser => evaluationUser.User);
-
-            modelBuilder.Entity<UserSignature>()
-                .HasMany(userSignature => userSignature.EvaluationUsers)
-                .WithOne(evaluationUser => evaluationUser.UserSignature);
 
             modelBuilder.Entity<Section>()
                 .HasMany(section => section.Questions)
                 .WithOne(question => question.Section);
 
             modelBuilder.Entity<Section>()
-                .HasOne(section => section.ParentSection);
+                .HasOne(x => x.ParentSection).WithMany(x => x.ChildSections)
+                .Metadata.DeleteBehavior = DeleteBehavior.Restrict;
+
+            modelBuilder.Entity<Section>()
+                .HasMany(section => section.ChildSections)
+                .WithOne(section => section.ParentSection);
+
+            modelBuilder.Entity<Question>()
+                .HasMany(question => question.EvaluationQuestions)
+                .WithOne(evaluationQuestion => evaluationQuestion.Question);
+
+            modelBuilder.Entity<EvaluationQuestion>()
+                .HasOne(evaluationQuestion => evaluationQuestion.Answer)
+                .WithOne(answer => answer.EvaluationQuestion);
+
+            modelBuilder.Entity<Evaluation>()
+                .HasMany(evaluation => evaluation.Questions)
+                .WithOne(question => question.Evaluation);
+
+            modelBuilder.Entity<Evaluation>()
+                .HasOne(evaluation => evaluation.Revision)
+                .WithOne(revision => revision.Evaluation);
+
+            modelBuilder.Entity<EvaluationRevision>()
+                .HasOne(evaluation => evaluation.ReviewerUser)
+                .WithMany(user => user.EvaluationRevisions);
         }
     }
 }

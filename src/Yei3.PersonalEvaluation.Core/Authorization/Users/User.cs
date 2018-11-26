@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Authorization.Users;
 using Abp.Extensions;
 using Yei3.PersonalEvaluation.Evaluations;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 using Yei3.PersonalEvaluation.Identity;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
@@ -25,9 +26,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public virtual DateTime BirthDate { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual ICollection<UserSignature> UserSignatures { get; protected set; }
-        [ForeignKey("UserId")]
-        public virtual ICollection<EvaluationUser> EvaluationsReceived { get; protected set; }
+        public virtual ICollection<Evaluation> EvaluationsReceived { get; protected set; }
+        [ForeignKey("ReviewerUserId")]
+        public virtual ICollection<EvaluationRevision> EvaluationRevisions { get; protected set; }
 
         public static string CreateRandomPassword()
         {

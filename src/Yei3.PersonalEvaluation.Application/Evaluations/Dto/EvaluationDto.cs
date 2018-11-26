@@ -1,8 +1,9 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations.Dto
+﻿using Yei3.PersonalEvaluation.Evaluations.Terms;
+
+namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
     using Abp.AutoMapper;
     using Abp.Application.Services.Dto;
-    using Term;
     using System;
     using System.Collections.Generic;
 
@@ -13,7 +14,6 @@
         public DateTime CreationTime { get; set; }
         public EvaluationTerm Term { get; set; }
 
-        public ICollection<SectionDto> Sections { get; set; }
         public EvaluationStatus Status { get; set; }
         public DateTime EndDate { get; set; }
         public string Name { get; set; }
