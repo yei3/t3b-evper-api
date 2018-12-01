@@ -12,5 +12,6 @@ namespace Yei3.PersonalEvaluation.Dashboard.Dto
         public ToDoesSummaryDto ToDoesSummary { get; set; }
         public ICollection<EvaluationSummaryDto> AutoEvaluationSummary { get; set; }
         public ICollection<RevisionSummaryDto> RevisionSummary { get; set; }
+        public ICollection<PendingObjectivesSummaryDto> ObjectiveSummary { get; set; }
     }
 }

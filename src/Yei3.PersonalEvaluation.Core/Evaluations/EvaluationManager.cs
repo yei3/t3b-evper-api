@@ -5,6 +5,7 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 using Abp.Runtime.Session;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 using Yei3.PersonalEvaluation.Evaluations.Terms;
@@ -19,12 +20,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IAbpSession AbpSession;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<EvaluationRevision, long> EvaluationRevisionRepository;
+        private readonly IRepository<EvaluationQuestion, long> EvaluationQuestionRepository;
 
-        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationRevision, long> evaluationRevisionRepository)
+        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationRevision, long> evaluationRevisionRepository, IRepository<EvaluationQuestion, long> evaluationQuestionRepository)
         {
             AbpSession = abpSession;
             EvaluationRepository = evaluationRepository;
             EvaluationRevisionRepository = evaluationRevisionRepository;
+            EvaluationQuestionRepository = evaluationQuestionRepository;
         }
 
         public async Task<EvaluationTerm> GetUserNextEvaluationTermAsync()
@@ -88,6 +91,21 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     EndDateTime = revision.Evaluation.EndDateTime,
                     Name = revision.Evaluation.Template.Name,
                     RevisionDateTime = revision.RevisionDateTime
+                }).ToListAsync();
+        }
+
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserPendingObjectiveAsync()
+        {
+            return await EvaluationQuestionRepository
+                .GetAll()
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == AbpSession.GetUserId())
+                .Where(evaluationQuestion => evaluationQuestion.MeasuredQuestion != null)
+                .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                {
+                    Status = evaluationQuestion.Status,
+                    Name = evaluationQuestion.MeasuredQuestion.Text,
+                    Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
+                    DeliveryDate = evaluationQuestion.TerminationDateTime
                 }).ToListAsync();
         }
 

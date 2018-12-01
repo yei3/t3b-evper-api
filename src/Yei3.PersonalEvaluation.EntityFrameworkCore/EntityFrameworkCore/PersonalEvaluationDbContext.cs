@@ -20,8 +20,9 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<EvaluationTemplate> EvaluationTemplates { get; set; }
         public virtual DbSet<Evaluation> Evaluation { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
-        public virtual DbSet<Question> Questions { get; set; }
-        public virtual DbSet<FrequentQuestion> FrequentQuestions { get; set; }
+        public virtual DbSet<UnmeasuredQuestion> Questions { get; set; }
+        public virtual DbSet<MeasuredQuestion> MeasuredQuestions { get; set; }
+        public virtual DbSet<Question> FrequentQuestions { get; set; }
         public virtual DbSet<EvaluationQuestion> EvaluationQuestions { get; set; }
         public virtual DbSet<AreaOrganizationUnit> AreaOrganizationUnits { get; set; }
         public virtual DbSet<RegionOrganizationUnit> RegionOrganizationUnits { get; set; }
@@ -64,9 +65,9 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
                 .HasMany(section => section.ChildSections)
                 .WithOne(section => section.ParentSection);
 
-            modelBuilder.Entity<Question>()
+            modelBuilder.Entity<UnmeasuredQuestion>()
                 .HasMany(question => question.EvaluationQuestions)
-                .WithOne(evaluationQuestion => evaluationQuestion.Question);
+                .WithOne(evaluationQuestion => evaluationQuestion.UnmeasuredQuestion);
 
             modelBuilder.Entity<EvaluationQuestion>()
                 .HasOne(evaluationQuestion => evaluationQuestion.Answer)

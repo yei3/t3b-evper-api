@@ -2,7 +2,6 @@
 {
     public class EvaluationMeasuredAnswer : EvaluationAnswer
     {
-        public virtual decimal Expected { get; protected set; }
         public virtual decimal Real { get; protected set; }
     }
 }

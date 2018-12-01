@@ -14,6 +14,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<int> GetUserPendingAutoEvaluationsCountAsync();
         Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync();
         Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync();
+        Task<List<EvaluationObjectivesSummaryValueObject>> GetUserPendingObjectiveAsync();
         Task<int> GetUserPendingEvaluationsCountAsync();
         Task<int> GetUserPendingObjectivesCountAsync();
     }

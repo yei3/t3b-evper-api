@@ -14,7 +14,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
         public virtual Evaluation Evaluation { get; protected set; }
         public virtual long QuestionId { get; protected set; }
         [ForeignKey("QuestionId")]
-        public virtual Question Question { get; protected set; }
+        public virtual UnmeasuredQuestion UnmeasuredQuestion { get; protected set; }
+        [ForeignKey("QuestionId")]
+        public virtual MeasuredQuestion MeasuredQuestion { get; protected set; }
         [CanBeNull]
         [ForeignKey("QuestionId")]
         public virtual EvaluationAnswer Answer { get; protected set; }

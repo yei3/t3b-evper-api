@@ -4,7 +4,7 @@ using Yei3.PersonalEvaluation.Evaluations.Questions;
 
 namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
 {
-    [AutoMap(typeof(Evaluations.Questions.Question))]
+    [AutoMap(typeof(Evaluations.Questions.UnmeasuredQuestion))]
     public class QuestionDto : EntityDto<long>
     {
         public string Text { get; set; }
