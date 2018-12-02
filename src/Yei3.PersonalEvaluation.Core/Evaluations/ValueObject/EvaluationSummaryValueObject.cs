@@ -11,5 +11,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public EvaluationTerm Term { get; set; }
         public DateTime EndDateTime { get; set; }
         public string Name { get; set; }
+        public string CollaboratorName { get; set; }
     }
 }

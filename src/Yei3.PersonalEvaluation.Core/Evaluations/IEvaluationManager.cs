@@ -9,13 +9,21 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
     public interface IEvaluationManager : IDomainService
     {
-        Task<EvaluationTerm> GetUserNextEvaluationTermAsync();
-        Task<ToDoesSummaryValueObject> GetUserToDoesSummary();
-        Task<int> GetUserPendingAutoEvaluationsCountAsync();
-        Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync();
-        Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync();
-        Task<List<EvaluationObjectivesSummaryValueObject>> GetUserPendingObjectiveAsync();
-        Task<int> GetUserPendingEvaluationsCountAsync();
-        Task<int> GetUserPendingObjectivesCountAsync();
+        Task<EvaluationTerm> GetUserNextEvaluationTermAsync(long? userId = null);
+        Task<ToDoesSummaryValueObject> GetUserToDoesSummary(long? userId = null);
+        Task<int> GetUserPendingAutoEvaluationsCountAsync(long? userId = null);
+        Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync(long? userId = null);
+        Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync(long? userId = null);
+        Task<List<EvaluationObjectivesSummaryValueObject>> GetUserPendingObjectiveAsync(long? userId = null);
+        Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null);
+        Task<int> GetUserPendingObjectivesCountAsync(long? userId = null);
+        Task<int> GetUserOrganizationUnitPendingEvaluationsCountAsync(long? userId = null);
+        Task<int> GetUserOrganizationUnitPendingEvaluationValidationsCountAsync(long? userId = null);
+
+        Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync(
+            long? userId = null);
+        Task<ICollection<RevisionSummaryValueObject>> GetUserOrganizationUnitPendingEvaluationRevisionsAsync(long? userId = null);
+        Task<ICollection<CollaboratorsPendingObjectivesSummaryValueObject>> GetUserOrganizationUnitObjectivesSummaryAsync(long? userId = null);
+
     }
 }

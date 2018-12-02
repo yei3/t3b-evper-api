@@ -8,5 +8,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
     public interface IDashboardAppService : IApplicationService
     {
         Task<CollaboratorUserDashboardDto> Collaborator();
+        Task<SupervisorUserDashboardDto> Supervisor();
+
     }
 }
