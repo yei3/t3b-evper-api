@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -7,5 +8,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
     public interface IEvaluationAppService
     {
         Task ApplyEvaluationTemplate(CreateEvaluationDto input);
+        Task<ICollection<Evaluation>> GetAllAsync();
     }
 }

@@ -133,5 +133,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
 
         }
+
+        public async Task<ICollection<Evaluation>> GetAllAsync()
+        {
+            return await EvaluationRepository.GetAllListAsync();
+        }
     }
 }
