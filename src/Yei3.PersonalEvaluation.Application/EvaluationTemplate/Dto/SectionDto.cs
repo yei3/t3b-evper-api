@@ -12,7 +12,8 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
         public bool DisplayName { get; set; }
         public long? EvaluationTemplateId { get; set; }
         public long? ParentId { get; set; }
-        [CanBeNull] public ICollection<QuestionDto> Questions { get; set; }
+        [CanBeNull] public ICollection<QuestionDto> UnmeasuredQuestions { get; set; }
+        [CanBeNull] public ICollection<QuestionDto> MeasuredQuestions { get; set; }
         [CanBeNull] public ICollection<SectionDto> ChildSections { get; set; }
     }
 }

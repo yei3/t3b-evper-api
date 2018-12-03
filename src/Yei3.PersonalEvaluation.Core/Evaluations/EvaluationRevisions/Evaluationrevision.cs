@@ -7,6 +7,14 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
 {
     public class EvaluationRevision : FullAuditedEntity<long>
     {
+        public EvaluationRevision(long evaluationId, long reviewerUserId, DateTime revisionDateTime)
+        {
+            EvaluationId = evaluationId;
+            ReviewerUserId = reviewerUserId;
+            RevisionDateTime = revisionDateTime;
+            Status = EvaluationRevisionStatus.Pending;
+        }
+
         public virtual long EvaluationId { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual Evaluation Evaluation { get; protected set; }

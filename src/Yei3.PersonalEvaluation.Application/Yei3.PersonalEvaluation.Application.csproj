@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Evaluations\Dto\" />
+    <Folder Include="Objective\Dto\" />
   </ItemGroup>
 </Project>

@@ -3,5 +3,9 @@
     public class EvaluationMeasuredAnswer : EvaluationAnswer
     {
         public virtual decimal Real { get; protected set; }
+
+        public EvaluationMeasuredAnswer(long evaluationQuestionId, long evaluationId) : base(evaluationQuestionId, evaluationId)
+        {
+        }
     }
 }

@@ -18,8 +18,8 @@ namespace Yei3.PersonalEvaluation.Section
         {
             return Repository.GetAll()
                 .Include(section => section.ChildSections)
-                .ThenInclude(section => section.Questions)
-                .Include(section => section.Questions)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(section => section.UnmeasuredQuestions)
                 .Where(section => !section.ParentId.HasValue);
         }
 
@@ -28,8 +28,8 @@ namespace Yei3.PersonalEvaluation.Section
             return await Repository
                 .GetAll()
                 .Include(section => section.ChildSections)
-                .ThenInclude(section => section.Questions)
-                .Include(section => section.Questions)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(section => section.UnmeasuredQuestions)
                 .FirstOrDefaultAsync(section => section.Id == id);
         }
     }

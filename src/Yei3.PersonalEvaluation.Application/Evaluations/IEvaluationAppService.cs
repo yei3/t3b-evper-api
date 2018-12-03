@@ -1,13 +1,11 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations
-{
-    using Abp.Application.Services;
-    using System.Threading.Tasks;
-    using Abp.Application.Services.Dto;
-    using Dto;
-    using System.Collections.Generic;
+﻿using System.Threading.Tasks;
 
-    public interface IEvaluationAppService : IAsyncCrudAppService<EvaluationDto, long, GetAllEvaluationsInputDto, CreateEvaluationDto>
+namespace Yei3.PersonalEvaluation.Evaluations
+{
+    using Dto;
+
+    public interface IEvaluationAppService
     {
-        Task<ICollection<EntityDto<long>>> EvaluateUsersAndGetIdsAsync(EvaluateUsersInputDto evaluateUsersInputDto);
+        Task ApplyEvaluationTemplate(CreateEvaluationDto input);
     }
 }

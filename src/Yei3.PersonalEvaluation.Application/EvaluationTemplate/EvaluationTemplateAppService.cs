@@ -5,7 +5,6 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Yei3.PersonalEvaluation.Evaluations.EvaluationTemplates;
 using Yei3.PersonalEvaluation.EvaluationTemplate.Dto;
 
 namespace Yei3.PersonalEvaluation.EvaluationTemplate
@@ -21,10 +20,15 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
             return Repository
                 .GetAll()
                 .Include(evaluationTemplate => evaluationTemplate.Sections)
-                    .ThenInclude(section => section.Questions)
+                    .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                    .ThenInclude(section => section.MeasuredQuestions)
                 .Include(evaluationTemplate => evaluationTemplate.Sections)
                     .ThenInclude(section => section.ChildSections)
-                    .ThenInclude(section => section.Questions);
+                    .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                    .ThenInclude(section => section.ChildSections)
+                    .ThenInclude(section => section.UnmeasuredQuestions);
 
         }
 
@@ -40,10 +44,15 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
             return Repository
                 .GetAll()
                 .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .ThenInclude(section => section.Questions)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
                 .Include(evaluationTemplate => evaluationTemplate.Sections)
                 .ThenInclude(section => section.ChildSections)
-                .ThenInclude(section => section.Questions)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .ThenInclude(section => section.MeasuredQuestions)
                 .FirstAsync(evaluationTemplate => evaluationTemplate.Id == id);
         }
 

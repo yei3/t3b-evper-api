@@ -1,11 +1,18 @@
-﻿namespace Yei3.PersonalEvaluation.Evaluations.Dto
+﻿using System;
+using System.Collections.Generic;
+
+namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
     using Abp.Application.Services.Dto;
     using Abp.AutoMapper;
 
     [AutoMap(typeof(Evaluation))]
-    public class CreateEvaluationDto : IEntityDto<long>
+    public class CreateEvaluationDto : EntityDto<long>
     {
-        public long Id { get; set; }
+        public string Name { get; set; }
+        public long EvaluationTemplateId { get; set; }
+        public ICollection<long> OrganizationUnitIds { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

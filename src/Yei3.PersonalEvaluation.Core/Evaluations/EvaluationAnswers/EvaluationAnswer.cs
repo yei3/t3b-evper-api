@@ -6,6 +6,13 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
 {
     public class EvaluationAnswer : FullAuditedEntity<long>
     {
+        public EvaluationAnswer(long evaluationQuestionId, long evaluationId)
+        {
+            EvaluationQuestionId = evaluationQuestionId;
+            EvaluationId = evaluationId;
+        }
+
+        public virtual string Text { get; protected set; }
         public virtual long EvaluationQuestionId { get; protected set; }
         [ForeignKey("EvaluationQuestionId")]
         public virtual EvaluationQuestion EvaluationQuestion { get; protected set; }

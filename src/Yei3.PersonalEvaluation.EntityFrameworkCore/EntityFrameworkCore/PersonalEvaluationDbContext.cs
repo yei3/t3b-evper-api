@@ -46,7 +46,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
                 .WithOne(section => section.Template);
 
             modelBuilder.Entity<Section>()
-                .HasMany(section => section.Questions)
+                .HasMany(section => section.UnmeasuredQuestions)
                 .WithOne(question => question.Section);
 
             modelBuilder.Entity<User>()
@@ -54,7 +54,11 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
                 .WithOne(evaluationUser => evaluationUser.User);
 
             modelBuilder.Entity<Section>()
-                .HasMany(section => section.Questions)
+                .HasMany(section => section.UnmeasuredQuestions)
+                .WithOne(question => question.Section);
+
+            modelBuilder.Entity<Section>()
+                .HasMany(section => section.MeasuredQuestions)
                 .WithOne(question => question.Section);
 
             modelBuilder.Entity<Section>()
@@ -68,6 +72,10 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
             modelBuilder.Entity<UnmeasuredQuestion>()
                 .HasMany(question => question.EvaluationQuestions)
                 .WithOne(evaluationQuestion => evaluationQuestion.UnmeasuredQuestion);
+
+            modelBuilder.Entity<MeasuredQuestion>()
+                .HasMany(question => question.EvaluationQuestions)
+                .WithOne(evaluationQuestion => evaluationQuestion.MeasuredQuestion);
 
             modelBuilder.Entity<EvaluationQuestion>()
                 .HasOne(evaluationQuestion => evaluationQuestion.Answer)

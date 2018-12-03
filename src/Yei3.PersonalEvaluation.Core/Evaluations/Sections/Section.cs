@@ -23,6 +23,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
         public virtual ICollection<Section> ChildSections { get; protected set; }
 
         public virtual bool IsActive { get; set; }
-        public virtual ICollection<UnmeasuredQuestion> Questions { get; protected set; }
+        public virtual ICollection<UnmeasuredQuestion> UnmeasuredQuestions { get; protected set; }
+        public virtual ICollection<MeasuredQuestion> MeasuredQuestions { get; protected set; }
     }
 }
