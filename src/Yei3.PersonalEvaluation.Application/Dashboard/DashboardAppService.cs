@@ -22,7 +22,24 @@ namespace Yei3.PersonalEvaluation.Dashboard
                 NextEvaluationTerm = await EvaluationManager.GetUserNextEvaluationTermAsync(),
                 ToDoesSummary = (await EvaluationManager.GetUserToDoesSummary()).MapTo<ToDoesSummaryDto>(),
                 AutoEvaluationSummary = (await EvaluationManager.GetUserPendingAutoEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),
-                RevisionSummary = (await EvaluationManager.GetUserPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>()
+                RevisionSummary = (await EvaluationManager.GetUserPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
+                ObjectiveSummary = (await EvaluationManager.GetUserPendingObjectiveAsync()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
+            };
+        }
+
+        public async Task<SupervisorUserDashboardDto> Supervisor()
+        {
+            return new SupervisorUserDashboardDto
+            {
+                NextEvaluationTerm = await EvaluationManager.GetUserNextEvaluationTermAsync(),
+                SupervisorToDoes = new SupervisorToDoes
+                {
+                    CollaboratorsObjectivesValidationPending = await EvaluationManager.GetUserOrganizationUnitPendingEvaluationValidationsCountAsync(),
+                    CollaboratorsPendingEvaluations = await EvaluationManager.GetUserOrganizationUnitPendingEvaluationsCountAsync()
+                },
+                CollaboratorsEvaluationSummary = (await EvaluationManager.GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),
+                CollaboratorRevisionSummary = (await EvaluationManager.GetUserOrganizationUnitPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
+                CollaboratorsObjectivesSummary = (await EvaluationManager.GetUserOrganizationUnitObjectivesSummaryAsync()).MapTo<ICollection<CollaboratorsObjectivesSummaryDto>>()
             };
         }
     }

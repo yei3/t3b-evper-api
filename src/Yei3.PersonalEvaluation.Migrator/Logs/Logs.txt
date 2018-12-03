@@ -55,3 +55,60 @@ DEBUG 2018-10-08 22:28:11,296 [1    ] Abp.Localization.LocalizationManager     -
 DEBUG 2018-10-08 22:28:11,302 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
 INFO  2018-10-08 22:28:11,419 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Host database: server=localhost;database=PersonalEvaluationDB;user=root;password=*****
 INFO  2018-10-08 22:28:11,419 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Continue to migration for this host database and all tenants..? (Y/N): 
+DEBUG 2018-11-03 21:28:02,600 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-11-03 21:28:02,807 [1    ] Abp.Modules.AbpModuleManager             - Found 9 ABP modules in total.
+DEBUG 2018-11-03 21:28:03,069 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Migrator.PersonalEvaluationMigratorModule, Yei3.PersonalEvaluation.Migrator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,073 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,073 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,073 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,074 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,074 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,074 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,075 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,075 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:03,079 [1    ] Abp.Modules.AbpModuleManager             - 9 modules loaded.
+DEBUG 2018-11-03 21:28:03,511 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:04,356 [1    ] Abp.Localization.LocalizationManager     - Initializing 3 localization sources.
+DEBUG 2018-11-03 21:28:04,407 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-11-03 21:28:04,422 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-11-03 21:28:04,432 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+INFO  2018-11-03 21:28:04,721 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Host database: server=localhost;database=PersonalEvaluationDB;user=root;password=*****
+INFO  2018-11-03 21:28:04,721 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Continue to migration for this host database and all tenants..? (Y/N): 
+DEBUG 2018-11-03 21:28:37,269 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-11-03 21:28:37,371 [1    ] Abp.Modules.AbpModuleManager             - Found 9 ABP modules in total.
+DEBUG 2018-11-03 21:28:37,568 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Migrator.PersonalEvaluationMigratorModule, Yei3.PersonalEvaluation.Migrator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,570 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,570 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,571 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,571 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,571 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,571 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,571 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,572 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:37,574 [1    ] Abp.Modules.AbpModuleManager             - 9 modules loaded.
+DEBUG 2018-11-03 21:28:37,873 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-03 21:28:38,467 [1    ] Abp.Localization.LocalizationManager     - Initializing 3 localization sources.
+DEBUG 2018-11-03 21:28:38,503 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-11-03 21:28:38,510 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-11-03 21:28:38,515 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+INFO  2018-11-03 21:28:38,691 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Host database: server=localhost;database=PersonalEvaluationDB;user=root;password=*****
+INFO  2018-11-03 21:28:38,691 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Continue to migration for this host database and all tenants..? (Y/N): 
+DEBUG 2018-11-04 11:23:00,828 [1    ] Abp.Modules.AbpModuleManager             - Loading Abp modules...
+DEBUG 2018-11-04 11:23:01,012 [1    ] Abp.Modules.AbpModuleManager             - Found 9 ABP modules in total.
+DEBUG 2018-11-04 11:23:01,235 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.Migrator.PersonalEvaluationMigratorModule, Yei3.PersonalEvaluation.Migrator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,239 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationEntityFrameworkModule, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,239 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Yei3.PersonalEvaluation.PersonalEvaluationCoreModule, Yei3.PersonalEvaluation.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,240 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCoreModule, Abp.ZeroCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,240 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.AbpZeroCommonModule, Abp.Zero.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,240 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.AbpKernelModule, Abp, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,241 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.Zero.EntityFrameworkCore.AbpZeroCoreEntityFrameworkCoreModule, Abp.ZeroCore.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,241 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFrameworkCore.AbpEntityFrameworkCoreModule, Abp.EntityFrameworkCore, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,242 [1    ] Abp.Modules.AbpModuleManager             - Loaded module: Abp.EntityFramework.AbpEntityFrameworkCommonModule, Abp.EntityFramework.Common, Version=3.9.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:01,245 [1    ] Abp.Modules.AbpModuleManager             - 9 modules loaded.
+DEBUG 2018-11-04 11:23:01,594 [1    ] ameworkCore.AbpEntityFrameworkCoreModule - Registering DbContext: Yei3.PersonalEvaluation.EntityFrameworkCore.PersonalEvaluationDbContext, Yei3.PersonalEvaluation.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+DEBUG 2018-11-04 11:23:02,245 [1    ] Abp.Localization.LocalizationManager     - Initializing 3 localization sources.
+DEBUG 2018-11-04 11:23:02,290 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: Abp
+DEBUG 2018-11-04 11:23:02,301 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: AbpZero
+DEBUG 2018-11-04 11:23:02,308 [1    ] Abp.Localization.LocalizationManager     - Initialized localization source: PersonalEvaluation
+INFO  2018-11-04 11:23:02,509 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Host database: server=localhost;database=PersonalEvaluationDB;user=root;password=*****
+INFO  2018-11-04 11:23:02,509 [1    ] Yei3.PersonalEvaluation.Migrator.Log     - Continue to migration for this host database and all tenants..? (Y/N): 

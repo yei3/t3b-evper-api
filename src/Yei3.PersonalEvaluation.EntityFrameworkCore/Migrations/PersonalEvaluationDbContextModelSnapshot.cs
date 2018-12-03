@@ -1177,7 +1177,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.ToTable("EvaluationTemplates");
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.FrequentQuestion", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.Question", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
@@ -1207,7 +1207,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.ToTable("FrequentQuestions");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("FrequentQuestion");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Question");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Sections.Section", b =>
@@ -1368,17 +1368,30 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.HasDiscriminator().HasValue("RegionOrganizationUnit");
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.Question", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion", b =>
                 {
-                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.Questions.FrequentQuestion");
+                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.Questions.Question");
 
                     b.Property<long>("SectionId");
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("Question");
+                    b.ToTable("UnmeasuredQuestion");
 
-                    b.HasDiscriminator().HasValue("Question");
+                    b.HasDiscriminator().HasValue("UnmeasuredQuestion");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.MeasuredQuestion", b =>
+                {
+                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion");
+
+                    b.Property<string>("Deliverable");
+
+                    b.Property<decimal>("Expected");
+
+                    b.ToTable("MeasuredQuestion");
+
+                    b.HasDiscriminator().HasValue("MeasuredQuestion");
                 });
 
             modelBuilder.Entity("Abp.Authorization.Roles.RoleClaim", b =>
@@ -1517,9 +1530,15 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .WithOne("EvaluationQuestion")
                         .HasForeignKey("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion", "Id");
 
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.Question", "Question")
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.MeasuredQuestion", "MeasuredQuestion")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion", "UnmeasuredQuestion")
                         .WithMany("EvaluationQuestions")
                         .HasForeignKey("QuestionId")
+                        .HasConstraintName("FK_EvaluationQuestions_FrequentQuestions_QuestionId1")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -1587,7 +1606,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.Question", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion", b =>
                 {
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.Sections.Section", "Section")
                         .WithMany("Questions")
