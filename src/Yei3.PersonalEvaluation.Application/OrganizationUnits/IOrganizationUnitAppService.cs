@@ -9,6 +9,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     {
         Task<ICollection<OrganizationUnitDto>> GetAllOrganizationUnits();
         Task<ICollection<OrganizationUnitDto>> GetAllRegionsOrganizationUnits();
+        Task<ICollection<OrganizationUnitDto>> GetAllAreaOrganizationUnits();
         Task<ICollection<OrganizationUnitDto>> GetAllAreasOrganizationUnitsByRegionCode(string regionCode);
     }
 }

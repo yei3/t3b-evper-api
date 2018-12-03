@@ -37,6 +37,13 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return organizationUnitDtos;
         }
 
+        public async Task<ICollection<OrganizationUnitDto>> GetAllAreaOrganizationUnits()
+        {
+            List<AreaOrganizationUnit> organizationUnits = await _areaOrganizationUnitRepository.GetAllListAsync();
+            List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
+            return organizationUnitDtos;
+        }
+
         public async Task<ICollection<OrganizationUnitDto>> GetAllAreasOrganizationUnitsByRegionCode(string regionCode)
         {
             List<AreaOrganizationUnit> organizationUnits = (await _areaOrganizationUnitRepository
