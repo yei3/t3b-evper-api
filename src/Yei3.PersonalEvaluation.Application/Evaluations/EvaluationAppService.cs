@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Extensions;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
@@ -134,9 +136,31 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         }
 
-        public async Task<ICollection<Evaluation>> GetAllAsync()
+        public async Task<ICollection<Evaluation>> GetAll()
         {
             return await EvaluationRepository.GetAllListAsync();
+        }
+
+        public async Task Delete(long id)
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                return;
+            }
+
+            if (DateTime.Now.IsBetween(evaluation.StartDateTime, evaluation.EndDateTime))
+            {
+                throw new UserFriendlyException("La evaluación está activa, por el momento no se puede eliminar.");
+            }
+
+            await EvaluationRepository.DeleteAsync(evaluation);
+        }
+
+        public async Task<Evaluation> Get(long id)
+        {
+            return await EvaluationRepository.FirstOrDefaultAsync(id);
         }
     }
 }
