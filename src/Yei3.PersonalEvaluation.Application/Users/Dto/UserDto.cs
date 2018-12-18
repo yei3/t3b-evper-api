@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
 using Abp.Authorization.Users;
 using Abp.AutoMapper;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 
 namespace Yei3.PersonalEvaluation.Users.Dto
 {
@@ -36,5 +38,9 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         public DateTime CreationTime { get; set; }
 
         public string[] RoleNames { get; set; }
+        public string Scholarship { get; set; }
+
+        public ICollection<OrganizationUnitDto> OrganizationUnits { get; set; }
+
     }
 }

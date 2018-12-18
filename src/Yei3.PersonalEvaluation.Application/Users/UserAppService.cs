@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
+using Abp.AutoMapper;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.IdentityFramework;
@@ -14,6 +15,7 @@ using Abp.Runtime.Session;
 using Yei3.PersonalEvaluation.Authorization;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
 
@@ -40,6 +42,8 @@ namespace Yei3.PersonalEvaluation.Users
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
         }
+
+
 
         public override async Task<UserDto> Create(CreateUserDto input)
         {
@@ -119,8 +123,10 @@ namespace Yei3.PersonalEvaluation.Users
         protected override UserDto MapToEntityDto(User user)
         {
             var roles = _roleManager.Roles.Where(r => user.Roles.Any(ur => ur.RoleId == r.Id)).Select(r => r.NormalizedName);
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = _userManager.GetOrganizationUnitsAsync(user).GetAwaiter().GetResult();
             var userDto = base.MapToEntityDto(user);
             userDto.RoleNames = roles.ToArray();
+            userDto.OrganizationUnits = organizationUnits.MapTo<List<OrganizationUnitDto>>();
             return userDto;
         }
 
@@ -149,6 +155,11 @@ namespace Yei3.PersonalEvaluation.Users
         protected virtual void CheckErrors(IdentityResult identityResult)
         {
             identityResult.CheckErrors(LocalizationManager);
+        }
+
+        public override Task<PagedResultDto<UserDto>> GetAll(PagedResultRequestDto input)
+        {
+            return base.GetAll(input);
         }
     }
 }
