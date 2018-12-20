@@ -826,10 +826,13 @@ namespace Yei3.PersonalEvaluation.Migrations
                     IsDeleted = table.Column<bool>(nullable: false),
                     DeleterUserId = table.Column<long>(nullable: true),
                     DeletionTime = table.Column<DateTime>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
                     EvaluationId = table.Column<long>(nullable: false),
+                    RevisionId = table.Column<long>(nullable: false),
                     UserId = table.Column<long>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Term = table.Column<int>(nullable: false),
+                    StartDateTime = table.Column<DateTime>(nullable: false),
                     EndDateTime = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
@@ -842,8 +845,8 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Evaluation_EvaluationRevisions_Id",
-                        column: x => x.Id,
+                        name: "FK_Evaluation_EvaluationRevisions_RevisionId",
+                        column: x => x.RevisionId,
                         principalTable: "EvaluationRevisions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -856,7 +859,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FrequentQuestions",
+                name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
@@ -870,44 +873,25 @@ namespace Yei3.PersonalEvaluation.Migrations
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     Text = table.Column<string>(nullable: true),
                     QuestionType = table.Column<int>(nullable: false),
+                    SectionId = table.Column<long>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
-                    SectionId = table.Column<long>(nullable: true),
-                    Expected = table.Column<decimal>(nullable: true)
+                    Expected = table.Column<decimal>(nullable: true),
+                    Relation = table.Column<int>(nullable: true),
+                    Deliverable = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FrequentQuestions", x => x.Id);
+                    table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FrequentQuestions_Sections_SectionId",
+                        name: "FK_Questions_Sections_SectionId",
                         column: x => x.SectionId,
                         principalTable: "Sections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "EvaluationAnswer",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CreationTime = table.Column<DateTime>(nullable: false),
-                    CreatorUserId = table.Column<long>(nullable: true),
-                    LastModificationTime = table.Column<DateTime>(nullable: true),
-                    LastModifierUserId = table.Column<long>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    DeleterUserId = table.Column<long>(nullable: true),
-                    DeletionTime = table.Column<DateTime>(nullable: true),
-                    EvaluationQuestionId = table.Column<long>(nullable: false),
-                    EvaluationId = table.Column<long>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EvaluationAnswer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EvaluationAnswer_Evaluation_EvaluationId",
-                        column: x => x.EvaluationId,
-                        principalTable: "Evaluation",
+                        name: "FK_Questions_Sections_SectionId1",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -926,13 +910,20 @@ namespace Yei3.PersonalEvaluation.Migrations
                     DeleterUserId = table.Column<long>(nullable: true),
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     EvaluationId = table.Column<long>(nullable: false),
-                    QuestionId = table.Column<long>(nullable: false),
+                    EvaluationQuestionId = table.Column<long>(nullable: false),
                     TerminationDateTime = table.Column<DateTime>(nullable: false),
-                    Status = table.Column<int>(nullable: false)
+                    Status = table.Column<int>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EvaluationQuestions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EvaluationQuestions_Questions_EvaluationQuestionId",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_EvaluationQuestions_Evaluation_EvaluationId",
                         column: x => x.EvaluationId,
@@ -940,21 +931,44 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EvaluationQuestions_EvaluationAnswer_Id",
-                        column: x => x.Id,
-                        principalTable: "EvaluationAnswer",
+                        name: "FK_EvaluationQuestions_Questions_EvaluationQuestionId1",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "Questions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Answers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    Text = table.Column<string>(nullable: true),
+                    EvaluationQuestionId = table.Column<long>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    Real = table.Column<decimal>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Answers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EvaluationQuestions_FrequentQuestions_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "FrequentQuestions",
+                        name: "FK_Answers_EvaluationQuestions_EvaluationQuestionId",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "EvaluationQuestions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EvaluationQuestions_FrequentQuestions_QuestionId1",
-                        column: x => x.QuestionId,
-                        principalTable: "FrequentQuestions",
+                        name: "FK_Answers_EvaluationQuestions_EvaluationQuestionId1",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "EvaluationQuestions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1260,9 +1274,26 @@ namespace Yei3.PersonalEvaluation.Migrations
                 columns: new[] { "TenantId", "UserId" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Answers_EvaluationQuestionId",
+                table: "Answers",
+                column: "EvaluationQuestionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Answers_EvaluationQuestionId1",
+                table: "Answers",
+                column: "EvaluationQuestionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Evaluation_EvaluationId",
                 table: "Evaluation",
                 column: "EvaluationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Evaluation_RevisionId",
+                table: "Evaluation",
+                column: "RevisionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Evaluation_UserId",
@@ -1270,9 +1301,9 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EvaluationAnswer_EvaluationId",
-                table: "EvaluationAnswer",
-                column: "EvaluationId");
+                name: "IX_EvaluationQuestions_EvaluationQuestionId",
+                table: "EvaluationQuestions",
+                column: "EvaluationQuestionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EvaluationQuestions_EvaluationId",
@@ -1280,9 +1311,9 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "EvaluationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EvaluationQuestions_QuestionId",
+                name: "IX_EvaluationQuestions_EvaluationQuestionId1",
                 table: "EvaluationQuestions",
-                column: "QuestionId");
+                column: "EvaluationQuestionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EvaluationRevisions_ReviewerUserId",
@@ -1290,8 +1321,13 @@ namespace Yei3.PersonalEvaluation.Migrations
                 column: "ReviewerUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FrequentQuestions_SectionId",
-                table: "FrequentQuestions",
+                name: "IX_Questions_SectionId",
+                table: "Questions",
+                column: "SectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_SectionId1",
+                table: "Questions",
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
@@ -1374,7 +1410,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                 name: "AbpUserTokens");
 
             migrationBuilder.DropTable(
-                name: "EvaluationQuestions");
+                name: "Answers");
 
             migrationBuilder.DropTable(
                 name: "AbpEntityChanges");
@@ -1386,13 +1422,13 @@ namespace Yei3.PersonalEvaluation.Migrations
                 name: "AbpEditions");
 
             migrationBuilder.DropTable(
-                name: "EvaluationAnswer");
-
-            migrationBuilder.DropTable(
-                name: "FrequentQuestions");
+                name: "EvaluationQuestions");
 
             migrationBuilder.DropTable(
                 name: "AbpEntityChangeSets");
+
+            migrationBuilder.DropTable(
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "Evaluation");

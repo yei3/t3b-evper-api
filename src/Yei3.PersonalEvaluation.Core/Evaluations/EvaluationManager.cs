@@ -117,7 +117,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationQuestionRepository
                 .GetAll()
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
-                .Where(evaluationQuestion => evaluationQuestion.MeasuredQuestion != null)
+                .OfType<EvaluationMeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
                     Status = evaluationQuestion.Status,

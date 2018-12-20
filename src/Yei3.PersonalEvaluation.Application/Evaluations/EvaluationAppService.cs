@@ -97,8 +97,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 currentEvaluation = await EvaluationRepository.FirstOrDefaultAsync(evaluationId);
 
-
-
                 List<MeasuredQuestion> measuredQuestions = new List<MeasuredQuestion>();
                 List<UnmeasuredQuestion> unmeasuredQuestions = new List<UnmeasuredQuestion>();
 
@@ -110,30 +108,32 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (UnmeasuredQuestion unmeasuredQuestion in unmeasuredQuestions)
                 {
-                    currentEvaluation.Questions.Add(new EvaluationQuestion(
+                    EvaluationUnmeasuredQuestion evaluationMeasuredQuestion = new EvaluationUnmeasuredQuestion(
                         currentEvaluation.EvaluationId,
                         unmeasuredQuestion.Id,
-                        currentEvaluation.EndDateTime));
+                        currentEvaluation.EndDateTime,
+                        EvaluationQuestionStatus.Unanswered);
+
+                    evaluationMeasuredQuestion.SetAnswer(unmeasuredQuestion.Id);
+
+                    currentEvaluation.Questions.Add(evaluationMeasuredQuestion);
                 }
 
                 foreach (MeasuredQuestion measuredQuestion in measuredQuestions)
                 {
-                    currentEvaluation.Questions.Add(new EvaluationQuestion(
+                    EvaluationMeasuredQuestion evaluationMeasuredQuestion = new EvaluationMeasuredQuestion(
                         currentEvaluation.EvaluationId,
                         measuredQuestion.Id,
-                        currentEvaluation.EndDateTime));
-                }
+                        currentEvaluation.EndDateTime,
+                        EvaluationQuestionStatus.Unanswered);
 
-                foreach (EvaluationQuestion currentEvaluationQuestion in currentEvaluation.Questions)
-                {
-                    currentEvaluationQuestion.SetAnswer(currentEvaluationQuestion.QuestionId, evaluationId);
-                }
+                    evaluationMeasuredQuestion.SetAnswer(measuredQuestion.Id);
 
+                    currentEvaluation.Questions.Add(evaluationMeasuredQuestion);
+                }
 
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
-
-
         }
 
         public async Task<ICollection<Evaluation>> GetAll()
