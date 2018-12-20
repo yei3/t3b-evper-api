@@ -26,5 +26,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
         [ForeignKey("EvaluationQuestionId")]
         public virtual DateTime TerminationDateTime { get; protected set; }
         public virtual EvaluationQuestionStatus Status { get; protected set; }
+        public virtual bool IsActive { get; protected set; }
     }
 }

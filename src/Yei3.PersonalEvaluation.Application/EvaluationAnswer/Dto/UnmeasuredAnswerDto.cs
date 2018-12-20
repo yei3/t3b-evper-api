@@ -9,5 +9,6 @@ namespace Yei3.PersonalEvaluation.EvaluationAnswer.Dto
     {
         public string Text { get; set; }
         public long EvaluationQuestionId { get; set; }
+        public bool IsActive { get; set; }
     }
 }
