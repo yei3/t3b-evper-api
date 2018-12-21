@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Yei3.PersonalEvaluation.Authorization.Users;
 
 namespace Yei3.PersonalEvaluation.OrganizationUnits
 {
@@ -26,8 +27,18 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         public async Task<ICollection<OrganizationUnitDto>> GetAllOrganizationUnits()
         {
             List<OrganizationUnit> organizationUnits = await _repository.GetAllListAsync();
-            List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
-            return organizationUnitDtos;
+            List<OrganizationUnitDto> organizationsUnitDto = organizationUnits.MapTo<List<OrganizationUnitDto>>();
+
+            foreach (OrganizationUnitDto organizationUnitDto in organizationsUnitDto)
+            {
+                var currentOrganizationUnit = organizationUnits.FirstOrDefault(organizationUnit => organizationUnit.Id == organizationUnitDto.Id);
+
+                organizationUnitDto.OrganizationUnitUsers =
+                    (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit))
+                    .MapTo<ICollection<OrganizationUnitUserDto>>();
+            }
+
+            return organizationsUnitDto;
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllRegionsOrganizationUnits()

@@ -1,4 +1,6 @@
-﻿namespace Yei3.PersonalEvaluation.OrganizationUnits.Dto
+﻿using System.Collections.Generic;
+
+namespace Yei3.PersonalEvaluation.OrganizationUnits.Dto
 {
     using Abp.AutoMapper;
     using OrganizationUnit;
@@ -10,5 +12,6 @@
         public string DisplayName { get; set; }
         public string Code { get; set; }
         public long? ParentId { get; set; }
+        public ICollection<OrganizationUnitUserDto> OrganizationUnitUsers { get; set; }
     }
 }
