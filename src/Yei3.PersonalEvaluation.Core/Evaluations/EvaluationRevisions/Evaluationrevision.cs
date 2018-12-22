@@ -23,5 +23,15 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
         public virtual User ReviewerUser { get; protected set; }
         public virtual EvaluationRevisionStatus Status { get; protected set; }
         public virtual DateTime RevisionDateTime { get; protected set; }
+
+        public void MarkAsRevised()
+        {
+            Status = EvaluationRevisionStatus.Revised;
+        }
+
+        public void MarkAsPending()
+        {
+            Status = EvaluationRevisionStatus.Pending;
+        }
     }
 }
