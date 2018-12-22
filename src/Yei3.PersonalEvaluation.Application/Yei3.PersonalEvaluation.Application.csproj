@@ -13,7 +13,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Yei3.PersonalEvaluation.Core\Yei3.PersonalEvaluation.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Evaluations\Dto\" />
-  </ItemGroup>
 </Project>

@@ -8,9 +8,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
     public interface IEvaluationAppService
     {
         Task ApplyEvaluationTemplate(CreateEvaluationDto input);
-        Task<ICollection<Evaluation>> GetAll();
+        Task<ICollection<EvaluationDto>> GetAll();
 
         Task Delete(long id);
-        Task<Evaluation> Get(long id);
+        Task<EvaluationDto> Get(long id);
     }
 }

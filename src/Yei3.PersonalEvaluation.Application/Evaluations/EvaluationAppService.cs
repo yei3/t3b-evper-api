@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.AutoMapper;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
@@ -136,9 +138,24 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
         }
 
-        public async Task<ICollection<Evaluation>> GetAll()
+        public Task<ICollection<EvaluationDto>> GetAll()
         {
-            return await EvaluationRepository.GetAllListAsync();
+            IIncludableQueryable<Evaluation, ICollection<UnmeasuredQuestion>> resultEvaluations = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion) evaluationQuestion).MeasuredAnswer)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion) evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluation => evaluation.Template)
+                .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.UnmeasuredQuestions);
+
+            return Task.FromResult(resultEvaluations.MapTo<ICollection<EvaluationDto>>());
         }
 
         public async Task Delete(long id)
@@ -158,9 +175,25 @@ namespace Yei3.PersonalEvaluation.Evaluations
             await EvaluationRepository.DeleteAsync(evaluation);
         }
 
-        public async Task<Evaluation> Get(long id)
+        public async Task<EvaluationDto> Get(long id)
         {
-            return await EvaluationRepository.FirstOrDefaultAsync(id);
+            Evaluation resultEvaluation = await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluation => evaluation.Template)
+                .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
+
+            return resultEvaluation.MapTo<EvaluationDto>();
         }
     }
 }
