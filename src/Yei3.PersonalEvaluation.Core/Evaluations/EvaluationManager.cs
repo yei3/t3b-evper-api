@@ -14,7 +14,7 @@ using Yei3.PersonalEvaluation.Evaluations.ValueObject;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
-    
+
     public class EvaluationManager : DomainService, IEvaluationManager
     {
 
@@ -65,8 +65,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.CreatorUserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .CountAsync();
         }
 
@@ -79,8 +79,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.CreatorUserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
@@ -130,13 +130,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
         {
-
             userId = userId ?? AbpSession.GetUserId();
 
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .CountAsync();
         }
 
@@ -147,12 +147,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             IQueryable<Evaluation> pendingEvaluations = EvaluationRepository
                 .GetAll()
+                .Include(evaluation => evaluation.Questions)
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.Pending);
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated);
 
             foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
-                pendingObjectivesCountAsync += pendingEvaluation.Questions.Count(question => question.Status == EvaluationQuestionStatus.Unanswered);
+                pendingObjectivesCountAsync += pendingEvaluation.Questions.Count(question => question.Status == EvaluationQuestionStatus.Unanswered || question.Status == EvaluationQuestionStatus.NoStatus);
             }
 
             return Task.FromResult(pendingObjectivesCountAsync);
