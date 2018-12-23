@@ -121,6 +121,9 @@ namespace Yei3.PersonalEvaluation.Users
 
         public async Task RecoverPassword(RecoverPasswordDto recoverPassword)
         {
+
+            CurrentUnitOfWork.SetTenantId(1);
+
             User user;
             try
             {
@@ -137,8 +140,8 @@ namespace Yei3.PersonalEvaluation.Users
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
 
-            string newPassword = CreateRandomPassword(12);
-            await _userManager.ChangePasswordAsync(user, newPassword);
+            string newPassword = $"{CreateRandomPassword(12)}007";
+            var x = await _userManager.ChangePasswordAsync(user, newPassword);
 
             user.IsEmailConfirmed = false;
 
