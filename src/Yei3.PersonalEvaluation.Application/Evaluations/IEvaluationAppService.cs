@@ -12,5 +12,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         Task Delete(long id);
         Task<EvaluationDto> Get(long id);
+        Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
     }
 }

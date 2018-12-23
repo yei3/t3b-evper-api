@@ -155,7 +155,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.Template.Sections)
                 .ThenInclude(section => section.UnmeasuredQuestions);
 
-            return Task.FromResult(resultEvaluations.MapTo<ICollection<EvaluationDto>>());
+            ICollection<EvaluationDto> evaluationsDto = resultEvaluations.MapTo<ICollection<EvaluationDto>>();
+
+            foreach (EvaluationDto evaluationDto in evaluationsDto)
+            {
+                evaluationDto.Template.PurgeSubSections();
+            }
+
+            return Task.FromResult(evaluationsDto);
         }
 
         public async Task Delete(long id)
@@ -194,6 +201,35 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
 
             return resultEvaluation.MapTo<EvaluationDto>();
+        }
+
+        public async Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary()
+        {
+            var evaluations = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .GroupBy(evaluation => evaluation.EvaluationId);
+
+            List<AdministratorEvaluationSummaryDto> result = new List<AdministratorEvaluationSummaryDto>();
+
+            foreach (IGrouping<long, Evaluation> evaluation in evaluations)
+            {
+                var firstEvaluation = evaluation.First();
+                result.Add(new AdministratorEvaluationSummaryDto
+                {
+                    Description = firstEvaluation.Template.Description,
+                    Name = firstEvaluation.Name,
+                    EndDateTime = firstEvaluation.EndDateTime,
+                    EvaluationTemplateId = firstEvaluation.EvaluationId,
+                    Status = firstEvaluation.StartDateTime < DateTime.Now
+                        ? EvaluationStatus.NonInitiated
+                        : firstEvaluation.EndDateTime <= DateTime.Now
+                            ? EvaluationStatus.Finished
+                            : EvaluationStatus.NonInitiated,
+                });
+            }
+
+            return result;
         }
     }
 }
