@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
-using Abp.Authorization;
 using Abp.AutoMapper;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.IdentityFramework;
 using Abp.Localization;
 using Abp.Runtime.Session;
-using Yei3.PersonalEvaluation.Authorization;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
@@ -21,7 +19,6 @@ using Yei3.PersonalEvaluation.Users.Dto;
 
 namespace Yei3.PersonalEvaluation.Users
 {
-    [AbpAuthorize(PermissionNames.Pages_Users)]
     public class UserAppService : AsyncCrudAppService<User, UserDto, long, PagedResultRequestDto, CreateUserDto, UserDto>, IUserAppService
     {
         private readonly UserManager _userManager;
@@ -105,6 +102,14 @@ namespace Yei3.PersonalEvaluation.Users
                 LocalizationSettingNames.DefaultLanguage,
                 input.LanguageName
             );
+        }
+
+        public async Task UpdateScholarshipAndEmailAddress(UpdateUserDto updateUser)
+        {
+            User user = await _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            user.EmailAddress = updateUser.EmailAddress;
+            user.Scholarship = updateUser.Scholarship;
         }
 
         protected override User MapToEntity(CreateUserDto createInput)

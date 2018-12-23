@@ -11,5 +11,6 @@ namespace Yei3.PersonalEvaluation.Users
         Task<ListResultDto<RoleDto>> GetRoles();
 
         Task ChangeLanguage(ChangeUserLanguageDto input);
+        Task UpdateScholarshipAndEmailAddress(UpdateUserDto updateUser);
     }
 }
