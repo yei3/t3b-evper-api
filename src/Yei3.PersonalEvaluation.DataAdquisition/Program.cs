@@ -23,7 +23,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets["Hoja1"];
+                ExcelWorksheet worksheet = package.Workbook.Worksheets["Sheet1"];
                 int rowCount = worksheet.Dimension.Rows;
 
                 using (var bootstrapper = AbpBootstrapper.Create<PersonalEvaluationDataAdquisitionModule>())
@@ -32,7 +32,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
 
                     UserRegistrationManager userRegistrationManager = bootstrapper.IocManager.Resolve<UserRegistrationManager>();
 
-                    for (int row = 3; row < rowCount; row++) // start in row 3 cause data starts there, any template change can break this, is better if we provide the template
+                    for (int row = 2; row < rowCount; row++) // start in row 3 cause data starts there, any template change can break this, is better if we provide the template
                     {
                         try
                          {
@@ -55,7 +55,8 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                     : worksheet.Cells[row, 14].Value.ToString(),
                                 birthDate: worksheet.Cells[row, 15].Value.ToString(),
                                 scholarship: worksheet.Cells[row, 16].Value.ToString(),
-                                email: worksheet.Cells[row, 17].Value.ToString()
+                                email: worksheet.Cells[row, 17].Value.ToString(),
+                                isMale: worksheet.Cells[row, 18].Value.ToString() == "MASCULINO"
                             );
                         }
                         catch (Exception)
@@ -76,7 +77,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
             }
             catch (IndexOutOfRangeException)
             {
-                filePath = "C:\\Users\\hackergateII\\Downloads\\18-09-03 Base de datos - RRHH HPA.xlsx";
+                filePath = "C:\\Users\\hackergateII\\Downloads\\Layout Carga Empleados.xlsx";
             }
         }
     }

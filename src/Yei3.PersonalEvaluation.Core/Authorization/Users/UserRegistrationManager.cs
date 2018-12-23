@@ -6,6 +6,8 @@ using Abp.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Abp.Authorization.Users;
+using Abp.Domain.Entities;
+using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 using Abp.IdentityFramework;
 using Abp.Runtime.Session;
@@ -24,18 +26,20 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
         private readonly IPermissionManager _permissionManager;
+        private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
 
         private readonly string PasswordSalt = "_t3B";
 
         public UserRegistrationManager(
             TenantManager tenantManager,
             UserManager userManager,
-            RoleManager roleManager, IPermissionManager permissionManager)
+            RoleManager roleManager, IPermissionManager permissionManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _permissionManager = permissionManager;
+            _organizationUnitRepository = organizationUnitRepository;
 
             AbpSession = NullAbpSession.Instance;
         }
@@ -90,7 +94,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             string reassignDate,
             string birthDate,
             string scholarship,
-            string email)
+            string email,
+            bool isMale)
         {
             using (Abp.Domain.Uow.IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
             {
@@ -116,7 +121,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     EmailAddress = email,
                     IsEmailConfirmed = false,
                     TenantId = 1,
-                    Roles = new List<UserRole>()
+                    Roles = new List<UserRole>(),
+                    IsMale = isMale
                 };
 
 
@@ -148,6 +154,16 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult();
 
+                var organizationUnit = _organizationUnitRepository
+                    .GetAll()
+                    .Where(ou => ou.Parent.DisplayName == user.Region)
+                    .FirstOrDefault(ou => ou.DisplayName == user.Area);
+
+                if (!organizationUnit.IsNullOrDeleted())
+                {
+                    _userManager.AddToOrganizationUnitAsync(user, organizationUnit).GetAwaiter().GetResult();
+                }
+
                 unitOfWork.Complete();
 
                 return user;
@@ -160,7 +176,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return !(await _userManager.IsEmailConfirmedAsync(user));
         }
 
-        private DateTime NormalizeDateTime(string dateString)
+        private DateTime NormalizeDateTime(string dateString) // 07/02/2014
         {
 
             if (dateString.IsNullOrEmpty())
@@ -170,11 +186,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
             int firstSlashIndex = dateString.IndexOf('/');
             int secondSlashIndex = dateString.Substring(firstSlashIndex + 1).IndexOf('/') + firstSlashIndex;
-            int firstSpaceIndex = dateString.Substring(secondSlashIndex + 1).IndexOf(' ') + secondSlashIndex;
 
-            int months = int.Parse(dateString.Substring(0, firstSlashIndex));
-            int days = int.Parse(dateString.Substring(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex));
-            int years = int.Parse(dateString.Substring(secondSlashIndex + 2, firstSpaceIndex - secondSlashIndex));
+            int days = int.Parse(dateString.Substring(0, firstSlashIndex));
+            int months = int.Parse(dateString.Substring(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex));
+            int years = int.Parse(dateString.Substring(secondSlashIndex + 2));
 
             return new DateTime(years, months, days);
         }

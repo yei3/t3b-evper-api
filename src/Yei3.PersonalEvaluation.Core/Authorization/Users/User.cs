@@ -24,6 +24,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public virtual DateTime EntryDate { get; set; }
         public virtual DateTime? ReassignDate { get; set; }
         public virtual DateTime BirthDate { get; set; }
+        public virtual bool IsMale { get; set; }
 
         [ForeignKey("UserId")]
         public virtual ICollection<Evaluation> EvaluationsReceived { get; protected set; }
