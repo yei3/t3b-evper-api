@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +13,9 @@ using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.IdentityFramework;
 using Abp.Localization;
+using Abp.Net.Mail;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
@@ -25,19 +30,21 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly RoleManager _roleManager;
         private readonly IRepository<Role> _roleRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IEmailSender _emailSender;
 
         public UserAppService(
             IRepository<User, long> repository,
             UserManager userManager,
             RoleManager roleManager,
             IRepository<Role> roleRepository,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher, IEmailSender emailSender)
             : base(repository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
+            _emailSender = emailSender;
         }
 
 
@@ -112,6 +119,37 @@ namespace Yei3.PersonalEvaluation.Users
             user.Scholarship = updateUser.Scholarship;
         }
 
+        public async Task RecoverPassword(RecoverPasswordDto recoverPassword)
+        {
+            User user;
+            try
+            {
+                user = await _userManager.FindByEmployeeNumberAsync(recoverPassword.EmployeeNumber);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new EntityNotFoundException(typeof(User), recoverPassword.EmployeeNumber);
+            }
+
+            if (user.EmailAddress != recoverPassword.EmailAddress)
+            {
+                throw new UserFriendlyException(501,
+                    $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
+            }
+
+            string newPassword = CreateRandomPassword(12);
+            await _userManager.ChangePasswordAsync(user, newPassword);
+
+            user.IsEmailConfirmed = false;
+
+            await _emailSender.SendAsync(new MailMessage(
+                from: "support@yei.com",
+                to: user.EmailAddress,
+                subject: "Recuperacion de Contraseña",
+                body: $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.")
+            );
+        }
+
         protected override User MapToEntity(CreateUserDto createInput)
         {
             var user = ObjectMapper.Map<User>(createInput);
@@ -165,6 +203,20 @@ namespace Yei3.PersonalEvaluation.Users
         public override Task<PagedResultDto<UserDto>> GetAll(PagedResultRequestDto input)
         {
             return base.GetAll(input);
+        }
+
+        private static string CreateRandomPassword(int passwordLength)
+        {
+            string allowedChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789!@$?_-";
+            char[] chars = new char[passwordLength];
+            Random rd = new Random();
+
+            for (int i = 0; i < passwordLength; i++)
+            {
+                chars[i] = allowedChars[rd.Next(0, allowedChars.Length)];
+            }
+
+            return new string(chars);
         }
     }
 }

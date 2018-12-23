@@ -12,5 +12,7 @@ namespace Yei3.PersonalEvaluation.Users
 
         Task ChangeLanguage(ChangeUserLanguageDto input);
         Task UpdateScholarshipAndEmailAddress(UpdateUserDto updateUser);
+
+        Task RecoverPassword(RecoverPasswordDto recoverPassword);
     }
 }
