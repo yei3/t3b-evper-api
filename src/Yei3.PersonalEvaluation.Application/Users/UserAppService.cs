@@ -16,6 +16,8 @@ using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Runtime.Session;
 using Abp.UI;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
@@ -151,6 +153,15 @@ namespace Yei3.PersonalEvaluation.Users
                 subject: "Recuperacion de Contraseña",
                 body: $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.")
             );
+
+            var sendGridClient = new SendGridClient("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");
+            var from = new EmailAddress("support@yei3.com", "Soporte");
+            var subject = "Soporte";
+            var to = new EmailAddress(user.EmailAddress, user.FullName);
+            var plainTextContent = $"Su nueva contraseña es { newPassword}. Al iniciar debe cambiarla.";
+            var htmlContent = $"Su nueva contraseña es <strong>{ newPassword}<strong/>. Al iniciar debe cambiarla.";
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            var response = await sendGridClient.SendEmailAsync(msg);
         }
 
         protected override User MapToEntity(CreateUserDto createInput)

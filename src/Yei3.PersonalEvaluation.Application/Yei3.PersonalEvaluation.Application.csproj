@@ -11,6 +11,9 @@
     <RootNamespace>Yei3.PersonalEvaluation</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Sendgrid" Version="9.10.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Yei3.PersonalEvaluation.Core\Yei3.PersonalEvaluation.Core.csproj" />
   </ItemGroup>
 </Project>
