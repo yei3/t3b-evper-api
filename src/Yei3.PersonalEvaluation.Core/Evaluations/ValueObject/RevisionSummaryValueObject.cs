@@ -10,6 +10,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public EvaluationRevisionStatus Status { get; set; }
         public EvaluationTerm Term { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public DateTime EndDateTime { get; set; }
         public DateTime RevisionDateTime { get; set; }
     }

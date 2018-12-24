@@ -85,7 +85,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 {
                     Term = evaluation.Term,
                     Id = evaluation.Id,
-                    Name = evaluation.Template.Name,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
                     Status = evaluation.Status,
                     EndDateTime = evaluation.EndDateTime,
                     CollaboratorName = user.FullName
@@ -105,7 +106,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Term = revision.Evaluation.Term,
                     Status = revision.Status,
                     EndDateTime = revision.Evaluation.EndDateTime,
-                    Name = revision.Evaluation.Template.Name,
+                    Name = revision.Evaluation.Name,
+                    Description = revision.Evaluation.Template.Description,
                     RevisionDateTime = revision.RevisionDateTime
                 }).ToListAsync();
         }
