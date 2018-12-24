@@ -208,11 +208,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
             var evaluations = EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
-                .GroupBy(evaluation => evaluation.EvaluationId);
+                .GroupBy(evaluation => new {
+                    EvaluationTemplateId = evaluation.EvaluationId,
+                    CreationTime = evaluation.CreationTime.DayOfYear,
+                    StartTime = evaluation.StartDateTime,
+                    EndTime = evaluation.EndDateTime,
+                    CreatorUserId = evaluation.CreatorUserId,
+                    Term = evaluation.Term
+                });
 
             List<AdministratorEvaluationSummaryDto> result = new List<AdministratorEvaluationSummaryDto>();
 
-            foreach (IGrouping<long, Evaluation> evaluation in evaluations)
+            foreach (var evaluation in evaluations)
             {
                 var firstEvaluation = evaluation.First();
                 result.Add(new AdministratorEvaluationSummaryDto
@@ -229,7 +236,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 });
             }
 
-            return result;
+            return await Task.FromResult(result);
         }
     }
 }
