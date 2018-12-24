@@ -11,5 +11,7 @@
         public const string AdministrationEvaluationCreate = "Administration.Evaluation.Create";
         public const string AdministrationEvaluationObjectivesManage = "Administration.Evaluation.Objectives.Manage";
         public const string AdministrationEvaluationCapabilitiesManage = "Administration.Evaluation.Capabilities.Manage";
+
+        public const string AdministrationEvaluationReports = "Administration.Evaluation.Report";
     }
 }

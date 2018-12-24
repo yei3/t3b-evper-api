@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Yei3.PersonalEvaluation.Dashboard.Dto;
 using Yei3.PersonalEvaluation.Evaluations;
 
@@ -15,6 +16,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
             EvaluationManager = evaluationManager;
         }
 
+        [HttpGet]
         public async Task<CollaboratorUserDashboardDto> Collaborator()
         {
             return new CollaboratorUserDashboardDto
@@ -27,6 +29,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
             };
         }
 
+        [HttpGet]
         public async Task<SupervisorUserDashboardDto> Supervisor()
         {
             return new SupervisorUserDashboardDto
