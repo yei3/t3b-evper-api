@@ -108,7 +108,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     EndDateTime = revision.Evaluation.EndDateTime,
                     Name = revision.Evaluation.Name,
                     Description = revision.Evaluation.Template.Description,
-                    RevisionDateTime = revision.RevisionDateTime
+                    RevisionDateTime = revision.RevisionDateTime,
+                    CollaboratorFullName = revision.Evaluation.User.FullName
                 }).ToListAsync();
         }
 
