@@ -295,6 +295,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
                     {
                         CollaboratorFullName = user.FullName,
+                        ObjectivesSummary = userObjectivesSummary,
                         TotalPendingObjectives = userObjectivesSummary
                             .Where(objective => objective.Status != EvaluationQuestionStatus.Answered)
                             .Count(objective => objective.Status != EvaluationQuestionStatus.Validated),

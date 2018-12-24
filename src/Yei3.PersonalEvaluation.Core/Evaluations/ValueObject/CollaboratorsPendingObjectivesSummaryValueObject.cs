@@ -1,4 +1,5 @@
-﻿using Abp.Domain.Values;
+﻿using System.Collections.Generic;
+using Abp.Domain.Values;
 
 namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
 {
@@ -7,5 +8,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string CollaboratorFullName { get; set; }
         public int TotalPendingObjectives { get; set; }
         public int AccomplishedObjectives { get; set; }
+        public ICollection<EvaluationObjectivesSummaryValueObject> ObjectivesSummary { get; set; }
     }
 }
