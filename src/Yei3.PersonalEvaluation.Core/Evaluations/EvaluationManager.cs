@@ -226,10 +226,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
             {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
                     .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
 
