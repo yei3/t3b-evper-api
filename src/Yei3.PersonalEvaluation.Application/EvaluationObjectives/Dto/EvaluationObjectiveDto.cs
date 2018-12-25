@@ -12,6 +12,6 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives.Dto
         public decimal Real { get; set; }
         public long EvaluationQuestionId { get; set; }
         public bool IsActive { get; set; }
-
+        public EvaluationMeasuredQuestionStatusDto EvaluationMeasuredQuestion { get; set; }
     }
 }

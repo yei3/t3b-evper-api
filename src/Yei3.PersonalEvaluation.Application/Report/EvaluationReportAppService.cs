@@ -165,7 +165,24 @@ namespace Yei3.PersonalEvaluation.Report
 
         public Task<EvaluationsComparisonDto> GetEvaluationComparision(EvaluationsComparisonInputDto input)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+            var left = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.EvaluationId == input.LeftEvaluationTemplateId)
+                .Where(evaluation => evaluation.Term == input.LeftEvaluationTerm)
+                .Where(evaluation => evaluation.CreationTime.DayOfYear == input.LeftEvaluationDayOfYear)
+                .OrderBy(evaluation => evaluation.CreationTime)
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Template)
+                .GroupBy(evaluation => new
+                {
+                    EvaluationTemplateId = evaluation.EvaluationId,
+                    CreationTime = evaluation.CreationTime.DayOfYear,
+                    StartTime = evaluation.StartDateTime,
+                    EndTime = evaluation.EndDateTime,
+                    CreatorUserId = evaluation.CreatorUserId,
+                    Term = evaluation.Term
+                });
         }
     }
 }

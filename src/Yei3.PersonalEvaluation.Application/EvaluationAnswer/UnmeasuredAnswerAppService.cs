@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,14 @@ namespace Yei3.PersonalEvaluation.EvaluationAnswer
                 .Where(unmeasuredAnswer => unmeasuredAnswer.EvaluationUnmeasuredQuestion.EvaluationId == input.EvaluationId);
 
             return evaluationMeasuredAnswers;
+        }
+
+        protected override async Task<UnmeasuredAnswer> GetEntityByIdAsync(long id)
+        {
+            return await Repository
+                .GetAll()
+                .Include(answer => answer.EvaluationUnmeasuredQuestion)
+                .SingleOrDefaultAsync(answer => answer.Id == id);
         }
     }
 }

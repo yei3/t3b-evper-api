@@ -1,10 +1,12 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.EvaluationObjectives.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 
-namespace Yei3.PersonalEvaluation.EvaluationObjectives.Dto
+namespace Yei3.PersonalEvaluation.EvaluationObjectives
 {
     public class EvaluationObjectivesAppService : AsyncCrudAppService<MeasuredAnswer, EvaluationObjectiveDto, long, GetAllEvaluationObjectivesDto>, IEvaluationObjectivesAppService
     {
@@ -23,6 +25,14 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives.Dto
                 .Where(measuredAnswer => measuredAnswer.EvaluationMeasuredQuestion.EvaluationId == input.EvaluationId);
 
             return evaluationMeasuredAnswers;
+        }
+
+        protected override async Task<MeasuredAnswer> GetEntityByIdAsync(long id)
+        {
+            return await Repository
+                .GetAll()
+                .Include(answer => answer.EvaluationMeasuredQuestion)
+                .SingleOrDefaultAsync(answer => answer.Id == id);
         }
     }
 }
