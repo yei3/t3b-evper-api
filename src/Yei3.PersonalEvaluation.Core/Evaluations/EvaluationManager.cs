@@ -152,7 +152,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Questions)
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated);
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending);
 
             foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
