@@ -10,5 +10,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string Name { get; set; }
         public string Deliverable { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public long Id { get; set; }
     }
 }

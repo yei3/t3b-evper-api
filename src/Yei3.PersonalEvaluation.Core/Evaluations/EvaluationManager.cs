@@ -126,7 +126,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Status = evaluationQuestion.Status,
                     Name = evaluationQuestion.MeasuredQuestion.Text,
                     Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
-                    DeliveryDate = evaluationQuestion.TerminationDateTime
+                    DeliveryDate = evaluationQuestion.TerminationDateTime,
+                    Id = evaluationQuestion.Id
                 }).ToListAsync();
         }
 
