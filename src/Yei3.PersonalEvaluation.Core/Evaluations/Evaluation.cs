@@ -45,5 +45,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             Revision = new EvaluationRevision(evaluationId, reviewerUserId, revisionDateTime);
         }
+
+        public void FinishEvaluation()
+        {
+            Status = EvaluationStatus.Finished;
+        }
+
+        public void UnfinishEvaluation()
+        {
+            Status = EvaluationStatus.Pending;
+        }
     }
 }
