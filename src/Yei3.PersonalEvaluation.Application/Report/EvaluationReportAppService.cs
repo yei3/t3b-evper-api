@@ -43,7 +43,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .GroupBy(evaluation => new
                 {
                     Id = evaluation.EvaluationId,
-                    CreationTime = evaluation.CreationTime.DayOfYear,
+                    CreationTimeDayOfYear = evaluation.CreationTime.DayOfYear,
                     StartTime = evaluation.StartDateTime,
                     EndTime = evaluation.EndDateTime,
                     CreatorUserId = evaluation.CreatorUserId,
@@ -58,6 +58,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluations.Add(new EvaluationResultsDto()
                 {
                     EvaluationTemplateId = groupedEvaluation.Key.Id,
+                    CreationTime = firstEvaluation.CreationTime,
                     Status = firstEvaluation.StartDateTime < DateTime.Now
                         ? EvaluationStatus.NonInitiated
                         : firstEvaluation.EndDateTime <= DateTime.Now
@@ -85,6 +86,7 @@ namespace Yei3.PersonalEvaluation.Report
                     Term = evaluation.Term,
                     Status = evaluation.Status,
                     Id = evaluation.Id,
+                    CreationTime = evaluation.CreationTime,
                     EvaluationTemplateId = evaluation.EvaluationId,
                     EndDateTime = evaluation.EndDateTime,
                     StartDateTime = evaluation.StartDateTime,
@@ -153,6 +155,7 @@ namespace Yei3.PersonalEvaluation.Report
                             ? EvaluationStatus.Finished
                             : EvaluationStatus.NonInitiated,
                     Term = groupedEvaluation.Key.Term,
+                    CreationTime = firstEvaluation.CreationTime,
                     EndDateTime = firstEvaluation.EndDateTime,
                     StartDateTime = firstEvaluation.StartDateTime,
                     Finished = groupedEvaluation.Count(evaluation => evaluation.Status == EvaluationStatus.Finished),

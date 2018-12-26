@@ -14,5 +14,6 @@ namespace Yei3.PersonalEvaluation.Report.Dto
         public DateTime EndDateTime { get; set; }
         public int Total { get; set; }
         public int Finished { get; set; }
+        public DateTime CreationTime { get; set; }
     }
 }
