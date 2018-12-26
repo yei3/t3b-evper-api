@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
-using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
-using Yei3.PersonalEvaluation.Authorization;
+using Yei3.PersonalEvaluation.Authorization.Roles;
+using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
@@ -20,18 +20,19 @@ using Yei3.PersonalEvaluation.Report.Dto;
 
 namespace Yei3.PersonalEvaluation.Report
 {
-    //[AbpAuthorize(PermissionNames.AdministrationEvaluationReports)]
     public class EvaluationReportAppService : ApplicationService, IEvaluationReportAppService
     {
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
+        private readonly UserManager UserManager;
 
-        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, UserManager userManager)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
             SectionRepository = sectionRepository;
+            UserManager = userManager;
         }
 
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
@@ -55,7 +56,7 @@ namespace Yei3.PersonalEvaluation.Report
                 Evaluation firstEvaluation = groupedEvaluation.First();
                 evaluations.Add(new EvaluationResultsDto()
                 {
-                    Id = groupedEvaluation.Key.Id,
+                    EvaluationTemplateId = groupedEvaluation.Key.Id,
                     Status = firstEvaluation.StartDateTime < DateTime.Now
                         ? EvaluationStatus.NonInitiated
                         : firstEvaluation.EndDateTime <= DateTime.Now
@@ -77,11 +78,13 @@ namespace Yei3.PersonalEvaluation.Report
             IQueryable<EvaluationResultsDto> evaluations = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .OrderBy(evaluation => evaluation.CreationTime)
                 .Select(evaluation => new EvaluationResultsDto
                 {
                     Term = evaluation.Term,
                     Status = evaluation.Status,
-                    Id = evaluation.EvaluationId,
+                    Id = evaluation.Id,
+                    EvaluationTemplateId = evaluation.EvaluationId,
                     EndDateTime = evaluation.EndDateTime,
                     StartDateTime = evaluation.StartDateTime,
                     Total = evaluation.Questions.OfType<EvaluationMeasuredQuestion>().Count(),
@@ -89,9 +92,74 @@ namespace Yei3.PersonalEvaluation.Report
                         .OfType<EvaluationMeasuredQuestion>()
                         .Where(evaluationMeasuredQuestion => evaluationMeasuredQuestion.IsActive)
                         .Count(evaluationMeasuredQuestion => evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Validated)
-                });
+                })
+                .Skip(0)
+                .Take(2);
 
             return await evaluations.ToListAsync();
+        }
+
+        public async Task<ICollection<EvaluationResultsDto>> GetEvaluationSupervisorResults()
+        {
+            User supervisorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+
+            List<Evaluation> evaluationsResult = new List<Evaluation>();
+
+            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+            {
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                    .Distinct()
+                    .Where(user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .ToList();
+
+                foreach (User user in users)
+                {
+                    evaluationsResult.AddRange(EvaluationRepository
+                        .GetAll()
+                        .Where(evaluation => evaluation.UserId == user.Id));
+                }
+            }
+
+            var groupedEvaluations = evaluationsResult
+                .AsQueryable()
+                .OrderBy(evaluation => evaluation.CreationTime)
+                .GroupBy(evaluation => new
+                {
+                    Id = evaluation.EvaluationId,
+                    CreationTime = evaluation.CreationTime.DayOfYear,
+                    StartTime = evaluation.StartDateTime,
+                    EndTime = evaluation.EndDateTime,
+                    CreatorUserId = evaluation.CreatorUserId,
+                    Term = evaluation.Term
+                })
+                .Skip(0)
+                .Take(2);
+
+            List<EvaluationResultsDto> evaluations = new List<EvaluationResultsDto>();
+
+            foreach (var groupedEvaluation in groupedEvaluations)
+            {
+                Evaluation firstEvaluation = groupedEvaluation.First();
+                evaluations.Add(new EvaluationResultsDto()
+                {
+                    EvaluationTemplateId = groupedEvaluation.Key.Id,
+                    Status = firstEvaluation.StartDateTime < DateTime.Now
+                        ? EvaluationStatus.NonInitiated
+                        : firstEvaluation.EndDateTime <= DateTime.Now
+                            ? EvaluationStatus.Finished
+                            : EvaluationStatus.NonInitiated,
+                    Term = groupedEvaluation.Key.Term,
+                    EndDateTime = firstEvaluation.EndDateTime,
+                    StartDateTime = firstEvaluation.StartDateTime,
+                    Finished = groupedEvaluation.Count(evaluation => evaluation.Status == EvaluationStatus.Finished),
+                    Total = groupedEvaluation.Count()
+                });
+            }
+
+            return await Task.FromResult(evaluations);
         }
 
         public async Task<EvaluationResultDetailsDto> GetEvaluationResultDetail(long evaluationTemplateId)

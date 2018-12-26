@@ -9,6 +9,7 @@ namespace Yei3.PersonalEvaluation.Report
     {
         Task<ICollection<EvaluationResultsDto>> GetEvaluationResults();
         Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults();
+        Task<ICollection<EvaluationResultsDto>> GetEvaluationSupervisorResults();
         Task<EvaluationResultDetailsDto> GetEvaluationResultDetail(long evaluationTemplateId);
         Task<EvaluationsComparisonDto> GetEvaluationComparision(EvaluationsComparisonInputDto input);
     }

@@ -7,6 +7,7 @@ namespace Yei3.PersonalEvaluation.Report.Dto
 {
     public class EvaluationResultsDto : EntityDto<long>
     {
+        public long EvaluationTemplateId { get; set; }
         public EvaluationStatus Status { get; set; }
         public EvaluationTerm Term { get; set; }
         public DateTime StartDateTime { get; set; }
