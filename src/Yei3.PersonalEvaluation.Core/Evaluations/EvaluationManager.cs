@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Domain.Repositories;
@@ -67,6 +68,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 .Where(evaluation => evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
                 .CountAsync();
         }
 
@@ -81,6 +83,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 .Where(evaluation => evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
@@ -99,8 +102,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             return await EvaluationRevisionRepository
                 .GetAll()
+                .Include(revision => revision.Evaluation)
                 .Where(revision => revision.Status == EvaluationRevisionStatus.Pending)
                 .Where(revision => revision.Evaluation.UserId == userId)
+                .Where(revision => revision.Evaluation.EndDateTime > DateTime.Now)
                 .Select(revision => new RevisionSummaryValueObject
                 {
                     Term = revision.Evaluation.Term,
@@ -119,8 +124,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             return await EvaluationQuestionRepository
                 .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
                 .OfType<EvaluationMeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
@@ -142,6 +149,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
                 .CountAsync();
         }
 
@@ -154,7 +162,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Questions)
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending);
+                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now);
 
             foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
