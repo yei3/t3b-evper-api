@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
@@ -271,6 +272,47 @@ namespace Yei3.PersonalEvaluation.Report
             return await Task.FromResult(evaluationsComparison);
         }
 
+        public async Task<EvaluationsComparisonDto> GetCollaboratorEvaluationComparision(UserEvaluationsComparisonInputDto input)
+        {
+            EvaluationsComparisonDto evaluationsComparison = new EvaluationsComparisonDto
+            {
+                LeftEvaluation = await GetEvaluationReport(input.LeftEvaluationTemplateId, input.LeftEvaluationTerm, input.LeftEvaluationDayOfYear, AbpSession.UserId),
+                RightEvaluation = await GetEvaluationReport(input.RightEvaluationTemplateId, input.RightEvaluationTerm, input.RightEvaluationYear, AbpSession.UserId)
+            };
+
+            return await Task.FromResult(evaluationsComparison);
+        }
+
+        public async Task<ICollection<EvaluationsCollaboratorComparisonDto>> GetSupervisorEvaluationComparision(UserEvaluationsComparisonInputDto input)
+        {
+            User supervisorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+
+            List<EvaluationsCollaboratorComparisonDto> collaboratorComparisons = new List<EvaluationsCollaboratorComparisonDto>();
+
+            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+            {
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                    .Distinct()
+                    .Where(user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .ToList();
+
+                foreach (User user in users)
+                {
+                    collaboratorComparisons.Add(new EvaluationsCollaboratorComparisonDto
+                    {
+                        LeftEvaluation = await GetEvaluationReport(input.LeftEvaluationTemplateId, input.LeftEvaluationTerm, input.LeftEvaluationDayOfYear, user.Id),
+                        RightEvaluation = await GetEvaluationReport(input.RightEvaluationTemplateId, input.RightEvaluationTerm, input.RightEvaluationYear, user.Id),
+                        UserFullName = user.FullName
+                    });
+                }
+            }
+
+            return collaboratorComparisons;
+        }
+
         protected bool IsObjectiveCompleted(MeasuredAnswer answer, MeasuredQuestion question)
         {
             if (answer == null)
@@ -294,7 +336,7 @@ namespace Yei3.PersonalEvaluation.Report
             }
         }
 
-        protected async Task<EvaluationReportDto> GetEvaluationReport(long evaluationTemplateId, EvaluationTerm term, int evaluationDayOfYear)
+        protected async Task<EvaluationReportDto> GetEvaluationReport(long evaluationTemplateId, EvaluationTerm term, int evaluationDayOfYear, long? userId = null)
         {
             var groupedEvaluations = EvaluationRepository
                 .GetAll()
@@ -305,6 +347,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Template)
                 .ThenInclude(template => template.Sections)
+                .WhereIf(userId.HasValue, evaluation => evaluation.UserId == userId.Value)
                 .GroupBy(evaluation => new
                 {
                     EvaluationTemplateId = evaluation.EvaluationId,
@@ -342,7 +385,7 @@ namespace Yei3.PersonalEvaluation.Report
             var firstGroupedEvaluation = groupedEvaluations.First();
 
 
-            EvaluationReportDto leftReport = new EvaluationReportDto
+            EvaluationReportDto reportDto = new EvaluationReportDto
             {
                 Term = firstGroupedEvaluation.Key.Term,
                 CreationTime = firstGroupedEvaluation.First().CreationTime,
@@ -362,13 +405,13 @@ namespace Yei3.PersonalEvaluation.Report
                 TotalEmployees = totalEmployees
             };
 
-            foreach (SectionSummaryDto leftReportSection in leftReport.Sections)
+            foreach (SectionSummaryDto reportSection in reportDto.Sections)
             {
-                leftReportSection.FinishedQuestions = (await SectionRepository
+                reportSection.FinishedQuestions = (await SectionRepository
                         .GetAll()
                         .Include(section => section.MeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationMeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
                         measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
@@ -376,22 +419,22 @@ namespace Yei3.PersonalEvaluation.Report
                             (IsObjectiveCompleted(evaluationMeasuredQuestion.MeasuredAnswer, evaluationMeasuredQuestion.MeasuredQuestion))))
                     .Sum();
 
-                leftReportSection.FinishedQuestions += (await SectionRepository
+                reportSection.FinishedQuestions += (await SectionRepository
                         .GetAll()
                         .Include(section => section.UnmeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationUnmeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
                         unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.Validated))
                     .Sum();
 
-                leftReportSection.NonAnsweredQuestions = (await SectionRepository
+                reportSection.NonAnsweredQuestions = (await SectionRepository
                         .GetAll()
                         .Include(section => section.MeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationMeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
                         measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
@@ -399,11 +442,11 @@ namespace Yei3.PersonalEvaluation.Report
                             evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.NoStatus))
                     .Sum();
 
-                leftReportSection.NonAnsweredQuestions += (await SectionRepository
+                reportSection.NonAnsweredQuestions += (await SectionRepository
                         .GetAll()
                         .Include(section => section.UnmeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationUnmeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
                         unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
@@ -411,11 +454,11 @@ namespace Yei3.PersonalEvaluation.Report
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.NoStatus))
                     .Sum();
 
-                leftReportSection.NonFinishedQuestions = (await SectionRepository
+                reportSection.NonFinishedQuestions = (await SectionRepository
                         .GetAll()
                         .Include(section => section.MeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationMeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
                         measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
@@ -426,11 +469,11 @@ namespace Yei3.PersonalEvaluation.Report
                             !IsObjectiveCompleted(evaluationMeasuredQuestion.MeasuredAnswer, evaluationMeasuredQuestion.MeasuredQuestion)))
                     .Sum();
 
-                leftReportSection.NonFinishedQuestions += (await SectionRepository
+                reportSection.NonFinishedQuestions += (await SectionRepository
                         .GetAll()
                         .Include(section => section.UnmeasuredQuestions)
                         .ThenInclude(measuredQuestion => measuredQuestion.EvaluationUnmeasuredQuestions)
-                        .SingleAsync(section => section.Id == leftReportSection.Id))
+                        .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
                         unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
@@ -438,7 +481,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Sum();
             }
 
-            return await Task.FromResult(leftReport);
+            return await Task.FromResult(reportDto);
         }
     }
 }
