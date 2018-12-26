@@ -417,7 +417,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
-                        measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
+                        measuredQuestion.EvaluationMeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationMeasuredQuestion => evaluationMeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationMeasuredQuestion =>
                             evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Validated &&
                             (IsObjectiveCompleted(evaluationMeasuredQuestion.MeasuredAnswer, evaluationMeasuredQuestion.MeasuredQuestion))))
                     .Sum();
@@ -429,7 +431,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
-                        unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
+                        unmeasuredQuestion.EvaluationUnmeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationUnmeasuredQuestion => evaluationUnmeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationUnmeasuredQuestion =>
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.Validated))
                     .Sum();
 
@@ -440,7 +444,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
-                        measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
+                        measuredQuestion.EvaluationMeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationMeasuredQuestion => evaluationMeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationMeasuredQuestion =>
                             evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Unanswered ||
                             evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.NoStatus))
                     .Sum();
@@ -452,7 +458,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
-                        unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
+                        unmeasuredQuestion.EvaluationUnmeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationUnmeasuredQuestion => evaluationUnmeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationUnmeasuredQuestion =>
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.Unanswered ||
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.NoStatus))
                     .Sum();
@@ -464,7 +472,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .MeasuredQuestions
                     .Select(measuredQuestion =>
-                        measuredQuestion.EvaluationMeasuredQuestions.Count(evaluationMeasuredQuestion =>
+                        measuredQuestion.EvaluationMeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationMeasuredQuestion => evaluationMeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationMeasuredQuestion =>
                             (evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Answered &&
                              IsObjectiveCompleted(evaluationMeasuredQuestion.MeasuredAnswer, evaluationMeasuredQuestion.MeasuredQuestion)) ||
                             (evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Answered ||
@@ -479,7 +489,9 @@ namespace Yei3.PersonalEvaluation.Report
                         .SingleAsync(section => section.Id == reportSection.Id))
                     .UnmeasuredQuestions
                     .Select(unmeasuredQuestion =>
-                        unmeasuredQuestion.EvaluationUnmeasuredQuestions.Count(evaluationUnmeasuredQuestion =>
+                        unmeasuredQuestion.EvaluationUnmeasuredQuestions
+                            .WhereIf(userId.HasValue, evaluationUnmeasuredQuestion => evaluationUnmeasuredQuestion.Evaluation.UserId == userId.Value)
+                            .Count(evaluationUnmeasuredQuestion =>
                             evaluationUnmeasuredQuestion.Status == EvaluationQuestionStatus.Answered))
                     .Sum();
             }
