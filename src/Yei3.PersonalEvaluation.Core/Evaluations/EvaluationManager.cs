@@ -158,7 +158,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
-                pendingObjectivesCountAsync += pendingEvaluation.Questions.OfType<EvaluationMeasuredQuestion>().Count(question => question.Status == EvaluationQuestionStatus.Unanswered || question.Status == EvaluationQuestionStatus.NoStatus);
+                pendingObjectivesCountAsync += pendingEvaluation
+                    .Questions
+                    .OfType<EvaluationMeasuredQuestion>()
+                    .Count(question => question.Status != EvaluationQuestionStatus.Validated);
             }
 
             return Task.FromResult(pendingObjectivesCountAsync);
