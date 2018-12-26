@@ -108,6 +108,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(revision => revision.Evaluation.EndDateTime > DateTime.Now)
                 .Select(revision => new RevisionSummaryValueObject
                 {
+                    EvaluationId = revision.EvaluationId,
                     Term = revision.Evaluation.Term,
                     Status = revision.Status,
                     EndDateTime = revision.Evaluation.EndDateTime,
