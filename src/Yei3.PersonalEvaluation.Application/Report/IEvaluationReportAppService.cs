@@ -8,6 +8,7 @@ namespace Yei3.PersonalEvaluation.Report
     public interface IEvaluationReportAppService : IApplicationService
     {
         Task<ICollection<EvaluationResultsDto>> GetEvaluationResults();
+        Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults();
         Task<EvaluationResultDetailsDto> GetEvaluationResultDetail(long evaluationTemplateId);
         Task<EvaluationsComparisonDto> GetEvaluationComparision(EvaluationsComparisonInputDto input);
     }

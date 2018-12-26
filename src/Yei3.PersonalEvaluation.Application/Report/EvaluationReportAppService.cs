@@ -6,6 +6,7 @@ using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
+using Abp.Runtime.Session;
 using Abp.UI;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,28 @@ namespace Yei3.PersonalEvaluation.Report
             }
 
             return await Task.FromResult(evaluations);
+        }
+
+        public async Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults()
+        {
+            IQueryable<EvaluationResultsDto> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .Select(evaluation => new EvaluationResultsDto
+                {
+                    Term = evaluation.Term,
+                    Status = evaluation.Status,
+                    Id = evaluation.EvaluationId,
+                    EndDateTime = evaluation.EndDateTime,
+                    StartDateTime = evaluation.StartDateTime,
+                    Total = evaluation.Questions.OfType<EvaluationMeasuredQuestion>().Count(),
+                    Finished = evaluation.Questions
+                        .OfType<EvaluationMeasuredQuestion>()
+                        .Where(evaluationMeasuredQuestion => evaluationMeasuredQuestion.IsActive)
+                        .Count(evaluationMeasuredQuestion => evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Validated)
+                });
+
+            return await evaluations.ToListAsync();
         }
 
         public async Task<EvaluationResultDetailsDto> GetEvaluationResultDetail(long evaluationTemplateId)
