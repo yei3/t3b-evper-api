@@ -45,5 +45,25 @@ namespace Yei3.PersonalEvaluation.Revision
 
             evaluation.Revision.MarkAsPending();
         }
+
+        public async Task FinishEvaluation(long evaluationId)
+        {
+            Evaluation evaluation = await EvaluationRepository
+                .GetAll()
+                .Include(currentEvaluation => currentEvaluation.Revision)
+                .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == evaluationId);
+
+            evaluation.FinishEvaluation();
+        }
+
+        public async Task UnfininshEvaluation(long evaluationId)
+        {
+            Evaluation evaluation = await EvaluationRepository
+                .GetAll()
+                .Include(currentEvaluation => currentEvaluation.Revision)
+                .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == evaluationId);
+
+            evaluation.UnfinishEvaluation();
+        }
     }
 }
