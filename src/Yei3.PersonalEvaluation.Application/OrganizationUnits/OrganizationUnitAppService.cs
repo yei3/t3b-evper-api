@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Yei3.PersonalEvaluation.Authorization.Users;
 
 namespace Yei3.PersonalEvaluation.OrganizationUnits
 {
