@@ -148,14 +148,14 @@ namespace Yei3.PersonalEvaluation.Users
             user.IsEmailConfirmed = false;
 
             await _emailSender.SendAsync(new MailMessage(
-                from: "support@yei.com",
+                from: "soporte@yei.com",
                 to: user.EmailAddress,
                 subject: "Recuperacion de Contraseña",
                 body: $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.")
             );
 
-            var sendGridClient = new SendGridClient("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");
-            var from = new EmailAddress("support@yei3.com", "Soporte");
+            var sendGridClient = new SendGridClient("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");
+            var from = new EmailAddress("soporte@yei3.com", "Soporte");
             var subject = "Soporte";
             var to = new EmailAddress(user.EmailAddress, user.FullName);
             var plainTextContent = $"Su nueva contraseña es { newPassword}. Al iniciar debe cambiarla.";

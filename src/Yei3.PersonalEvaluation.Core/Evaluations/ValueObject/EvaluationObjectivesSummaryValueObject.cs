@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Abp.Domain.Values;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 
@@ -11,5 +12,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string Deliverable { get; set; }
         public DateTime DeliveryDate { get; set; }
         public long Id { get; set; }
+        public ICollection<ObjectiveBinnacleValueObject> Binnacle { get; set; }
     }
 }

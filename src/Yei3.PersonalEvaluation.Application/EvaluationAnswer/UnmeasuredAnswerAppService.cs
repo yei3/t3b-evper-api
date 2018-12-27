@@ -51,6 +51,7 @@ namespace Yei3.PersonalEvaluation.EvaluationAnswer
             {
                 evaluation.UnfinishEvaluation();
             }
+
             return await base.Update(input);
         }
     }

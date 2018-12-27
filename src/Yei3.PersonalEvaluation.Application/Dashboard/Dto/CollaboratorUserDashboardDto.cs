@@ -10,7 +10,7 @@ namespace Yei3.PersonalEvaluation.Dashboard.Dto
     {
         public EvaluationTerm NextEvaluationTerm { get; set; }
         public ToDoesSummaryDto ToDoesSummary { get; set; }
-        public ICollection<EvaluationSummaryDto> AutoEvaluationSummary { get; set; }
+        public ICollection<EvaluationSummaryDto> EvaluationSummary { get; set; }
         public ICollection<RevisionSummaryDto> RevisionSummary { get; set; }
         public ICollection<PendingObjectivesSummaryDto> ObjectiveSummary { get; set; }
     }
