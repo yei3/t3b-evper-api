@@ -80,6 +80,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             return await EvaluationRepository
                 .GetAll()
+                .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 //.Where(evaluation => evaluation.Template.IsAutoEvaluation) !!!!!! luis angel me mando el dia de la entrega. !!!!!!
@@ -92,7 +93,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Description = evaluation.Template.Description,
                     Status = evaluation.Status,
                     EndDateTime = evaluation.EndDateTime,
-                    CollaboratorName = user.FullName
+                    CollaboratorName = user.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
         }
 
@@ -136,7 +138,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Name = evaluationQuestion.MeasuredQuestion.Text,
                     Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
                     DeliveryDate = evaluationQuestion.TerminationDateTime,
-                    Id = evaluationQuestion.Id
+                    Id = evaluationQuestion.Id,
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    {
+                        Id = objectiveBinnacle.Id,
+                        Text = objectiveBinnacle.Text
+                    }).ToList()
                 }).ToListAsync();
         }
 

@@ -13,5 +13,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string Name { get; set; }
         public string Description { get; set; }
         public string CollaboratorName { get; set; }
+        public bool IsAutoEvaluation { get; set; }
     }
 }
