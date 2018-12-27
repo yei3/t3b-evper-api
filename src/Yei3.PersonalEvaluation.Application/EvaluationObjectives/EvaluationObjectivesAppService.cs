@@ -4,6 +4,7 @@ using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.EvaluationObjectives.Dto;
+using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 
 namespace Yei3.PersonalEvaluation.EvaluationObjectives
@@ -33,6 +34,24 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives
                 .GetAll()
                 .Include(answer => answer.EvaluationMeasuredQuestion)
                 .SingleOrDefaultAsync(answer => answer.Id == id);
+        }
+
+        public override async Task<EvaluationObjectiveDto> Update(EvaluationObjectiveDto input)
+        {
+            Evaluation evaluation = Repository
+                .GetAll()
+                .Include(answer => answer.EvaluationMeasuredQuestion)
+                .ThenInclude(question => question.Evaluation)
+                .Single(answer => answer.Id == input.Id)
+                .EvaluationMeasuredQuestion
+                .Evaluation;
+
+            if (evaluation.Status == EvaluationStatus.NonInitiated)
+            {
+                evaluation.UnfinishEvaluation();
+            }
+
+            return await base.Update(input);
         }
     }
 }
