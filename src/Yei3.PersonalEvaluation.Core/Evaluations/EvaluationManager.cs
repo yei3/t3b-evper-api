@@ -105,6 +105,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRevisionRepository
                 .GetAll()
                 .Include(revision => revision.Evaluation)
+                .ThenInclude(evaluation => evaluation.Template)
                 .Where(revision => revision.Status == EvaluationRevisionStatus.Pending)
                 .Where(revision => revision.Evaluation.UserId == userId)
                 .Where(revision => revision.Evaluation.EndDateTime > DateTime.Now)
@@ -117,7 +118,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Name = revision.Evaluation.Name,
                     Description = revision.Evaluation.Template.Description,
                     RevisionDateTime = revision.RevisionDateTime,
-                    CollaboratorFullName = revision.Evaluation.User.FullName
+                    CollaboratorFullName = revision.Evaluation.User.FullName,
+                    IsAutoEvaluation = revision.Evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
         }
 
@@ -256,7 +258,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (User user in users)
                 {
-                    List<EvaluationSummaryValueObject> currentUserEvaluations = await GetUserPendingAutoEvaluationsAsync(user.Id);
+                    List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserPendingAutoEvaluationsAsync(user.Id)).Where(evaluation => !evaluation.IsAutoEvaluation).ToList();
                     evaluationsSummary.AddRange(currentUserEvaluations);
                 }
             }
@@ -284,7 +286,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (User user in users)
                 {
-                    List<RevisionSummaryValueObject> currentUserPendingRevisions = await GetUserPendingEvaluationRevisionsAsync(user.Id);
+                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(user.Id)).Where(evaluation => !evaluation.IsAutoEvaluation).ToList();
                     revisionsSummary.AddRange(currentUserPendingRevisions);
                 }
             }

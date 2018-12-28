@@ -61,5 +61,16 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
             evaluationTemplateDto.PurgeSubSections();
             return evaluationTemplateDto;
         }
+
+        public override Task Delete(EntityDto<long> input)
+        {
+            Repository
+                .GetAll()
+                .Include(template => template.Evaluations)
+                .Single(template => template.Id == input.Id)
+                .Evaluations.Clear();
+
+            return base.Delete(input);
+        }
     }
 }

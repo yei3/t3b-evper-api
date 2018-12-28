@@ -15,5 +15,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string Description { get; set; }
         public DateTime EndDateTime { get; set; }
         public DateTime RevisionDateTime { get; set; }
+        public bool IsAutoEvaluation { get; set; }
     }
 }
