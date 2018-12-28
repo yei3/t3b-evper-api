@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -199,6 +201,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
+                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
                     .Where(user =>
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
@@ -224,8 +228,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
                     .Distinct()
+                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
                     .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
 
@@ -252,6 +257,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
+                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
                     .Where(user =>
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
@@ -271,6 +278,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
+
+            bool isSupervisor = await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
+
+            if (!isSupervisor)
+            {
+                throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
+            }
+
             List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
 
             List<RevisionSummaryValueObject> revisionsSummary = new List<RevisionSummaryValueObject>();
@@ -279,8 +294,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
                     .Distinct()
+                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
                     .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
 
@@ -307,8 +323,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
                     .Distinct()
+                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
+                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
                     .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()) &&
                         !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
                     .ToList();
 
