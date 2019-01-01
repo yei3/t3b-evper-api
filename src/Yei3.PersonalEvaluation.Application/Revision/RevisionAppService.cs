@@ -4,6 +4,7 @@ using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Evaluations;
+using Yei3.PersonalEvaluation.Revision.Dto;
 
 namespace Yei3.PersonalEvaluation.Revision
 {
@@ -64,6 +65,16 @@ namespace Yei3.PersonalEvaluation.Revision
                 .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == evaluationId);
 
             evaluation.UnfinishEvaluation();
+        }
+
+        public async Task UpdateRevisionDate(UpdateRevisionDateInputDto input)
+        {
+            Evaluation evaluation = await EvaluationRepository
+                .GetAll()
+                .Include(currentEvaluation => currentEvaluation.Revision)
+                .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == input.EvaluationId);
+
+            evaluation.Revision.SetRevisionTime(input.RevisionTime);
         }
     }
 }

@@ -33,5 +33,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
         {
             Status = EvaluationRevisionStatus.Pending;
         }
+
+        public void SetRevisionTime(DateTime revisionTime)
+        {
+            RevisionDateTime = revisionTime;
+        }
     }
 }
