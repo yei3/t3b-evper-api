@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.AutoMapper;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
+using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -37,6 +39,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
         {
+            User supervisorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            if (!await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor))
+            {
+                throw new UserFriendlyException($"Usuario {supervisorUser.FullName} no es un supervisor.");
+            }
+
             EvaluationTemplates.EvaluationTemplate evaluationTemplate = await
                 EvaluationTemplateRepository
                         .GetAll()
@@ -61,28 +70,17 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (long inputOrganizationUnitId in input.OrganizationUnitIds)
             {
-                Abp.Organizations.OrganizationUnit currentOrganizationUnit = await 
+                Abp.Organizations.OrganizationUnit currentOrganizationUnit = await
                     OrganizationUnitRepository.FirstOrDefaultAsync(inputOrganizationUnitId);
-                users.AddRange(await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, false));
+
+                users.AddRange(
+                    (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, false))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    );
             }
 
             foreach (User user in users.Distinct())
             {
-                Abp.Organizations.OrganizationUnit userOrganizationUnit = (await UserManager.GetOrganizationUnitsAsync(user))
-                    .First();
-
-                User supervisor = (await UserManager.GetUsersInOrganizationUnit(userOrganizationUnit, false))
-                    .FirstOrDefault(currentUser =>
-                        UserManager.IsInRoleAsync(currentUser, StaticRoleNames.Tenants.Supervisor).GetAwaiter()
-                            .GetResult());
-
-                long? supervisorId = null;
-
-                if (!supervisor.IsNullOrDeleted())
-                {
-                    supervisorId = supervisor.Id;
-                }
-
                 Evaluation currentEvaluation = new Evaluation(
                     input.Name,
                     evaluationTemplate.Id,
@@ -92,7 +90,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 currentEvaluation.SetRevision(
                     currentEvaluation.EvaluationId,
-                    supervisorId.GetValueOrDefault(3),
+                    supervisorUser.Id,
                     input.EndDate);
 
                 long evaluationId = await EvaluationRepository.InsertAndGetIdAsync(currentEvaluation);
@@ -143,9 +141,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
             IIncludableQueryable<Evaluation, ICollection<UnmeasuredQuestion>> resultEvaluations = EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.Questions)
-                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion) evaluationQuestion).MeasuredAnswer)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)
-                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion) evaluationQuestion).UnmeasuredAnswer)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
                 .Include(evaluation => evaluation.Template)
                 .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
                 .Include(evaluation => evaluation.Template.Sections)
@@ -208,7 +206,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             var evaluations = EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
-                .GroupBy(evaluation => new {
+                .GroupBy(evaluation => new
+                {
                     EvaluationTemplateId = evaluation.EvaluationId,
                     CreationTime = evaluation.CreationTime.DayOfYear,
                     StartTime = evaluation.StartDateTime,
