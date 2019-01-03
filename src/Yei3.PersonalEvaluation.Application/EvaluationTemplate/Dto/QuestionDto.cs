@@ -10,6 +10,7 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
         public string Text { get; set; }
         public QuestionType QuestionType { get; set; }
         public long SectionId { get; set; }
-        public string Deliverable { get; set; } 
+        public string Deliverable { get; set; }
+        public bool IsQualifiable { get; set; }
     }
 }
