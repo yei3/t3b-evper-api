@@ -325,7 +325,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             if (!answer.Text.IsNullOrEmpty())
             {
-                return answer.Text == question.Text;
+                return answer.Text == question.ExpectedText;
             }
 
             switch (question.Relation)
@@ -399,6 +399,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .GetAll()
                     .Where(section => section.EvaluationTemplateId == firstGroupedEvaluation.Key.EvaluationTemplateId)
                     .Where(section => !section.MeasuredQuestions.IsNullOrEmpty() || !section.UnmeasuredQuestions.IsNullOrEmpty())
+                    .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                     .Select(section => new SectionSummaryDto
                     {
                         Id = section.Id,

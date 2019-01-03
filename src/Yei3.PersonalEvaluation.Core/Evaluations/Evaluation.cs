@@ -55,5 +55,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             Status = EvaluationStatus.Pending;
         }
+
+        public void ValidateEvaluation()
+        {
+            Status = EvaluationStatus.Validated;
+        }
+
+        public void InvalidateEvaluation()
+        {
+            Status = EvaluationStatus.Finished;
+        }
     }
 }
