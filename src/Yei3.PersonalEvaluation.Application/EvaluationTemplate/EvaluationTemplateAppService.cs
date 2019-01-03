@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +15,10 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 {
     public class EvaluationTemplateAppService : AsyncCrudAppService<Evaluations.EvaluationTemplates.EvaluationTemplate, EvaluationTemplateDto, long, GetAllEvaluationTemplateInputDto, EvaluationTemplateCreateInputDto>, IEvaluationTemplateAppService
     {
-        public EvaluationTemplateAppService(IRepository<Evaluations.EvaluationTemplates.EvaluationTemplate, long> repository) : base(repository)
+        private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
+        public EvaluationTemplateAppService(IRepository<Evaluations.EvaluationTemplates.EvaluationTemplate, long> repository, IRepository<Evaluations.Sections.Section, long> sectionRepository) : base(repository)
         {
+            SectionRepository = sectionRepository;
         }
 
         protected override IQueryable<Evaluations.EvaluationTemplates.EvaluationTemplate> CreateFilteredQuery(GetAllEvaluationTemplateInputDto input)
@@ -81,16 +85,6 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
             Evaluations.EvaluationTemplates.EvaluationTemplate lastEvaluationTemplate = Repository
                 .GetAll()
                 .OrderByDescending(evaluationTemplate => evaluationTemplate.CreationTime)
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .ThenInclude(section => section.UnmeasuredQuestions)
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .ThenInclude(section => section.MeasuredQuestions)
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .ThenInclude(section => section.ChildSections)
-                .ThenInclude(section => section.UnmeasuredQuestions)
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .ThenInclude(section => section.ChildSections)
-                .ThenInclude(section => section.MeasuredQuestions)
                 .FirstOrDefault();
 
             EvaluationTemplateDto result = await base.Create(input);
@@ -99,20 +93,29 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
             if (lastEvaluationTemplate.IsNullOrDeleted()) return result;
 
-            Evaluations.Sections.Section nextObjectiveSection = lastEvaluationTemplate
-                .Sections
-                .FirstOrDefault(section => section.Name.StartsWith(AppConsts.SectionNextObjectives,
-                    StringComparison.CurrentCultureIgnoreCase))
-                .MapTo<Evaluations.Sections.Section>();
+            Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
+                .GetAll()
+                .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
+                .Include(section => section.UnmeasuredQuestions)
+                .Include(section => section.MeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .FirstOrDefault(section =>
+                    section.Name.StartsWith(AppConsts.SectionNextObjectives,
+                        StringComparison.CurrentCultureIgnoreCase));
 
-            if (!nextObjectiveSection.IsNullOrDeleted())
-            {
-                Repository
-                    .GetAll()
-                    .Include(evaluationTemplate => evaluationTemplate.Sections)
-                    .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
-                    .Sections.Add(nextObjectiveSection);
-            }
+            nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
+
+            if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
+
+            Repository
+                .GetAll()
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
+                .Sections
+                .Add(nextObjectivesParentSection);
 
             return result;
         }
