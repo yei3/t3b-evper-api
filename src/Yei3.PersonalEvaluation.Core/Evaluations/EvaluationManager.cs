@@ -84,7 +84,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 //.Where(evaluation => evaluation.Template.IsAutoEvaluation) !!!!!! luis angel me mando el dia de la entrega. !!!!!!
                 .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
                 .Select(evaluation => new EvaluationSummaryValueObject
