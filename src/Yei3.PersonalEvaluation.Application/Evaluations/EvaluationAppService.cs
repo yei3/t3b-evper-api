@@ -114,15 +114,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (UnmeasuredQuestion unmeasuredQuestion in unmeasuredQuestions)
                 {
-                    EvaluationUnmeasuredQuestion evaluationMeasuredQuestion = new EvaluationUnmeasuredQuestion(
+                    EvaluationUnmeasuredQuestion evaluationUnmeasuredQuestion = new EvaluationUnmeasuredQuestion(
                         currentEvaluation.EvaluationId,
                         unmeasuredQuestion.Id,
                         currentEvaluation.EndDateTime,
                         EvaluationQuestionStatus.Unanswered);
 
-                    evaluationMeasuredQuestion.SetAnswer(unmeasuredQuestion.Id);
+                    evaluationUnmeasuredQuestion.SetAnswer(unmeasuredQuestion.Id);
 
-                    currentEvaluation.Questions.Add(evaluationMeasuredQuestion);
+                    currentEvaluation.Questions.Add(evaluationUnmeasuredQuestion);
                 }
 
                 foreach (MeasuredQuestion measuredQuestion in measuredQuestions)
