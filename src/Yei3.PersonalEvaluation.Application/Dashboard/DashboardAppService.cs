@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
             {
                 NextEvaluationTerm = await EvaluationManager.GetUserNextEvaluationTermAsync(),
                 ToDoesSummary = (await EvaluationManager.GetUserToDoesSummary()).MapTo<ToDoesSummaryDto>(),
-                EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),
+                EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).Where(evaluation => evaluation.IsAutoEvaluation).MapTo<ICollection<EvaluationSummaryDto>>(),
                 RevisionSummary = (await EvaluationManager.GetUserPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
                 ObjectiveSummary = (await EvaluationManager.GetUserPendingObjectiveAsync()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
             };
