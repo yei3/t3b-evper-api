@@ -12,7 +12,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<EvaluationTerm> GetUserNextEvaluationTermAsync(long? userId = null);
         Task<ToDoesSummaryValueObject> GetUserToDoesSummary(long? userId = null);
         Task<int> GetUserPendingAutoEvaluationsCountAsync(long? userId = null);
-        Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync(long? userId = null);
+        Task<List<EvaluationSummaryValueObject>> GetUserPendingEvaluationsAsync(long? userId = null);
         Task<List<RevisionSummaryValueObject>> GetUserPendingEvaluationRevisionsAsync(long? userId = null);
         Task<List<EvaluationObjectivesSummaryValueObject>> GetUserPendingObjectiveAsync(long? userId = null);
         Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null);

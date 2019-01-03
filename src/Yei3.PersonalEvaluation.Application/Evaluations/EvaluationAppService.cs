@@ -39,11 +39,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
         {
-            User supervisorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
-            if (!await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor))
+            if (!await UserManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
             {
-                throw new UserFriendlyException($"Usuario {supervisorUser.FullName} no es un supervisor.");
+                throw new UserFriendlyException($"Usuario {administratorUser.FullName} no es un Administrador.");
             }
 
             EvaluationTemplates.EvaluationTemplate evaluationTemplate = await
@@ -73,9 +73,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 Abp.Organizations.OrganizationUnit currentOrganizationUnit = await
                     OrganizationUnitRepository.FirstOrDefaultAsync(inputOrganizationUnitId);
 
+                List<User> allUsers = await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true);
+
                 users.AddRange(
-                    (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, false))
-                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    allUsers
+                        .Where(user => UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult()
+                        )
                     );
             }
 
@@ -88,9 +91,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     input.StartDate,
                     input.EndDate);
 
+                User immediateSupervisor =
+                    users.FirstOrDefault(currentUser => currentUser.JobDescription == user.ImmediateSupervisor);
+
                 currentEvaluation.SetRevision(
                     currentEvaluation.EvaluationId,
-                    supervisorUser.Id,
+                    immediateSupervisor == null ? user.Id : immediateSupervisor.Id,
                     input.EndDate);
 
                 long evaluationId = await EvaluationRepository.InsertAndGetIdAsync(currentEvaluation);
@@ -227,11 +233,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Name = firstEvaluation.Name,
                     EndDateTime = firstEvaluation.EndDateTime,
                     EvaluationTemplateId = firstEvaluation.EvaluationId,
-                    Status = firstEvaluation.StartDateTime < DateTime.Now
+                    Status = firstEvaluation.StartDateTime > DateTime.Now
                         ? EvaluationStatus.NonInitiated
                         : firstEvaluation.EndDateTime <= DateTime.Now
                             ? EvaluationStatus.Finished
-                            : EvaluationStatus.NonInitiated,
+                            : EvaluationStatus.Pending,
                 });
             }
 

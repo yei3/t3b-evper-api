@@ -74,7 +74,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .CountAsync();
         }
 
-        public async Task<List<EvaluationSummaryValueObject>> GetUserPendingAutoEvaluationsAsync(long? userId = null)
+        public async Task<List<EvaluationSummaryValueObject>> GetUserPendingEvaluationsAsync(long? userId = null)
         {
             userId = userId ?? AbpSession.GetUserId();
 
@@ -104,24 +104,24 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
-            return await EvaluationRevisionRepository
+            return await EvaluationRepository
                 .GetAll()
-                .Include(revision => revision.Evaluation)
-                .ThenInclude(evaluation => evaluation.Template)
-                .Where(revision => revision.Status == EvaluationRevisionStatus.Pending)
-                .Where(revision => revision.Evaluation.UserId == userId)
-                .Where(revision => revision.Evaluation.EndDateTime > DateTime.Now)
-                .Select(revision => new RevisionSummaryValueObject
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Finished)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Include(evaluation => evaluation.Template)
+                .Include(evaluation => evaluation.Revision)
+                .Select(evaluation => new RevisionSummaryValueObject
                 {
-                    EvaluationId = revision.EvaluationId,
-                    Term = revision.Evaluation.Term,
-                    Status = revision.Status,
-                    EndDateTime = revision.Evaluation.EndDateTime,
-                    Name = revision.Evaluation.Name,
-                    Description = revision.Evaluation.Template.Description,
-                    RevisionDateTime = revision.RevisionDateTime,
-                    CollaboratorFullName = revision.Evaluation.User.FullName,
-                    IsAutoEvaluation = revision.Evaluation.Template.IsAutoEvaluation
+                    EvaluationId = evaluation.Id,
+                    Term = evaluation.Term,
+                    Status = evaluation.Revision.Status,
+                    EndDateTime = evaluation.EndDateTime,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
+                    RevisionDateTime = evaluation.Revision.RevisionDateTime,
+                    CollaboratorFullName = evaluation.User.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
         }
 
@@ -146,7 +146,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
                         Id = objectiveBinnacle.Id,
-                        Text = objectiveBinnacle.Text
+                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime
                     }).ToList()
                 }).ToListAsync();
         }
@@ -201,10 +203,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
-                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
-                    .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
                 foreach (User user in users)
                 {
@@ -226,12 +225,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
             {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
-                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
-                    .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
                 foreach (User user in users)
@@ -257,15 +253,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
             {
                 List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
-                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
-                    .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
                 foreach (User user in users)
                 {
-                    List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserPendingAutoEvaluationsAsync(user.Id)).Where(evaluation => !evaluation.IsAutoEvaluation).ToList();
+                    List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserPendingEvaluationsAsync(user.Id))
+                        .ToList();
                     evaluationsSummary.AddRange(currentUserEvaluations);
                 }
             }
@@ -292,17 +286,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
             {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
-                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
-                    .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
                 foreach (User user in users)
                 {
-                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(user.Id)).Where(evaluation => !evaluation.IsAutoEvaluation).ToList();
+                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(user.Id))
+                        .ToList();
+
                     revisionsSummary.AddRange(currentUserPendingRevisions);
                 }
             }
@@ -315,26 +308,33 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
+
+            bool isSupervisor = await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
+
+            if (!isSupervisor)
+            {
+                throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
+            }
+
             List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
 
             List<CollaboratorsPendingObjectivesSummaryValueObject> collaboratorsPendingObjectivesSummary = new List<CollaboratorsPendingObjectivesSummaryValueObject>();
 
             foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
             {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit))
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
                     .Distinct()
-                    .WhereIf(!UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult(), user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult()))
-                    .Where(user =>
-                        !(UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult()))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
                 foreach (User user in users)
                 {
                     List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserPendingObjectiveAsync(user.Id);
+
                     collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
                     {
                         CollaboratorFullName = user.FullName,
+                        CollaboratorEmployeeNumber = user.EmployeeNumber,
                         ObjectivesSummary = userObjectivesSummary,
                         TotalPendingObjectives = userObjectivesSummary
                             .Where(objective => objective.Status != EvaluationQuestionStatus.Answered)

@@ -2,6 +2,7 @@
 using Abp.Zero.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
@@ -34,6 +35,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<Answer> Answers { get; set; }
         public virtual DbSet<MeasuredAnswer> MeasuredAnswers { get; set; }
         public virtual DbSet<UnmeasuredAnswer> UnmeasuredAnswers{ get; set; }
+        public virtual DbSet<ObjectiveBinnacle> Binnacles{ get; set; }
         
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
             : base(options)
@@ -83,7 +85,10 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
             modelBuilder.Entity<EvaluationRevision>()
                 .HasOne(evaluation => evaluation.ReviewerUser)
                 .WithMany(user => user.EvaluationRevisions);
-            
+
+            modelBuilder.Entity<ObjectiveBinnacle>()
+                .HasOne(binnacle => binnacle.EvaluationMeasuredQuestion)
+                .WithMany(objective => objective.Binnacle);
         }
     }
 }
