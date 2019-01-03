@@ -8,6 +8,7 @@ namespace Yei3.PersonalEvaluation.Objective.Dto
     public class ObjectiveDto : QuestionDto
     {
         public decimal Expected { get; set; }
+        public string ExpectedText { get; set; }
         public MeasuredQuestionRelation Relation { get; set; }
     }
 }

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Yei3.PersonalEvaluation.EntityFrameworkCore;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    partial class PersonalEvaluationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190103072755_add text to objective")]
+    partial class addtexttoobjective
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1038,7 +1040,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasIndex("EvaluationMeasuredQuestionId");
 
-                    b.ToTable("Binnacles");
+                    b.ToTable("ObjectiveBinnacle");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
@@ -1245,8 +1247,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .IsRequired();
 
                     b.Property<bool>("IsDeleted");
-
-                    b.Property<bool>("IsQualifiable");
 
                     b.Property<DateTime?>("LastModificationTime");
 
