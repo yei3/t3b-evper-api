@@ -12,5 +12,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         public MeasuredAnswer(long evaluationQuestionId) : base(evaluationQuestionId)
         {
         }
+
+        public MeasuredAnswer()
+        {
+        }
     }
 }

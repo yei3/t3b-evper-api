@@ -10,6 +10,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
 {
     public class Section : FullAuditedEntity<long>, INamed, IPassivable
     {
+        public Section()
+        {
+        }
+
         public Section(string name, bool displayName, long evaluationTemplateId, long? parentId, bool isActive)
         {
             Name = name;

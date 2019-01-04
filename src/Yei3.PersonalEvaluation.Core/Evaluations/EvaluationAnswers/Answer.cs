@@ -9,6 +9,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
             EvaluationQuestionId = evaluationQuestionId;
         }
 
+        protected Answer()
+        {
+        }
+
         public virtual string Text { get; protected set; }
         public virtual long EvaluationQuestionId { get; protected set; }
     }
