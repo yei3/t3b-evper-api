@@ -11,5 +11,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         public UnmeasuredAnswer(long evaluationQuestionId) : base(evaluationQuestionId)
         {
         }
+
+        public UnmeasuredAnswer()
+        {
+        }
     }
 }

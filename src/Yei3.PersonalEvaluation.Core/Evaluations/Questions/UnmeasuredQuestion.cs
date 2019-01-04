@@ -11,6 +11,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.Questions
         {
         }
 
+        public UnmeasuredQuestion()
+        {
+        }
+
         public virtual ICollection<EvaluationUnmeasuredQuestion> EvaluationUnmeasuredQuestions{ get; protected set; }
         [ForeignKey("SectionId")]
         public virtual Section Section { get; protected set; }

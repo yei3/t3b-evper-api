@@ -11,6 +11,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.Questions
             IsQualifiable = isQualifiable;
         }
 
+        protected Question()
+        {
+        }
+
         public string Text { get; protected set; }
         public QuestionType QuestionType { get; set; }
         public virtual long SectionId { get; protected set; }
