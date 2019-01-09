@@ -19,7 +19,7 @@ If you want to learn more about creating good readme files then refer the follow
 - [Visual Studio Code](https://github.com/Microsoft/vscode)
 - [Chakra Core](https://github.com/Microsoft/ChakraCore)
 
-[\# Estados de objetivos]()
+# Estados de objetivos
 
 **No iniciado:** Es el estado de origen, tendrá ese estado al cargarse por primera vez en el seguimiento o en la auto evaluación o evalución.
 
@@ -29,7 +29,7 @@ If you want to learn more about creating good readme files then refer the follow
 
 **Validado:** El evaluador podrá validar el objetivo en cualquier momento (lo más común es que lo haga una vez que el evaluado lo haya completado de manera satisfactoria). En este estado, ya no se permitirán agregar avances.
 
-[# Estados de evaluaciones]()
+# Estados de evaluaciones
 
 **No iniciada:** El primer estado de una evaluación, es el estado que tendrá una vez programada la evaluación.
 
