@@ -2,6 +2,6 @@
 {
     public enum EvaluationQuestionStatus
     {
-        NoStatus, Unanswered, Answered, Validated
+        NoStatus, Unanswered, Initiated, Answered, Validated
     }
 }
