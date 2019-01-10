@@ -13,5 +13,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationTemplates
         public virtual string Instructions { get; protected set; }
         public virtual bool IsAutoEvaluation { get; protected set; }
         public virtual ICollection<Evaluation> Evaluations { get; protected set; }
+        public virtual bool IncludePastObjectives { get; protected set; }
     }
 }

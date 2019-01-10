@@ -12,6 +12,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public string Name { get; set; }
         public long EvaluationTemplateId { get; set; }
         public ICollection<long> OrganizationUnitIds { get; set; }
+        public ICollection<string> JobDescriptions { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }
