@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
@@ -14,5 +15,7 @@ namespace Yei3.PersonalEvaluation.Users
         Task UpdateScholarshipAndEmailAddress(UpdateUserDto updateUser);
 
         Task RecoverPassword(RecoverPasswordDto recoverPassword);
+
+        Task<ICollection<string>> GetAllJobDescriptions();
     }
 }
