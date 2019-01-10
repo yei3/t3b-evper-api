@@ -46,5 +46,14 @@ namespace Yei3.PersonalEvaluation.Dashboard
                 CollaboratorsObjectivesSummary = (await EvaluationManager.GetUserOrganizationUnitObjectivesSummaryAsync()).MapTo<ICollection<CollaboratorsObjectivesSummaryDto>>()
             };
         }
+
+        [HttpGet]
+        public async Task<CollaboratorUserDashboardDto> EvaluationsHistory()
+        {
+            return new CollaboratorUserDashboardDto
+            {
+                EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),                
+            };
+        }
     }
 }
