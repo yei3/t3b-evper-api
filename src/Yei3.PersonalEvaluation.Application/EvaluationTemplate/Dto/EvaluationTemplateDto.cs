@@ -13,6 +13,7 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
         public string Instructions { get; set; }
         public ICollection<SectionDto> Sections { get; set; }
         public bool IsAutoEvaluation { get; set; }
+        public bool IncludePastObjectives { get; set; }
 
         public void PurgeSubSections()
         {

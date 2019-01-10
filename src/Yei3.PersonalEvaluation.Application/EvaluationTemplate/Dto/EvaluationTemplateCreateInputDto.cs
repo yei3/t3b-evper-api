@@ -10,5 +10,6 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
         public string Description { get; set; }
         public string Instructions { get; set; }
         public bool IsAutoEvaluation { get; set; }
+        public bool IncludePastObjectives { get; set; }
     }
 }

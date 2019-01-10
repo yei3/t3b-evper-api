@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
-using Abp.AutoMapper;
-using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -93,30 +90,39 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
             if (lastEvaluationTemplate.IsNullOrDeleted()) return result;
 
-            Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
-                .GetAll()
-                .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
-                .Include(section => section.UnmeasuredQuestions)
-                .Include(section => section.MeasuredQuestions)
-                .Include(section => section.ChildSections)
-                .ThenInclude(section => section.MeasuredQuestions)
-                .Include(section => section.ChildSections)
-                .ThenInclude(section => section.UnmeasuredQuestions)
-                .FirstOrDefault(section =>
-                    section.Name.StartsWith(AppConsts.SectionNextObjectives,
-                        StringComparison.CurrentCultureIgnoreCase));
+            if (result.IncludePastObjectives)
+            {
+                Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
+                    .GetAll()
+                    .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
+                    .Include(section => section.UnmeasuredQuestions)
+                    .Include(section => section.MeasuredQuestions)
+                    .Include(section => section.ChildSections)
+                    .ThenInclude(section => section.MeasuredQuestions)
+                    .Include(section => section.ChildSections)
+                    .ThenInclude(section => section.UnmeasuredQuestions)
+                    .FirstOrDefault(section =>
+                        section.Name.StartsWith(AppConsts.SectionNextObjectives,
+                            StringComparison.CurrentCultureIgnoreCase));
 
-            nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
+                nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
 
-            if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
+                if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
 
-            Repository
-                .GetAll()
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
-                .Sections
-                .Add(nextObjectivesParentSection);
-
+                Repository
+                    .GetAll()
+                    .Include(evaluationTemplate => evaluationTemplate.Sections)
+                    .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
+                    .Sections
+                    .Add(nextObjectivesParentSection);
+            }
+            else
+            {
+                long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section("Objetivos", true, result.Id, null, true));
+                await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Preguntas", false, result.Id,
+                    objectiveSectionId, true));
+            }
+            
             return result;
         }
     }
