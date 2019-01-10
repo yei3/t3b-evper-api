@@ -28,12 +28,6 @@ namespace Yei3.PersonalEvaluation.Notifications
             _userNotificationManager = userNotificationManager;
         }
 
-        //Subscribe to a general notification
-        public async Task Subscribe_SentFriendshipRequest(int? tenantId, long userId)
-        {
-            await _notificationSubscriptionManager.SubscribeAsync(new Abp.UserIdentifier(tenantId, userId), "SentFriendshipRequest");    
-        }
-
         public async Task<List<UserNotification>> getAll()
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
@@ -46,7 +40,7 @@ namespace Yei3.PersonalEvaluation.Notifications
             return await _userNotificationManager.GetUserNotificationCountAsync(new Abp.UserIdentifier(administratorUser.TenantId, administratorUser.Id),0);
         }
 
-        public async Task Publish_SentFrendshipRequest(string senderUserName, string generalMessage)
+        public async Task Publish_SentGeneralUserNotification(string senderUserName, string generalMessage)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
             UserIdentifier targetUserId = new UserIdentifier(administratorUser.TenantId, administratorUser.Id);
