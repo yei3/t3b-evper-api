@@ -11,6 +11,7 @@ using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Extensions;
 using Abp.IdentityFramework;
 using Abp.Localization;
 using Abp.Net.Mail;
@@ -162,6 +163,17 @@ namespace Yei3.PersonalEvaluation.Users
             var htmlContent = $"Su nueva contraseña es <strong>{ newPassword}<strong/>. Al iniciar debe cambiarla.";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await sendGridClient.SendEmailAsync(msg);
+        }
+
+        public async Task<ICollection<string>> GetAllJobDescriptions()
+        {
+            return await _userManager
+                .Users
+                .Select(user => user.JobDescription)
+                .Where(jobDescription => !jobDescription.IsNullOrEmpty())
+                .Distinct()
+                .OrderBy(jobDescription => jobDescription)
+                .ToListAsync();
         }
 
         protected override User MapToEntity(CreateUserDto createInput)
