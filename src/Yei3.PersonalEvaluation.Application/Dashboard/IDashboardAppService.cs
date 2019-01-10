@@ -9,6 +9,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
     {
         Task<CollaboratorUserDashboardDto> Collaborator();
         Task<SupervisorUserDashboardDto> Supervisor();
+        Task<CollaboratorUserDashboardDto> EvaluationsHistory();
 
     }
 }
