@@ -4,7 +4,7 @@ using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 
 namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
-    [AutoMap(typeof(MeasuredAnswer), typeof(UnmeasuredAnswer))]
+    [AutoMap(typeof(MeasuredAnswer), typeof(UnmeasuredAnswer), typeof(NotEvaluableAnswer))]
     public class EvaluationAnswerDto : EntityDto<long>
     {
         public decimal Real { get; set; }
