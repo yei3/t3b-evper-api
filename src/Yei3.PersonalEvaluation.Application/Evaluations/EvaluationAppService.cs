@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.AutoMapper;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
@@ -83,7 +84,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     allUsers
                         .Where(user => UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult()
                         )
-                        .Where(user => input.JobDescriptions.Contains(user.JobDescription))
+                        .WhereIf(!input.JobDescriptions.IsNullOrEmpty(), user => input.JobDescriptions.Contains(user.JobDescription))
                     );
             }
 
