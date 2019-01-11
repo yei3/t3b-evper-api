@@ -5,9 +5,9 @@ using Yei3.PersonalEvaluation.Evaluations.Questions;
 
 namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
 {
-    public class EvaluationUnmeasuredQuestion : EvaluationQuestion
+    public class EvaluationUnmeasuredQuestion : EvaluableQuestion
     {
-        public EvaluationUnmeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status) : base(evaluationId, evaluationQuestionId, terminationDateTime, status)
+        public EvaluationUnmeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status) : base(evaluationId, terminationDateTime, status, evaluationQuestionId)
         {
         }
 

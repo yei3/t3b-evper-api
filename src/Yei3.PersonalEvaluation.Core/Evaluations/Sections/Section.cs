@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationTemplates;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
 using Yei3.PersonalEvaluation.Interfaces;
@@ -26,7 +27,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
             MeasuredQuestions = new List<MeasuredQuestion>();
         }
 
-        public virtual string Name { get; protected set; }
+        public virtual string Name { get; set; }
         public virtual bool DisplayName { get; protected set; }
         public virtual long EvaluationTemplateId { get; protected set; }
 
@@ -41,6 +42,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
         public virtual bool IsActive { get; set; }
         public virtual ICollection<UnmeasuredQuestion> UnmeasuredQuestions { get; protected set; }
         public virtual ICollection<MeasuredQuestion> MeasuredQuestions { get; protected set; }
+        public virtual ICollection<NotEvaluableQuestion> NotEvaluableQuestions { get; protected set; }
 
         public Section NoTracking(long evaluationId, bool trackParent = false)
         {

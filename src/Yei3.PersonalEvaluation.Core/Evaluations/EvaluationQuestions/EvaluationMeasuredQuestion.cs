@@ -7,10 +7,10 @@ using Yei3.PersonalEvaluation.Evaluations.Questions;
 
 namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
 {
-    public class EvaluationMeasuredQuestion : EvaluationQuestion
+    public class EvaluationMeasuredQuestion : EvaluableQuestion
     {
         
-        public EvaluationMeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status) : base(evaluationId, evaluationQuestionId, terminationDateTime, status)
+        public EvaluationMeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status) : base(evaluationId, terminationDateTime, status, evaluationQuestionId)
         {
         }
 

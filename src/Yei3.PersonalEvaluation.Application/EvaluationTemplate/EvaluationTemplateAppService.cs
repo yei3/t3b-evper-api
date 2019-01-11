@@ -90,7 +90,7 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
             if (lastEvaluationTemplate.IsNullOrDeleted()) return result;
 
-            if (result.IncludePastObjectives)
+            if (result.IncludePastObjectives) return result;
             {
                 Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
                     .GetAll()
@@ -109,20 +109,20 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
                 if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
 
+                nextObjectivesParentSection.Name = "Objetivos";
+
                 Repository
                     .GetAll()
                     .Include(evaluationTemplate => evaluationTemplate.Sections)
                     .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
                     .Sections
                     .Add(nextObjectivesParentSection);
-            }
-            else
-            {
-                long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section("Objetivos", true, result.Id, null, true));
+
+                long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true));
                 await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Preguntas", false, result.Id,
                     objectiveSectionId, true));
             }
-            
+
             return result;
         }
     }

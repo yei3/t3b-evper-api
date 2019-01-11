@@ -53,11 +53,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         .Include(currentEvaluationTemplate => currentEvaluationTemplate.Sections)
                         .ThenInclude(section => section.MeasuredQuestions)
                         .Include(currentEvaluationTemplate => currentEvaluationTemplate.Sections)
+                        .ThenInclude(section => section.NotEvaluableQuestions)
+                        .Include(currentEvaluationTemplate => currentEvaluationTemplate.Sections)
                         .ThenInclude(section => section.ChildSections)
                         .ThenInclude(section => section.UnmeasuredQuestions)
                         .Include(currentEvaluationTemplate => currentEvaluationTemplate.Sections)
                         .ThenInclude(section => section.ChildSections)
                         .ThenInclude(section => section.MeasuredQuestions)
+                        .Include(currentEvaluationTemplate => currentEvaluationTemplate.Sections)
+                        .ThenInclude(section => section.ChildSections)
+                        .ThenInclude(section => section.NotEvaluableQuestions)
                     .FirstOrDefaultAsync(currentEvaluationTemplate => currentEvaluationTemplate.Id == input.EvaluationTemplateId);
 
             if (evaluationTemplate.IsNullOrDeleted())
@@ -150,12 +155,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
                 .Include(evaluation => evaluation.Template)
                 .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
                 .Include(evaluation => evaluation.Template.Sections)
                 .ThenInclude(section => section.ChildSections)
                 .Include(evaluation => evaluation.Template.Sections)
                 .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.NotEvaluableQuestions)
                 .Include(evaluation => evaluation.Template.Sections)
                 .ThenInclude(section => section.UnmeasuredQuestions);
 
@@ -194,6 +203,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
                 .Include(evaluation => evaluation.Template)
                 .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
                 .Include(evaluation => evaluation.Template.Sections)
@@ -202,6 +213,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(section => section.MeasuredQuestions)
                 .Include(evaluation => evaluation.Template.Sections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.NotEvaluableQuestions)
                 .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
 
             return resultEvaluation.MapTo<EvaluationDto>();

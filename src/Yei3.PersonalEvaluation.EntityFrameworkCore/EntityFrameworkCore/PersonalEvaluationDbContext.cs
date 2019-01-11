@@ -27,14 +27,17 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<UnmeasuredQuestion> UnmeasuredQuestions { get; set; }
         public virtual DbSet<MeasuredQuestion> MeasuredQuestions { get; set; }
         public virtual DbSet<EvaluationQuestion> EvaluationQuestions { get; set; }
+        public virtual DbSet<EvaluableQuestion> EvaluableQuestions { get; set; }
         public virtual DbSet<EvaluationMeasuredQuestion> EvaluationMeasuredQuestions{ get; set; }
         public virtual DbSet<EvaluationUnmeasuredQuestion> EvaluationUnmeasuredQuestions{ get; set; }
+        public virtual DbSet<NotEvaluableQuestion> NotEvaluableQuestions { get; set; }
         public virtual DbSet<AreaOrganizationUnit> AreaOrganizationUnits { get; set; }
         public virtual DbSet<RegionOrganizationUnit> RegionOrganizationUnits { get; set; }
         public virtual DbSet<EvaluationRevision> EvaluationRevisions { get; set; }
         public virtual DbSet<Answer> Answers { get; set; }
         public virtual DbSet<MeasuredAnswer> MeasuredAnswers { get; set; }
-        public virtual DbSet<UnmeasuredAnswer> UnmeasuredAnswers{ get; set; }
+        public virtual DbSet<UnmeasuredAnswer> UnmeasuredAnswers { get; set; }
+        public virtual DbSet<NotEvaluableAnswer> NotEvaluableAnswers { get; set; }
         public virtual DbSet<ObjectiveBinnacle> Binnacles{ get; set; }
         
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
@@ -60,6 +63,10 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
 
             modelBuilder.Entity<Section>()
                 .HasMany(section => section.MeasuredQuestions)
+                .WithOne(question => question.Section);
+
+            modelBuilder.Entity<Section>()
+                .HasMany(section => section.NotEvaluableQuestions)
                 .WithOne(question => question.Section);
 
             modelBuilder.Entity<User>()
