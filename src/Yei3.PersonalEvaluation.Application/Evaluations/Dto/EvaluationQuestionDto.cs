@@ -16,5 +16,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public EvaluationQuestionStatus Status { get; set; }
         public bool IsActive { get; set; }
         public string Text { get; set; }
+        public long SectionId { get; set; }
+
     }
 }
