@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
@@ -58,26 +59,33 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
                 noTrackedSection.ParentSection = ParentSection?.NoTracking(evaluationId);
             }
 
-            foreach (MeasuredQuestion measuredQuestion in MeasuredQuestions)
+            if (!MeasuredQuestions.IsNullOrEmpty())
             {
-                noTrackedSection.MeasuredQuestions.Add(new MeasuredQuestion(
-                    measuredQuestion.Text,
-                    measuredQuestion.QuestionType,
-                    measuredQuestion.IsQualifiable,
-                    measuredQuestion.Expected,
-                    measuredQuestion.ExpectedText,
-                    measuredQuestion.Relation,
-                    measuredQuestion.Deliverable));
+                foreach (MeasuredQuestion measuredQuestion in MeasuredQuestions)
+                {
+                    noTrackedSection.MeasuredQuestions.Add(new MeasuredQuestion(
+                        measuredQuestion.Text,
+                        measuredQuestion.QuestionType,
+                        measuredQuestion.IsQualifiable,
+                        measuredQuestion.Expected,
+                        measuredQuestion.ExpectedText,
+                        measuredQuestion.Relation,
+                        measuredQuestion.Deliverable));
+                }
             }
 
-            foreach (UnmeasuredQuestion unmeasuredQuestion in UnmeasuredQuestions)
+            if (!UnmeasuredQuestions.IsNullOrEmpty())
             {
-                noTrackedSection.UnmeasuredQuestions.Add(new UnmeasuredQuestion(
-                    unmeasuredQuestion.Text,
-                    unmeasuredQuestion.QuestionType,
-                    unmeasuredQuestion.IsQualifiable));
+                foreach (UnmeasuredQuestion unmeasuredQuestion in UnmeasuredQuestions)
+                {
+                    noTrackedSection.UnmeasuredQuestions.Add(new UnmeasuredQuestion(
+                        unmeasuredQuestion.Text,
+                        unmeasuredQuestion.QuestionType,
+                        unmeasuredQuestion.IsQualifiable));
+                }
             }
 
+            if (ChildSections.IsNullOrEmpty()) return noTrackedSection;
             foreach (Section childSection in ChildSections)
             {
                 noTrackedSection.ChildSections.Add(childSection.NoTracking(evaluationId));

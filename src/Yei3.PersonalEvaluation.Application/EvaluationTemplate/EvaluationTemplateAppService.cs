@@ -90,38 +90,38 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
             if (lastEvaluationTemplate.IsNullOrDeleted()) return result;
 
-            if (result.IncludePastObjectives) return result;
-            {
-                Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
-                    .GetAll()
-                    .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
-                    .Include(section => section.UnmeasuredQuestions)
-                    .Include(section => section.MeasuredQuestions)
-                    .Include(section => section.ChildSections)
-                    .ThenInclude(section => section.MeasuredQuestions)
-                    .Include(section => section.ChildSections)
-                    .ThenInclude(section => section.UnmeasuredQuestions)
-                    .FirstOrDefault(section =>
-                        section.Name.StartsWith(AppConsts.SectionNextObjectives,
-                            StringComparison.CurrentCultureIgnoreCase));
+            if (!result.IncludePastObjectives) return result;
 
-                nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
+            Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
+                .GetAll()
+                .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
+                .Include(section => section.UnmeasuredQuestions)
+                .Include(section => section.MeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .FirstOrDefault(section =>
+                    section.Name.StartsWith(AppConsts.SectionNextObjectives,
+                        StringComparison.CurrentCultureIgnoreCase));
 
-                if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
+            nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
 
-                nextObjectivesParentSection.Name = "Objetivos";
+            if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
 
-                Repository
-                    .GetAll()
-                    .Include(evaluationTemplate => evaluationTemplate.Sections)
-                    .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
-                    .Sections
-                    .Add(nextObjectivesParentSection);
+            nextObjectivesParentSection.Name = "Objetivos";
 
-                long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true));
-                await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Preguntas", false, result.Id,
-                    objectiveSectionId, true));
-            }
+            Repository
+                .GetAll()
+                .Include(evaluationTemplate => evaluationTemplate.Sections)
+                .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
+                .Sections
+                .Add(nextObjectivesParentSection);
+
+            long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true));
+            await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Objetivos", false, result.Id,
+                objectiveSectionId, true));
+
 
             return result;
         }
