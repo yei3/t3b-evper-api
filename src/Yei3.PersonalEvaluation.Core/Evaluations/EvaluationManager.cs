@@ -155,13 +155,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
                             Text = objectiveBinnacle.Text,
                             CreationTime = objectiveBinnacle.CreationTime
                         }).ToList()
-                        : evaluationQuestion.As<NotEvaluableQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
-                        {
-                            Id = objectiveBinnacle.Id,
-                            EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
-                            Text = objectiveBinnacle.Text,
-                            CreationTime = objectiveBinnacle.CreationTime
-                        }).ToList()
+                        : null
+                        //: evaluationQuestion.As<NotEvaluableQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                        //{
+                        //    Id = objectiveBinnacle.Id,
+                        //    //EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        //    Text = objectiveBinnacle.Text,
+                        //    //CreationTime = objectiveBinnacle.CreationTime
+                        //}).ToList()
                 }).ToListAsync();
         }
 
