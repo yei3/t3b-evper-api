@@ -1,12 +1,17 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Abp.Linq.Extensions;
 using Abp;
 using Abp.Application.Services;
+using Abp.Domain.Repositories;
 using Abp.Notifications;
 using Abp.Runtime.Session;
 using Yei3.PersonalEvaluation.Authorization.Users;
-using Yei3.PersonalEvaluation.Notifications;
 using Yei3.PersonalEvaluation.Sessions;
+using Abp.Collections.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Abp.UI;
 
 namespace Yei3.PersonalEvaluation.Notifications
 {
@@ -20,12 +25,15 @@ namespace Yei3.PersonalEvaluation.Notifications
         private readonly ISessionAppService _sessionAppService;
         private readonly UserManager UserManager;
 
-         public NotificationsAppService(INotificationSubscriptionManager notificationSubscriptionManager, UserManager userManager, INotificationPublisher notiticationPublisher, IUserNotificationManager  userNotificationManager)
+        private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
+
+         public NotificationsAppService(INotificationSubscriptionManager notificationSubscriptionManager, UserManager userManager, INotificationPublisher notiticationPublisher, IUserNotificationManager  userNotificationManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
         {
             _notificationSubscriptionManager = notificationSubscriptionManager;
             UserManager = userManager;
             _notiticationPublisher = notiticationPublisher;
             _userNotificationManager = userNotificationManager;
+            OrganizationUnitRepository = organizationUnitRepository;
         }
 
         public async Task<List<UserNotification>> getAll()
@@ -45,6 +53,35 @@ namespace Yei3.PersonalEvaluation.Notifications
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
             UserIdentifier targetUserId = new UserIdentifier(administratorUser.TenantId, administratorUser.Id);
             await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData(senderUserName, generalMessage), userIds: new[] { targetUserId });
+        }
+
+        public async Task Publish_SentGeneralMultipleUserNotification(CreateNotificationDto input)
+        {
+            if(string.IsNullOrEmpty(input.GeneralMessage)){
+                throw new UserFriendlyException($"Debe seleccionar al menos un destinatario y un mensaje.");
+            }
+            List<User> users = await UserManager
+                .Users
+                .WhereIf(!input.UserIds.IsNullOrEmpty(), user => input.UserIds.Contains(user.Id) ||  input.JobDescriptions.Contains(user.JobDescription) ) 
+                .ToListAsync();
+
+            foreach (long inputOrganizationUnitId in input.OrganizationUnitIds)
+            {
+                Abp.Organizations.OrganizationUnit currentOrganizationUnit = await
+                    OrganizationUnitRepository.FirstOrDefaultAsync(inputOrganizationUnitId);
+
+                List<User> allUsers = await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true);
+
+                users.AddRange(
+                    allUsers
+                        /* .Where(user => UserManager.IsInRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult()
+                        )*/
+                    );
+            }
+
+            await _notiticationPublisher.PublishAsync("GeneralNotification", 
+                        new SentGeneralUserNotificationData(input.SenderName, input.GeneralMessage), 
+                        userIds: users.Select(user => new UserIdentifier(user.TenantId, user.Id)).ToArray());
         }
 
     }
