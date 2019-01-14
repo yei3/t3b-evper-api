@@ -135,34 +135,21 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
-                .Where(evaluationQuestion => evaluationQuestion is EvaluationMeasuredQuestion || evaluationQuestion is NotEvaluableQuestion)
+                .OfType<EvaluationMeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
                     Status = evaluationQuestion.Status,
-                    Name = evaluationQuestion is EvaluationMeasuredQuestion
-                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().MeasuredQuestion.Text
-                        : evaluationQuestion.As<NotEvaluableQuestion>().Text,
-                    Deliverable = evaluationQuestion is EvaluationMeasuredQuestion
-                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().MeasuredQuestion.Deliverable
-                        : evaluationQuestion.As<NotEvaluableQuestion>().Text,
+                    Name = evaluationQuestion.MeasuredQuestion.Text,
+                    Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
                     DeliveryDate = evaluationQuestion.TerminationDateTime,
                     Id = evaluationQuestion.Id,
-                    Binnacle = evaluationQuestion is EvaluationMeasuredQuestion
-                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                         {
                             Id = objectiveBinnacle.Id,
                             EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
                             Text = objectiveBinnacle.Text,
                             CreationTime = objectiveBinnacle.CreationTime
                         }).ToList()
-                        : null
-                        //: evaluationQuestion.As<NotEvaluableQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
-                        //{
-                        //    Id = objectiveBinnacle.Id,
-                        //    //EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
-                        //    Text = objectiveBinnacle.Text,
-                        //    //CreationTime = objectiveBinnacle.CreationTime
-                        //}).ToList()
                 }).ToListAsync();
         }
 
