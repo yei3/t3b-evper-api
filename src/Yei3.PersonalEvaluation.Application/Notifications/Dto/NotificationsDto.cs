@@ -1,8 +1,6 @@
 namespace Yei3.PersonalEvaluation.OrganizationUnits.Dto
 {
     using Abp.AutoMapper;
-    using Notifications;
-
     using Abp.Domain.Entities;
     [AutoMap(typeof(Abp.Notifications.UserNotification))]
     public class NotificationsDto : Entity<long>
