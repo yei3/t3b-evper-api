@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Abp.Extensions;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
@@ -134,21 +135,33 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
-                .OfType<EvaluationMeasuredQuestion>()
+                .Where(evaluationQuestion => evaluationQuestion is EvaluationMeasuredQuestion || evaluationQuestion is NotEvaluableQuestion)
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
                     Status = evaluationQuestion.Status,
-                    Name = evaluationQuestion.MeasuredQuestion.Text,
-                    Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
+                    Name = evaluationQuestion is EvaluationMeasuredQuestion
+                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().MeasuredQuestion.Text
+                        : evaluationQuestion.As<NotEvaluableQuestion>().Text,
+                    Deliverable = evaluationQuestion is EvaluationMeasuredQuestion
+                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().MeasuredQuestion.Deliverable
+                        : evaluationQuestion.As<NotEvaluableQuestion>().Text,
                     DeliveryDate = evaluationQuestion.TerminationDateTime,
                     Id = evaluationQuestion.Id,
-                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
-                    {
-                        Id = objectiveBinnacle.Id,
-                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
-                        Text = objectiveBinnacle.Text,
-                        CreationTime = objectiveBinnacle.CreationTime
-                    }).ToList()
+                    Binnacle = evaluationQuestion is EvaluationMeasuredQuestion
+                        ? evaluationQuestion.As<EvaluationMeasuredQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                        {
+                            Id = objectiveBinnacle.Id,
+                            EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                            Text = objectiveBinnacle.Text,
+                            CreationTime = objectiveBinnacle.CreationTime
+                        }).ToList()
+                        : evaluationQuestion.As<NotEvaluableQuestion>().Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                        {
+                            Id = objectiveBinnacle.Id,
+                            EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                            Text = objectiveBinnacle.Text,
+                            CreationTime = objectiveBinnacle.CreationTime
+                        }).ToList()
                 }).ToListAsync();
         }
 
