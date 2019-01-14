@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.NotEvaluableQuestion.Dto;
 using Yei3.PersonalEvaluation.Question.Dto;
 
@@ -17,11 +18,15 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
             NotEvaluableQuestionDto notEvaluableQuestion = await base.Create(input);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion = await Repository.SingleAsync(question => question.Id == notEvaluableQuestion.Id);
+            Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion = await Repository
+                .GetAll()
+                .SingleAsync(question => question.Id == notEvaluableQuestion.Id);
 
             currentQuestion.SetAnswer(notEvaluableQuestion.Id);
 
-            return notEvaluableQuestion;
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return MapToEntityDto(currentQuestion);
         }
     }
 }

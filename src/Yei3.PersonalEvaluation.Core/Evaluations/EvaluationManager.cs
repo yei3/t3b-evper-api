@@ -165,7 +165,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 }).ToListAsync();
         }
 
-
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
         {
             userId = userId ?? AbpSession.GetUserId();
