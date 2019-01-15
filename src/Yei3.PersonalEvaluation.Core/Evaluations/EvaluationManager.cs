@@ -129,7 +129,29 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
-            return await EvaluationQuestionRepository
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
+                .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                .OfType<NotEvaluableQuestion>()
+                .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                {
+                    Status = evaluationQuestion.Status,
+                    Name = evaluationQuestion.Text,
+                    DeliveryDate = evaluationQuestion.TerminationDateTime,
+                    Id = evaluationQuestion.Id,
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    {
+                        Id = objectiveBinnacle.Id,
+                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime
+                    }).ToList()
+                }).ToListAsync();
+
+            evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
@@ -144,13 +166,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     DeliveryDate = evaluationQuestion.TerminationDateTime,
                     Id = evaluationQuestion.Id,
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
-                        {
-                            Id = objectiveBinnacle.Id,
-                            EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
-                            Text = objectiveBinnacle.Text,
-                            CreationTime = objectiveBinnacle.CreationTime
-                        }).ToList()
-                }).ToListAsync();
+                    {
+                        Id = objectiveBinnacle.Id,
+                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime
+                    }).ToList()
+                }).ToListAsync());
+
+            return evaluationObjectivesSummaryValueObjects;
         }
 
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
