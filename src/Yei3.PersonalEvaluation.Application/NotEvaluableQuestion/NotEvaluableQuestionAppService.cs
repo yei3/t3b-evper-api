@@ -59,5 +59,20 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                       isNotEvaluable = true
                   }).ToListAsync();
         }
+
+        protected override IQueryable<Evaluations.EvaluationQuestions.NotEvaluableQuestion> CreateFilteredQuery(QuestionGetAllInputDto input)
+        {
+            return Repository
+                .GetAll()
+                .Include(question => question.NotEvaluableAnswer);
+        }
+
+        protected override async Task<Evaluations.EvaluationQuestions.NotEvaluableQuestion> GetEntityByIdAsync(long id)
+        {
+            return await Repository
+                .GetAll()
+                .Include(question => question.NotEvaluableAnswer)
+                .SingleAsync(question => question.Id == id);
+        }
     }
 }

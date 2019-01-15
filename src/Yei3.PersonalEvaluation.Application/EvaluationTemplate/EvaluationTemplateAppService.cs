@@ -80,49 +80,19 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
         public override async Task<EvaluationTemplateDto> Create(EvaluationTemplateCreateInputDto input)
         {
-            Evaluations.EvaluationTemplates.EvaluationTemplate lastEvaluationTemplate = Repository
-                .GetAll()
-                .OrderByDescending(evaluationTemplate => evaluationTemplate.CreationTime)
-                .FirstOrDefault();
-
             EvaluationTemplateDto result = await base.Create(input);
 
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            if (lastEvaluationTemplate.IsNullOrDeleted()) return result;
-
             if (!result.IncludePastObjectives) return result;
 
-            Evaluations.Sections.Section nextObjectivesParentSection = SectionRepository
-                .GetAll()
-                .Where(section => section.EvaluationTemplateId == lastEvaluationTemplate.Id)
-                .Include(section => section.UnmeasuredQuestions)
-                .Include(section => section.MeasuredQuestions)
-                .Include(section => section.ChildSections)
-                .ThenInclude(section => section.MeasuredQuestions)
-                .Include(section => section.ChildSections)
-                .ThenInclude(section => section.UnmeasuredQuestions)
-                .FirstOrDefault(section =>
-                    section.Name.StartsWith(AppConsts.SectionNextObjectives,
-                        StringComparison.CurrentCultureIgnoreCase));
+            long nextObjectivesSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true));
+            await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Objetivos", false, result.Id,
+                nextObjectivesSectionId, true));
 
-            nextObjectivesParentSection = nextObjectivesParentSection?.NoTracking(result.Id, true);
-
-            if (nextObjectivesParentSection.IsNullOrDeleted()) return result;
-
-            nextObjectivesParentSection.Name = "Objetivos";
-
-            Repository
-                .GetAll()
-                .Include(evaluationTemplate => evaluationTemplate.Sections)
-                .Single(evaluationTemplate => evaluationTemplate.Id == result.Id)
-                .Sections
-                .Add(nextObjectivesParentSection);
-
-            long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true));
+            long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section("Objetivos", true, result.Id, null, true));
             await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Objetivos", false, result.Id,
                 objectiveSectionId, true));
-
 
             return result;
         }
