@@ -13,5 +13,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public DateTime DeliveryDate { get; set; }
         public long Id { get; set; }
         public ICollection<ObjectiveBinnacleValueObject> Binnacle { get; set; }
+        public bool isNotEvaluable { get; set; }
     }
 }

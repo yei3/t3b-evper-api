@@ -12,6 +12,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
 
         public NotEvaluableAnswer(long evaluationQuestionId) : base(evaluationQuestionId)
         {
+            
         }
 
         [ForeignKey("EvaluationQuestionId")]

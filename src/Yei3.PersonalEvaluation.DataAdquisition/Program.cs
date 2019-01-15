@@ -40,7 +40,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                 employeeNumber: worksheet.Cells[row, 1].Value.ToString(),
                                 status: worksheet.Cells[row, 2].Value.ToString() == AppConst.IsActiveImportValue,
                                 firstLastName: worksheet.Cells[row, 3].Value.ToString(),
-                                secondLastName: worksheet.Cells[row, 4].Value.ToString(),
+                                secondLastName: worksheet.Cells[row, 4].Value?.ToString(),
                                 name: worksheet.Cells[row, 5].Value.ToString(),
                                 jobDescription: worksheet.Cells[row, 6].Value.ToString(),
                                 area: worksheet.Cells[row, 7].Value.ToString(),

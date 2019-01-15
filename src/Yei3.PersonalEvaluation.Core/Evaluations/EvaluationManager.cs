@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Abp.Extensions;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
@@ -128,7 +129,30 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
-            return await EvaluationQuestionRepository
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
+                .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                .OfType<NotEvaluableQuestion>()
+                .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                {
+                    Status = evaluationQuestion.Status,
+                    Name = evaluationQuestion.Text,
+                    DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
+                    Id = evaluationQuestion.Id,
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    {
+                        Id = objectiveBinnacle.Id,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime
+                    }).ToList(),
+                    isNotEvaluable = true
+                }).ToListAsync();
+
+            evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
@@ -145,13 +169,17 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
                         Id = objectiveBinnacle.Id,
-                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime
-                    }).ToList()
-                }).ToListAsync();
-        }
+                    }).ToList(),
+                    isNotEvaluable = false
+                }).ToListAsync());
 
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .ToList();
+        }
 
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
         {
