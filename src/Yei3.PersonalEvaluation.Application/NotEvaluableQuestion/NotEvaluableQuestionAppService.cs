@@ -47,6 +47,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                   {
                       Status = evaluationQuestion.Status,
                       Name = evaluationQuestion.Text,
+                      Deliverable = evaluationQuestion.NotEvaluableAnswer.Text,
                       DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
                       Id = evaluationQuestion.Id,
                       Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject

@@ -146,11 +146,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 await CurrentUnitOfWork.SaveChangesAsync();
 
-                //var lastEvaluation = EvaluationRepository
-                //    .GetAll()
-                //    .Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
-                //    .Where(evaluation => evaluation.UserId == )
-                //    .Where(evaluation => evaluation.Id != evaluationId)
+                var lastEvaluation = EvaluationRepository
+                    .GetAll()
+                    .Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
+                    .Where(evaluation => evaluation.UserId == user.Id)
+                    .Where(evaluation => evaluation.Id != evaluationId)
+                    .OrderBy(evaluation => evaluation.CreationTime)
+                    .First();
+
+                if (lastEvaluation.IsNullOrDeleted())
+                {
+                    
+                }
             }
         }
 
