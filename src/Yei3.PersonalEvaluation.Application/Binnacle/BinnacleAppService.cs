@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Binnacle.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 
@@ -10,8 +11,12 @@ namespace Yei3.PersonalEvaluation.Binnacle
 {
     public class BinnacleAppService : AsyncCrudAppService<ObjectiveBinnacle, ObjectiveBinnacleDto, long, ObjectiveBinnacleGetAllInputDto>, IBinnacleAppService
     {
-        public BinnacleAppService(IRepository<ObjectiveBinnacle, long> repository) : base(repository)
+
+        private readonly UserManager _userManager;
+
+        public BinnacleAppService(IRepository<ObjectiveBinnacle, long> repository, UserManager userManager) : base(repository)
         {
+            _userManager = userManager;
         }
 
         protected override IQueryable<ObjectiveBinnacle> CreateFilteredQuery(ObjectiveBinnacleGetAllInputDto input)
@@ -34,6 +39,14 @@ namespace Yei3.PersonalEvaluation.Binnacle
                 : binnacle.EvaluationQuestion.Status;
 
             return binnacleDto;
+        }
+
+        protected override ObjectiveBinnacleDto MapToEntityDto(ObjectiveBinnacle entity)
+        {
+            ObjectiveBinnacleDto entityDto = base.MapToEntityDto(entity);
+            entityDto.UserName = _userManager.Users.Single(user => user.Id == entity.CreatorUserId).FullName;
+
+            return entityDto;
         }
     }
 }
