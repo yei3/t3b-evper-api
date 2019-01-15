@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.ValueObject;
 using Yei3.PersonalEvaluation.NotEvaluableQuestion.Dto;
@@ -14,8 +16,12 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
 {
     public class NotEvaluableQuestionAppService : AsyncCrudAppService<Evaluations.EvaluationQuestions.NotEvaluableQuestion, NotEvaluableQuestionDto, long, QuestionGetAllInputDto>, INotEvaluableQuestionAppService
     {
-        public NotEvaluableQuestionAppService(IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> repository) : base(repository)
+
+        private readonly UserManager _userManager;
+
+        public NotEvaluableQuestionAppService(IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> repository, UserManager userManager) : base(repository)
         {
+            _userManager = userManager;
         }
 
         public override async Task<NotEvaluableQuestionDto> Create(NotEvaluableQuestionDto input)
@@ -36,29 +42,33 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
 
         public async Task<List<EvaluationObjectivesSummaryValueObject>> GetSummary(long evaluationId)
         {
-            return await Repository
-                  .GetAll()
-                  .Include(evaluationQuestion => evaluationQuestion.Evaluation)
-                  .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == evaluationId)
-                  .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
-                  .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
-                  .OfType<Evaluations.EvaluationQuestions.NotEvaluableQuestion>()
-                  .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
-                  {
-                      Status = evaluationQuestion.Status,
-                      Name = evaluationQuestion.Text,
-                      Deliverable = evaluationQuestion.NotEvaluableAnswer.Text,
-                      DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
-                      Id = evaluationQuestion.Id,
-                      Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
-                      {
-                          Id = objectiveBinnacle.Id,
-                          EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
-                          Text = objectiveBinnacle.Text,
-                          CreationTime = objectiveBinnacle.CreationTime
-                      }).ToList(),
-                      isNotEvaluable = true
-                  }).ToListAsync();
+            return await
+                Repository
+                    .GetAll()
+                    .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                    .Include(evaluationQuestion => evaluationQuestion.Binnacle)
+                    .Include(evaluationQuestion => evaluationQuestion.NotEvaluableAnswer)
+                    .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == evaluationId)
+                    .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
+                    .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                    .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                    {
+                        Status = evaluationQuestion.Status,
+                        Name = evaluationQuestion.Text,
+                        Deliverable = evaluationQuestion.NotEvaluableAnswer.Text,
+                        DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
+                        Id = evaluationQuestion.Id,
+                        Binnacle = evaluationQuestion.Binnacle
+                            .Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                            {
+                                Id = objectiveBinnacle.Id,
+                                EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
+                                Text = objectiveBinnacle.Text,
+                                CreationTime = objectiveBinnacle.CreationTime,
+                                UserName = _userManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
+                            }).ToList(),
+                        isNotEvaluable = true
+                    }).ToListAsync();
         }
 
         public async Task UpdateStatus(UpdateStatusInputDto input)

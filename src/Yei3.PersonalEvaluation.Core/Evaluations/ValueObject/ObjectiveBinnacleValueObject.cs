@@ -9,6 +9,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public long EvaluationQuestionId { get; set; }
         public string Text { get; set; }
         public DateTime CreationTime { get; set; }
+        public string UserName { get; set; }
 
     }
 }
