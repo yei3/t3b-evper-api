@@ -10,5 +10,6 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
     public interface INotEvaluableQuestionAppService : IAsyncCrudAppService<NotEvaluableQuestionDto, long, QuestionGetAllInputDto>
     {
         Task<List<EvaluationObjectivesSummaryValueObject>> GetSummary(long evaluationId);
+        Task UpdateStatus(UpdateStatusInputDto input);
     }
 }
