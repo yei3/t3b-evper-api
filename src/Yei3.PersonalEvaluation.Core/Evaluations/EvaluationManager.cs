@@ -148,7 +148,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime
-                    }).ToList()
+                    }).ToList(),
+                    isNotEvaluable = true
                 }).ToListAsync();
 
             evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
@@ -171,10 +172,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime
-                    }).ToList()
+                    }).ToList(),
+                    isNotEvaluable = false
                 }).ToListAsync());
 
-            return evaluationObjectivesSummaryValueObjects;
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .ToList();
         }
 
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
