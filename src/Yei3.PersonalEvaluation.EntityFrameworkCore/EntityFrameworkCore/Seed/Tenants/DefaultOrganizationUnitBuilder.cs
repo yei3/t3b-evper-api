@@ -28,7 +28,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
 
             if (organizationUnitRegion != null) return;
 
-            organizationUnitRegion = new RegionOrganizationUnit(_tenantId, "Region")
+            organizationUnitRegion = new RegionOrganizationUnit(_tenantId, "CORPORATIVO")
             {
                 Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1})
             };
@@ -40,7 +40,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Tenants
             AreaOrganizationUnit organizationUnitAreaPurchasesInAndOut = new AreaOrganizationUnit(_tenantId, "Compras In & Out", organizationUnitRegion.Id);
             AreaOrganizationUnit organizationUnitAreaSystemsAndLogistics = new AreaOrganizationUnit(_tenantId, "Sistemas y Logistica", organizationUnitRegion.Id);
             AreaOrganizationUnit organizationUnitAreaSellsAndOperations = new AreaOrganizationUnit(_tenantId, "Ventas y Operaciones", organizationUnitRegion.Id);
-            AreaOrganizationUnit organizationUnitAreaHumanResources = new AreaOrganizationUnit(_tenantId, "RRHH", organizationUnitRegion.Id);
+            AreaOrganizationUnit organizationUnitAreaHumanResources = new AreaOrganizationUnit(_tenantId, "RECURSOS HUMANOS", organizationUnitRegion.Id);
             AreaOrganizationUnit organizationUnitAreaExpansion = new AreaOrganizationUnit(_tenantId, "Expansion", organizationUnitRegion.Id);
 
             organizationUnitAreaFinances.Code = Abp.Organizations.OrganizationUnit.CreateCode(new[] {1, 1});

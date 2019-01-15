@@ -218,7 +218,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(section => section.NotEvaluableQuestions)
                 .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
 
-            return resultEvaluation.MapTo<EvaluationDto>();
+            var evaluationDto = resultEvaluation.MapTo<EvaluationDto>();
+
+            evaluationDto.Template.PurgeSubSections();
+
+            return evaluationDto;
         }
 
         public async Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary()

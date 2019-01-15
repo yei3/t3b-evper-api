@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Yei3.PersonalEvaluation.EntityFrameworkCore;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    partial class PersonalEvaluationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190115153809_binnacl")]
+    partial class binnacl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1024,6 +1026,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime?>("DeletionTime");
 
+                    b.Property<long?>("EvaluationMeasuredQuestionId");
+
                     b.Property<long>("EvaluationQuestionId");
 
                     b.Property<bool>("IsDeleted");
@@ -1032,11 +1036,17 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<long?>("LastModifierUserId");
 
+                    b.Property<long?>("NotEvaluableQuestionId");
+
                     b.Property<string>("Text");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EvaluationMeasuredQuestionId");
+
                     b.HasIndex("EvaluationQuestionId");
+
+                    b.HasIndex("NotEvaluableQuestionId");
 
                     b.ToTable("Binnacles");
                 });
@@ -1651,10 +1661,18 @@ namespace Yei3.PersonalEvaluation.Migrations
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Binnacle.ObjectiveBinnacle", b =>
                 {
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion", "EvaluationQuestion")
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion")
                         .WithMany("Binnacle")
+                        .HasForeignKey("EvaluationMeasuredQuestionId");
+
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion", "EvaluationQuestion")
+                        .WithMany()
                         .HasForeignKey("EvaluationQuestionId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.NotEvaluableQuestion")
+                        .WithMany("Binnacle")
+                        .HasForeignKey("NotEvaluableQuestionId");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.Evaluation", b =>
