@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
-using Abp.Extensions;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
-using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 using Yei3.PersonalEvaluation.Evaluations.Terms;
 using Yei3.PersonalEvaluation.Evaluations.ValueObject;
 
@@ -24,15 +21,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         private readonly IAbpSession AbpSession;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
-        private readonly IRepository<EvaluationRevision, long> EvaluationRevisionRepository;
         private readonly IRepository<EvaluationQuestion, long> EvaluationQuestionRepository;
         private readonly UserManager UserManager;
 
-        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationRevision, long> evaluationRevisionRepository, IRepository<EvaluationQuestion, long> evaluationQuestionRepository, UserManager userManager)
+        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationQuestion, long> evaluationQuestionRepository, UserManager userManager)
         {
             AbpSession = abpSession;
             EvaluationRepository = evaluationRepository;
-            EvaluationRevisionRepository = evaluationRevisionRepository;
             EvaluationQuestionRepository = evaluationQuestionRepository;
             UserManager = userManager;
         }
@@ -147,7 +142,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         Id = objectiveBinnacle.Id,
                         EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
-                        CreationTime = objectiveBinnacle.CreationTime
+                        CreationTime = objectiveBinnacle.CreationTime,
+                        UserName = UserManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
                     }).ToList(),
                     isNotEvaluable = true
                 }).ToListAsync();
