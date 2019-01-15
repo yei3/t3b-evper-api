@@ -61,6 +61,13 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                   }).ToListAsync();
         }
 
+        public async Task UpdateStatus(UpdateStatusInputDto input)
+        {
+            Evaluations.EvaluationQuestions.NotEvaluableQuestion question = await GetEntityByIdAsync(input.Id);
+            question.Status = input.Status;
+            await Repository.UpdateAsync(question);
+        }
+
         protected override IQueryable<Evaluations.EvaluationQuestions.NotEvaluableQuestion> CreateFilteredQuery(QuestionGetAllInputDto input)
         {
             return Repository
