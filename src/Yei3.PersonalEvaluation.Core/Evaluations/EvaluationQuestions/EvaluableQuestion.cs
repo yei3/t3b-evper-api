@@ -14,6 +14,5 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
 
         }
         public virtual long EvaluationQuestionId { get; protected set; }
-
     }
 }

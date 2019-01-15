@@ -145,7 +145,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
                         Id = objectiveBinnacle.Id,
-                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime
                     }).ToList(),
@@ -169,7 +169,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
                         Id = objectiveBinnacle.Id,
-                        EvaluationMeasuredQuestionId = objectiveBinnacle.EvaluationMeasuredQuestionId,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime
                     }).ToList(),

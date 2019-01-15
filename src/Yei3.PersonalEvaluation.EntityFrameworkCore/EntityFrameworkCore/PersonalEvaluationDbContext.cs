@@ -94,8 +94,7 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
                 .WithMany(user => user.EvaluationRevisions);
 
             modelBuilder.Entity<ObjectiveBinnacle>()
-                .HasOne(binnacle => binnacle.EvaluationMeasuredQuestion)
-                .WithMany(objective => objective.Binnacle);
+                .HasOne(binnacle => binnacle.EvaluationQuestion);
         }
     }
 }

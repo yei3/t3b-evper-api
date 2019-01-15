@@ -17,7 +17,7 @@ namespace Yei3.PersonalEvaluation.Binnacle
         protected override IQueryable<ObjectiveBinnacle> CreateFilteredQuery(ObjectiveBinnacleGetAllInputDto input)
         {
             return base.CreateFilteredQuery(input)
-                .Where(binnacleEntry => binnacleEntry.EvaluationMeasuredQuestionId == input.EvaluationMeasuredQuestionId);
+                .Where(binnacleEntry => binnacleEntry.EvaluationQuestionId == input.EvaluationMeasuredQuestionId);
         }
 
         public override async Task<ObjectiveBinnacleDto> Create(ObjectiveBinnacleDto input)
@@ -26,12 +26,12 @@ namespace Yei3.PersonalEvaluation.Binnacle
             await CurrentUnitOfWork.SaveChangesAsync();
             ObjectiveBinnacle binnacle = await Repository
                 .GetAll()
-                .Include(objectiveBinnacle => objectiveBinnacle.EvaluationMeasuredQuestion)
+                .Include(objectiveBinnacle => objectiveBinnacle.EvaluationQuestion)
                 .SingleAsync(objectiveBinnacle => objectiveBinnacle.Id == binnacleDto.Id);
 
-            binnacle.EvaluationMeasuredQuestion.Status = binnacle.EvaluationMeasuredQuestion.Status < EvaluationQuestionStatus.Initiated
+            binnacle.EvaluationQuestion.Status = binnacle.EvaluationQuestion.Status < EvaluationQuestionStatus.Initiated
                 ? EvaluationQuestionStatus.Initiated
-                : binnacle.EvaluationMeasuredQuestion.Status;
+                : binnacle.EvaluationQuestion.Status;
 
             return binnacleDto;
         }
