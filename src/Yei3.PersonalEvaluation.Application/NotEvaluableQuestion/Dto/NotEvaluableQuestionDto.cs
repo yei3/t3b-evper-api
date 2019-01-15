@@ -1,5 +1,6 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
+using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 
 namespace Yei3.PersonalEvaluation.NotEvaluableQuestion.Dto
@@ -11,5 +12,6 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion.Dto
         public long EvaluationId { get; set; }
         public string Text { get; set; }
         public EvaluationAnswerDto NotEvaluableAnswer { get; set; }
+        public EvaluationStatus Status { get; set; }
     }
 }
