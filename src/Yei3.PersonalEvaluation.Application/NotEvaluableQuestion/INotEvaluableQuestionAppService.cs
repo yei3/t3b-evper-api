@@ -7,7 +7,7 @@ using Yei3.PersonalEvaluation.Question.Dto;
 
 namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
 {
-    public interface INotEvaluableQuestionAppService : IAsyncCrudAppService<NotEvaluableQuestionDto, long, QuestionGetAllInputDto>
+    public interface INotEvaluableQuestionAppService : IAsyncCrudAppService<NotEvaluableQuestionDto, long, QuestionGetAllInputDto, NotEvaluableQuestionDto, NotEvaluableQuestionUpdateInputDto>
     {
         Task<List<EvaluationObjectivesSummaryValueObject>> GetSummary(long evaluationId);
         Task UpdateStatus(UpdateStatusInputDto input);
