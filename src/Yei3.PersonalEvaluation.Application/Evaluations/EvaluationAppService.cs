@@ -158,6 +158,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 long objectiveSectionId = currentEvaluation.Template.Sections
                     .Where(section => section.ParentId.HasValue)
+                    .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionNextObjectivesName, StringComparison.CurrentCultureIgnoreCase))
                     .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
 
                 foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in lastEvaluation.Questions.OfType<EvaluationQuestions.NotEvaluableQuestion>())
