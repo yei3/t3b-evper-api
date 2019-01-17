@@ -154,9 +154,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .OrderBy(evaluation => evaluation.CreationTime)
                     .First();
 
-                if (lastEvaluation.IsNullOrDeleted())
+                if (lastEvaluation.IsNullOrDeleted()) continue;
+
+                long objectiveSectionId = currentEvaluation.Template.Sections
+                    .Where(section => section.ParentId.HasValue)
+                    .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
+
+                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in lastEvaluation.Questions.OfType<EvaluationQuestions.NotEvaluableQuestion>())
                 {
-                    
+                    notEvaluableQuestion.EvaluationId = currentEvaluation.Id;
+                    notEvaluableQuestion.SectionId = objectiveSectionId;
                 }
             }
         }
@@ -266,7 +273,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     EvaluationTemplateId = firstEvaluation.EvaluationId,
                     Status = firstEvaluation.StartDateTime > DateTime.Now
                         ? EvaluationStatus.NonInitiated
-                        : firstEvaluation.EndDateTime <= DateTime.Now
+                        : firstEvaluation.EndDateTime <= DateTime.Now.AddMonths(1)
                             ? EvaluationStatus.Finished
                             : EvaluationStatus.Pending,
                 });

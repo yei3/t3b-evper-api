@@ -19,7 +19,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
             Status = status;
         }
 
-        public virtual long EvaluationId { get; protected set; }
+        public virtual long EvaluationId { get; set; }
         [ForeignKey("EvaluationId")]
         public virtual Evaluation Evaluation { get; protected set; }
         public virtual DateTime TerminationDateTime { get; protected set; }
