@@ -86,12 +86,12 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
             if (!result.IncludePastObjectives) return result;
 
-            long nextObjectivesSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectives, true, result.Id, null, true, 0));
-            await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Objetivos", false, result.Id,
+            long nextObjectivesSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionNextObjectivesName, true, result.Id, null, true, 0));
+            await SectionRepository.InsertAsync(new Evaluations.Sections.Section(AppConsts.SectionObjectivesName, false, result.Id,
                 nextObjectivesSectionId, true, 0));
 
-            long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section("Objetivos", true, result.Id, null, true, 0));
-            await SectionRepository.InsertAsync(new Evaluations.Sections.Section("Objetivos", false, result.Id,
+            long objectiveSectionId = await SectionRepository.InsertAndGetIdAsync(new Evaluations.Sections.Section(AppConsts.SectionObjectivesName, true, result.Id, null, true, 0));
+            await SectionRepository.InsertAsync(new Evaluations.Sections.Section(AppConsts.SectionObjectivesName, false, result.Id,
                 objectiveSectionId, true, 0));
 
             return result;
