@@ -11,5 +11,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public decimal Real { get; set; }
         public DateTime CommitmentTime { get; set; }
         public string Text { get; set; }
+        public string Observations { get; set; }
     }
 }

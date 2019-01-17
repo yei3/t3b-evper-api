@@ -266,7 +266,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     EvaluationTemplateId = firstEvaluation.EvaluationId,
                     Status = firstEvaluation.StartDateTime > DateTime.Now
                         ? EvaluationStatus.NonInitiated
-                        : firstEvaluation.EndDateTime <= DateTime.Now
+                        : firstEvaluation.EndDateTime <= DateTime.Now.AddMonths(1)
                             ? EvaluationStatus.Finished
                             : EvaluationStatus.Pending,
                 });

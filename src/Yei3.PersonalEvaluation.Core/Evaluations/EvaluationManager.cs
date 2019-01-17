@@ -66,7 +66,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 .Where(evaluation => evaluation.Template.IsAutoEvaluation)
-                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now.AddMonths(1))
                 .CountAsync();
         }
 
@@ -80,8 +80,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
-                //.Where(evaluation => evaluation.Template.IsAutoEvaluation) !!!!!! luis angel me mando el dia de la entrega. !!!!!!
-                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now.AddMonths(1))
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
@@ -129,7 +128,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now.AddMonths(1))
                 .OfType<NotEvaluableQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
@@ -153,7 +152,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now.AddMonths(1))
                 .OfType<EvaluationMeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
@@ -186,7 +185,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-                .Where(evaluation => evaluation.EndDateTime > DateTime.Now)
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now.AddMonths(1))
                 .CountAsync();
         }
 
@@ -200,7 +199,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.Questions)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending)
-                .Where(evaluation => evaluation.EndDateTime > DateTime.Now);
+                .Where(evaluation => evaluation.EndDateTime > DateTime.Now.AddMonths(1));
 
             foreach (Evaluation pendingEvaluation in pendingEvaluations)
             {
