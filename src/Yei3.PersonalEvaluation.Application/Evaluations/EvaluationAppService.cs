@@ -152,7 +152,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
                     .OrderBy(evaluation => evaluation.CreationTime)
-                    .First();
+                    .FirstOrDefault();
 
                 if (lastEvaluation.IsNullOrDeleted()) continue;
 
