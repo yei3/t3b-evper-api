@@ -28,13 +28,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
+        private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
             UserManager = userManager;
             OrganizationUnitRepository = organizationUnitRepository;
+            NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -148,23 +150,36 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 var lastEvaluation = EvaluationRepository
                     .GetAll()
-                    .Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .ThenInclude(section => section.ParentSection)
+                    //.Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
-                    .OrderBy(evaluation => evaluation.CreationTime)
+                    .OrderByDescending(evaluation => evaluation.CreationTime)
                     .FirstOrDefault();
 
                 if (lastEvaluation.IsNullOrDeleted()) continue;
 
-                long objectiveSectionId = currentEvaluation.Template.Sections
+                long lastEvaluationNextObjectiveSectionId = lastEvaluation.Template.Sections
                     .Where(section => section.ParentId.HasValue)
                     .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionNextObjectivesName, StringComparison.CurrentCultureIgnoreCase))
                     .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
 
-                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in lastEvaluation.Questions.OfType<EvaluationQuestions.NotEvaluableQuestion>())
+                long currentEvaluationObjectivesSectionId = currentEvaluation.Template.Sections
+                    .Where(section => section.ParentId.HasValue)
+                    .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                    .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
+
+                IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId)
+                    .Where(question => question.EvaluationId == lastEvaluation.Id);
+
+                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in questions)
                 {
                     notEvaluableQuestion.EvaluationId = currentEvaluation.Id;
-                    notEvaluableQuestion.SectionId = objectiveSectionId;
+                    notEvaluableQuestion.SectionId = currentEvaluationObjectivesSectionId;
                 }
             }
         }
