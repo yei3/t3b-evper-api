@@ -16,5 +16,6 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate.Dto
         [CanBeNull] public ICollection<QuestionDto> UnmeasuredQuestions { get; set; }
         [CanBeNull] public ICollection<ObjectiveDto> MeasuredQuestions { get; set; }
         [CanBeNull] public ICollection<SectionDto> ChildSections { get; set; }
+        [CanBeNull] public float Value { get; set; }
     }
 }

@@ -10,6 +10,6 @@ namespace Yei3.PersonalEvaluation.Section.Dto
         public bool DisplayName { get; set; }
         public long EvaluationTemplateId { get; set; }
         public long? ParentId { get; set; }
-
+        public float Value { get; set; }
     }
 }

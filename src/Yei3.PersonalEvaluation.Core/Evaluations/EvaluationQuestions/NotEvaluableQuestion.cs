@@ -16,7 +16,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
             Text = text;
         }
 
-        public virtual long SectionId { get; protected set; }
+        public virtual long SectionId { get; set; }
         [ForeignKey("SectionId")]
         public virtual Section Section { get; protected set; }
         public virtual string Text { get; protected set; }

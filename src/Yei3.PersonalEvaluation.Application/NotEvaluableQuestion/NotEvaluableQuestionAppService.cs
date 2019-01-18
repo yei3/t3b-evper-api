@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Repositories;
@@ -14,7 +13,7 @@ using Yei3.PersonalEvaluation.Question.Dto;
 
 namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
 {
-    public class NotEvaluableQuestionAppService : AsyncCrudAppService<Evaluations.EvaluationQuestions.NotEvaluableQuestion, NotEvaluableQuestionDto, long, QuestionGetAllInputDto>, INotEvaluableQuestionAppService
+    public class NotEvaluableQuestionAppService : AsyncCrudAppService<Evaluations.EvaluationQuestions.NotEvaluableQuestion, NotEvaluableQuestionDto, long, QuestionGetAllInputDto, NotEvaluableQuestionDto, NotEvaluableQuestionUpdateInputDto>, INotEvaluableQuestionAppService
     {
 
         private readonly UserManager _userManager;
@@ -48,9 +47,13 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                     .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                     .Include(evaluationQuestion => evaluationQuestion.Binnacle)
                     .Include(evaluationQuestion => evaluationQuestion.NotEvaluableAnswer)
+                    .Include(evaluationQuestion => evaluationQuestion.Section)
+                    .ThenInclude(section => section.ParentSection)
                     .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == evaluationId)
                     .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
-                    .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime > DateTime.Now)
+                    .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                    .Where(evaluationQuestion => evaluationQuestion.Section.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                    .Where(evaluationQuestion => evaluationQuestion.Section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
                     .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                     {
                         Status = evaluationQuestion.Status,

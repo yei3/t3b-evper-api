@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Abp.Zero.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -95,6 +96,9 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
 
             modelBuilder.Entity<ObjectiveBinnacle>()
                 .HasOne(binnacle => binnacle.EvaluationQuestion);
+
+            modelBuilder.Entity<NotEvaluableQuestion>()
+                .HasOne(question => question.Evaluation);
         }
     }
 }

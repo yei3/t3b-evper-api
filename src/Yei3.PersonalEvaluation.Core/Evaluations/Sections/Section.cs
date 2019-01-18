@@ -16,7 +16,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
         {
         }
 
-        public Section(string name, bool displayName, long evaluationTemplateId, long? parentId, bool isActive)
+        public Section(string name, bool displayName, long evaluationTemplateId, long? parentId, bool isActive, float value)
         {
             Name = name;
             DisplayName = displayName;
@@ -26,11 +26,13 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
             ChildSections = new List<Section>();
             UnmeasuredQuestions = new List<UnmeasuredQuestion>();
             MeasuredQuestions = new List<MeasuredQuestion>();
+            Value = value;
         }
 
         public virtual string Name { get; set; }
         public virtual bool DisplayName { get; protected set; }
         public virtual long EvaluationTemplateId { get; protected set; }
+        public virtual float Value { get; set; }
 
         [ForeignKey("EvaluationTemplateId")]
         public virtual EvaluationTemplate Template { get; protected set; }
@@ -52,7 +54,8 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
                 DisplayName,
                 evaluationId,
                 ParentId,
-                IsActive);
+                IsActive,
+                Value);
 
             if (trackParent)
             {
