@@ -152,6 +152,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .GetAll()
                     .Include(evaluation => evaluation.Template)
                     .ThenInclude(template => template.Sections)
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .ThenInclude(section => section.ChildSections)
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .ThenInclude(section => section.ChildSections)
                     .ThenInclude(section => section.ParentSection)
                     //.Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
                     .Where(evaluation => evaluation.UserId == user.Id)
@@ -161,25 +167,27 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 if (lastEvaluation.IsNullOrDeleted()) continue;
 
-                long lastEvaluationNextObjectiveSectionId = lastEvaluation.Template.Sections
+                long? lastEvaluationNextObjectiveSectionId = lastEvaluation.Template.Sections
                     .Where(section => section.ParentId.HasValue)
                     .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionNextObjectivesName, StringComparison.CurrentCultureIgnoreCase))
-                    .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
+                    .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)?.Id;
 
-                long currentEvaluationObjectivesSectionId = currentEvaluation.Template.Sections
+                long? currentEvaluationObjectivesSectionId = currentEvaluation.Template.Sections
                     .Where(section => section.ParentId.HasValue)
                     .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
-                    .Single(section => section.Name == AppConsts.SectionObjectivesName).Id;
+                    .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)?.Id;
+
+                if(!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId)
+                    .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId.Value)
                     .Where(question => question.EvaluationId == lastEvaluation.Id);
 
                 foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in questions)
                 {
                     notEvaluableQuestion.EvaluationId = currentEvaluation.Id;
-                    notEvaluableQuestion.SectionId = currentEvaluationObjectivesSectionId;
+                    notEvaluableQuestion.SectionId = currentEvaluationObjectivesSectionId.Value;
                 }
             }
         }

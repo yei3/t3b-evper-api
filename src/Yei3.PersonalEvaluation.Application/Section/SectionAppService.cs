@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.EvaluationTemplate.Dto;
@@ -31,6 +32,12 @@ namespace Yei3.PersonalEvaluation.Section
                 .ThenInclude(section => section.UnmeasuredQuestions)
                 .Include(section => section.UnmeasuredQuestions)
                 .FirstOrDefaultAsync(section => section.Id == id);
+        }
+
+        public override async Task Delete(EntityDto <long> input){
+            await base.Delete(input);
+            await Repository
+                .DeleteAsync(section => section.ParentId == input.Id);
         }
     }
 }
