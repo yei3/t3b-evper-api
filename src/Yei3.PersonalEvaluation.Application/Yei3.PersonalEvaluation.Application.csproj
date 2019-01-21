@@ -11,14 +11,10 @@
     <RootNamespace>Yei3.PersonalEvaluation</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0" />
     <PackageReference Include="Sendgrid" Version="9.10.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Yei3.PersonalEvaluation.Core\Yei3.PersonalEvaluation.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Mvc.Core">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.core\2.1.1\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="../Yei3.PersonalEvaluation.Core/Yei3.PersonalEvaluation.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -188,6 +188,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             IIncludableQueryable<Evaluation, ICollection<UnmeasuredQuestion>> resultEvaluations = EvaluationRepository
                 .GetAll()
+                .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)
@@ -236,6 +237,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             Evaluation resultEvaluation = await EvaluationRepository
                 .GetAll()
+                .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)
