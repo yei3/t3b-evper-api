@@ -99,5 +99,27 @@ namespace Yei3.PersonalEvaluation.Notifications
                         userIds: users.Select(user => new UserIdentifier(user.TenantId, user.Id)).ToArray());
         }
 
+        public async Task Publish_SentBossGeneralUserNotification(long objectiveId)
+        {
+            
+            User userLogged = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            if(!string.IsNullOrEmpty(userLogged.ImmediateSupervisor))
+            {
+                List<User> users = await UserManager
+                .Users
+                .Where(user => userLogged.ImmediateSupervisor.Equals(user.JobDescription) ) 
+                .ToListAsync();
+                if(!users.IsNullOrEmpty<User>())
+                {
+                    User bossUser = users[0];
+                    UserIdentifier targetUserId = new UserIdentifier(bossUser.TenantId, bossUser.Id);
+                    await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Administrador", "El evaluado "+userLogged.FullName+" ha completado un objetivo."), userIds: new[] { targetUserId });
+                }
+                
+            }
+
+            
+        }
+
     }
 }
