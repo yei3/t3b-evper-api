@@ -58,11 +58,14 @@ namespace Yei3.PersonalEvaluation.Notifications
         public async Task Publish_SentGeneralMultipleUserNotification(CreateNotificationDto input)
         {
             if(string.IsNullOrEmpty(input.GeneralMessage)){
-                throw new UserFriendlyException($"Debe seleccionar al menos un destinatario y un mensaje.");
+                throw new UserFriendlyException($"Por favor ingrese un mensaje.");
+            }
+            if(input.JobDescriptions.IsNullOrEmpty<string>() && input.UserIds.IsNullOrEmpty<long>() && input.OrganizationUnitIds.IsNullOrEmpty<long>()){
+                throw new UserFriendlyException($"Debe seleccionar algún destinatario para el mensaje.");
             }
             List<User> users = await UserManager
                 .Users
-                .WhereIf(!input.UserIds.IsNullOrEmpty(), user => input.UserIds.Contains(user.Id) ||  input.JobDescriptions.Contains(user.JobDescription) ) 
+                .Where(user => input.UserIds.Contains(user.Id) ) 
                 .ToListAsync();
 
             foreach (long inputOrganizationUnitId in input.OrganizationUnitIds)
@@ -79,9 +82,43 @@ namespace Yei3.PersonalEvaluation.Notifications
                     );
             }
 
+            if(!input.JobDescriptions.IsNullOrEmpty<string>()){
+                List<User> usersJob = await UserManager
+                .Users
+                .Where(user => input.JobDescriptions.Contains(user.JobDescription) ) 
+                .ToListAsync();
+
+                users.AddRange(
+                    usersJob
+                );
+
+            }
+
             await _notiticationPublisher.PublishAsync("GeneralNotification", 
                         new SentGeneralUserNotificationData(input.SenderName, input.GeneralMessage), 
                         userIds: users.Select(user => new UserIdentifier(user.TenantId, user.Id)).ToArray());
+        }
+
+        public async Task Publish_SentBossGeneralUserNotification(long objectiveId)
+        {
+            
+            User userLogged = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            if(!string.IsNullOrEmpty(userLogged.ImmediateSupervisor))
+            {
+                List<User> users = await UserManager
+                .Users
+                .Where(user => userLogged.ImmediateSupervisor.Equals(user.JobDescription) ) 
+                .ToListAsync();
+                if(!users.IsNullOrEmpty<User>())
+                {
+                    User bossUser = users[0];
+                    UserIdentifier targetUserId = new UserIdentifier(bossUser.TenantId, bossUser.Id);
+                    await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Administrador", "El evaluado "+userLogged.FullName+" ha completado un objetivo."), userIds: new[] { targetUserId });
+                }
+                
+            }
+
+            
         }
 
     }
