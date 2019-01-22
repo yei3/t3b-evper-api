@@ -75,6 +75,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             List<User> users = new List<User>();
 
+            if(input.OrganizationUnitIds.IsNullOrEmpty()){
+                input.OrganizationUnitIds = new List<long>() { OrganizationUnitRepository.Single(organizationUnit => organizationUnit.Code.Equals("00001")).Id };
+            }
+
             foreach (long inputOrganizationUnitId in input.OrganizationUnitIds)
             {
                 Abp.Organizations.OrganizationUnit currentOrganizationUnit = await
