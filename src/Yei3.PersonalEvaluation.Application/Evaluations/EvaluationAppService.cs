@@ -154,6 +154,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 var lastEvaluation = EvaluationRepository
                     .GetAll()
+                    .Include(evaluation => evaluation.Questions)
                     .Include(evaluation => evaluation.Template)
                     .ThenInclude(template => template.Sections)
                     .Include(evaluation => evaluation.Template)
