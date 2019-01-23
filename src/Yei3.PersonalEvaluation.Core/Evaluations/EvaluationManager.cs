@@ -127,7 +127,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
-                .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .OfType<NotEvaluableQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
@@ -206,6 +205,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 pendingObjectivesCountAsync += pendingEvaluation
                     .Questions
                     .OfType<EvaluationMeasuredQuestion>()
+                    .Count(question => question.Status != EvaluationQuestionStatus.Validated);
+                pendingObjectivesCountAsync += pendingEvaluation
+                    .Questions
+                    .OfType<NotEvaluableQuestion>()
                     .Count(question => question.Status != EvaluationQuestionStatus.Validated);
             }
 
