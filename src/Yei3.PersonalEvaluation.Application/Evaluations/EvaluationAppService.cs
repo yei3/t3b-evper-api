@@ -168,6 +168,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
                     .OrderByDescending(evaluation => evaluation.CreationTime)
+                    .WhereIf(currentEvaluation.Template.IsAutoEvaluation, evaluation => evaluation.Template.IsAutoEvaluation)
+                    .Skip(currentEvaluation.Template.IsAutoEvaluation ? 0 : 1)
                     .FirstOrDefault();
 
                 if (lastEvaluation.IsNullOrDeleted()) continue;
