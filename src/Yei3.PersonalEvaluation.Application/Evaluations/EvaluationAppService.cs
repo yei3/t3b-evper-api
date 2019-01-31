@@ -167,8 +167,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     //.Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
-                    .OrderByDescending(evaluation => evaluation.CreationTime)
-                    .WhereIf(currentEvaluation.Template.IsAutoEvaluation, evaluation => evaluation.Template.IsAutoEvaluation)
+                    .OrderBy(evaluation => evaluation.CreationTime)
+                    .WhereIf(currentEvaluation.Template.IsAutoEvaluation,
+                        evaluation => evaluation.Template.IsAutoEvaluation)
                     .Skip(currentEvaluation.Template.IsAutoEvaluation ? 0 : 1)
                     .FirstOrDefault();
 
@@ -193,8 +194,20 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in questions)
                 {
-                    notEvaluableQuestion.EvaluationId = currentEvaluation.Id;
-                    notEvaluableQuestion.SectionId = currentEvaluationObjectivesSectionId.Value;
+
+                    EvaluationQuestions.NotEvaluableQuestion currentQuestion = new EvaluationQuestions.NotEvaluableQuestion(
+                        currentEvaluationObjectivesSectionId.Value,
+                        notEvaluableQuestion.Text,
+                        currentEvaluation.Id,
+                        notEvaluableQuestion.TerminationDateTime,
+                        EvaluationQuestionStatus.Unanswered)
+                    {
+                        SectionId = currentEvaluationObjectivesSectionId.Value
+                    };
+
+                    currentQuestion.SetAnswer(currentEvaluation.Id);
+
+                    await NotEvaluableQuestionRepository.InsertAsync(currentQuestion);
                 }
             }
         }

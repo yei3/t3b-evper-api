@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.Sections;
 
@@ -11,6 +12,12 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
         }
 
         public NotEvaluableQuestion(long sectionId, string text)
+        {
+            SectionId = sectionId;
+            Text = text;
+        }
+
+        public NotEvaluableQuestion(long sectionId, string text, long evaluationId, DateTime terminationDateTime, EvaluationQuestionStatus status): base(evaluationId, terminationDateTime, status)
         {
             SectionId = sectionId;
             Text = text;
