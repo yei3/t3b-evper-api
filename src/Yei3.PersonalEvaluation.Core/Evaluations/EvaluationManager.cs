@@ -126,6 +126,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .ThenInclude(evaluation => evaluation.Template)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .OfType<NotEvaluableQuestion>()
@@ -149,7 +151,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
             evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
