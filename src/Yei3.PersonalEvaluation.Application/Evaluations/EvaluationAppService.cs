@@ -261,6 +261,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
             await EvaluationRepository.DeleteAsync(evaluation);
         }
 
+        public async Task ClosingComment(EvaluationCloseDto evaluationClose )
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.EvaluationId);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                return;
+            }
+
+            evaluation.ClosingComment = evaluationClose.Comment;
+        }
+
         public async Task<EvaluationDto> Get(long id)
         {
             Evaluation resultEvaluation = await EvaluationRepository

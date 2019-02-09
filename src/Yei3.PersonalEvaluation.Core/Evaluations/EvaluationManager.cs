@@ -101,7 +101,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.Finished)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.PendingReview)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .Include(evaluation => evaluation.Template)
                 .Include(evaluation => evaluation.Revision)
@@ -109,7 +109,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 {
                     EvaluationId = evaluation.Id,
                     Term = evaluation.Term,
-                    Status = evaluation.Revision.Status,
+                    Status = evaluation.Status,
                     EndDateTime = evaluation.EndDateTime,
                     Name = evaluation.Name,
                     Description = evaluation.Template.Description,

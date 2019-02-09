@@ -11,12 +11,13 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
     [AutoMap(typeof(Evaluation))]
     public class EvaluationDto : EntityDto<long>
     {
+        public string Name { get; set; }
+        public string ClosingComment { get; set; }
         public EvaluationUserDto User { get; set; }
         public DateTime StartDateTime { get; set; }
-        public EvaluationTerm Term { get; set; }
-        public EvaluationStatus Status { get; set; }
         public DateTime EndDateTime { get; set; }
-        public string Name { get; set; }
+        public EvaluationTerm Term { get; set; }
+        public EvaluationStatus Status { get; set; }        
         public EvaluationTemplateDto Template { get; set; }
         public ICollection<EvaluationQuestionDto> Questions { get; set; }
     }
