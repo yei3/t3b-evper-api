@@ -1,7 +1,12 @@
-﻿using Abp.Application.Services;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Abp.Application.Services;
+using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.EvaluationObjectives.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
+using Yei3.PersonalEvaluation.Evaluations.Terms;
 using Yei3.PersonalEvaluation.NotEvaluableAnswers.Dto;
 
 namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
@@ -10,6 +15,48 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
     {
         public NotEvaluableAnswerAppService(IRepository<NotEvaluableAnswer, long> repository) : base(repository)
         {
+        }
+
+        public override async Task<NotEvaluableAnswerDto> Update(NotEvaluableAnswerDto input)
+        {
+            NotEvaluableAnswer currentEvaluableAnswer = Repository
+                .GetAll()
+                .Where(answer => answer.Id == input.Id)
+                .Include(answer => answer.NotEvaluableQuestion)
+                .ThenInclude(question => question.Evaluation)
+                .FirstOrDefault();
+
+            NotEvaluableAnswer pairAnswer = null;
+
+            if (!currentEvaluableAnswer.NotEvaluableQuestion.IsNullOrDeleted())
+            {
+                if (!currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.IsNullOrDeleted())
+                {
+                    pairAnswer = Repository
+                        .GetAll()
+                        .Include(answer => answer.NotEvaluableQuestion)
+                        .ThenInclude(question => question.Evaluation)
+                        .Where(answer => answer.Text == currentEvaluableAnswer.Text)
+                        .Where(answer => answer.Id != currentEvaluableAnswer.Id)
+                        .Where(answer => answer.NotEvaluableQuestion.Evaluation.Term == currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
+                        .SingleOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
+                                                   currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
+
+                }
+            }
+            
+            NotEvaluableAnswerDto result = await base.Update(input);
+
+            if (pairAnswer.IsNullOrDeleted())
+            {
+                return result;
+            }
+
+            input.Id = pairAnswer.Id;
+
+            await base.Update(input);
+
+            return result;
         }
     }
 }
