@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
-    public partial class InitialModel : Migration
+    public partial class InitModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -360,7 +360,8 @@ namespace Yei3.PersonalEvaluation.Migrations
                     Scholarship = table.Column<string>(nullable: true),
                     EntryDate = table.Column<DateTime>(nullable: false),
                     ReassignDate = table.Column<DateTime>(nullable: true),
-                    BirthDate = table.Column<DateTime>(nullable: false)
+                    BirthDate = table.Column<DateTime>(nullable: false),
+                    IsMale = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -400,7 +401,9 @@ namespace Yei3.PersonalEvaluation.Migrations
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Instructions = table.Column<string>(nullable: true)
+                    Instructions = table.Column<string>(nullable: true),
+                    IsAutoEvaluation = table.Column<bool>(nullable: false),
+                    IncludePastObjectives = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -713,6 +716,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                     Name = table.Column<string>(nullable: true),
                     DisplayName = table.Column<bool>(nullable: false),
                     EvaluationTemplateId = table.Column<long>(nullable: false),
+                    Value = table.Column<float>(nullable: false),
                     ParentId = table.Column<long>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false)
                 },
@@ -874,8 +878,10 @@ namespace Yei3.PersonalEvaluation.Migrations
                     Text = table.Column<string>(nullable: true),
                     QuestionType = table.Column<int>(nullable: false),
                     SectionId = table.Column<long>(nullable: false),
+                    IsQualifiable = table.Column<bool>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     Expected = table.Column<decimal>(nullable: true),
+                    ExpectedText = table.Column<string>(nullable: true),
                     Relation = table.Column<int>(nullable: true),
                     Deliverable = table.Column<string>(nullable: true)
                 },
@@ -910,10 +916,13 @@ namespace Yei3.PersonalEvaluation.Migrations
                     DeleterUserId = table.Column<long>(nullable: true),
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     EvaluationId = table.Column<long>(nullable: false),
-                    EvaluationQuestionId = table.Column<long>(nullable: false),
                     TerminationDateTime = table.Column<DateTime>(nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false)
+                    IsActive = table.Column<bool>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    EvaluationQuestionId = table.Column<long>(nullable: true),
+                    SectionId = table.Column<long>(nullable: true),
+                    Text = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -936,6 +945,12 @@ namespace Yei3.PersonalEvaluation.Migrations
                         principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EvaluationQuestions_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -954,7 +969,9 @@ namespace Yei3.PersonalEvaluation.Migrations
                     Text = table.Column<string>(nullable: true),
                     EvaluationQuestionId = table.Column<long>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
-                    Real = table.Column<decimal>(nullable: true)
+                    Observations = table.Column<string>(nullable: true),
+                    Real = table.Column<decimal>(nullable: true),
+                    CommitmentTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -967,6 +984,39 @@ namespace Yei3.PersonalEvaluation.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Answers_EvaluationQuestions_EvaluationQuestionId1",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "EvaluationQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Answers_EvaluationQuestions_EvaluationQuestionId2",
+                        column: x => x.EvaluationQuestionId,
+                        principalTable: "EvaluationQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Binnacles",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<long>(nullable: true),
+                    LastModificationTime = table.Column<DateTime>(nullable: true),
+                    LastModifierUserId = table.Column<long>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    DeleterUserId = table.Column<long>(nullable: true),
+                    DeletionTime = table.Column<DateTime>(nullable: true),
+                    Text = table.Column<string>(nullable: true),
+                    EvaluationQuestionId = table.Column<long>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Binnacles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Binnacles_EvaluationQuestions_EvaluationQuestionId",
                         column: x => x.EvaluationQuestionId,
                         principalTable: "EvaluationQuestions",
                         principalColumn: "Id",
@@ -1282,6 +1332,18 @@ namespace Yei3.PersonalEvaluation.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_EvaluationQuestionId1",
                 table: "Answers",
+                column: "EvaluationQuestionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Answers_EvaluationQuestionId2",
+                table: "Answers",
+                column: "EvaluationQuestionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Binnacles_EvaluationQuestionId",
+                table: "Binnacles",
                 column: "EvaluationQuestionId");
 
             migrationBuilder.CreateIndex(
@@ -1314,6 +1376,11 @@ namespace Yei3.PersonalEvaluation.Migrations
                 name: "IX_EvaluationQuestions_EvaluationQuestionId1",
                 table: "EvaluationQuestions",
                 column: "EvaluationQuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EvaluationQuestions_SectionId",
+                table: "EvaluationQuestions",
+                column: "SectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EvaluationRevisions_ReviewerUserId",
@@ -1411,6 +1478,9 @@ namespace Yei3.PersonalEvaluation.Migrations
 
             migrationBuilder.DropTable(
                 name: "Answers");
+
+            migrationBuilder.DropTable(
+                name: "Binnacles");
 
             migrationBuilder.DropTable(
                 name: "AbpEntityChanges");

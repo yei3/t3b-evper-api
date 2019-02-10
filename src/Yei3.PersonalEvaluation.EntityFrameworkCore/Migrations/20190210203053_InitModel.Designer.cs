@@ -9,8 +9,8 @@ using Yei3.PersonalEvaluation.EntityFrameworkCore;
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    [Migration("20190111200801_yepanother")]
-    partial class yepanother
+    [Migration("20190210203053_InitModel")]
+    partial class InitModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1026,7 +1026,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime?>("DeletionTime");
 
-                    b.Property<long>("EvaluationMeasuredQuestionId");
+                    b.Property<long>("EvaluationQuestionId");
 
                     b.Property<bool>("IsDeleted");
 
@@ -1038,7 +1038,7 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EvaluationMeasuredQuestionId");
+                    b.HasIndex("EvaluationQuestionId");
 
                     b.ToTable("Binnacles");
                 });
@@ -1140,8 +1140,6 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .IsRequired();
 
                     b.Property<long>("EvaluationId");
-
-                    b.Property<long>("EvaluationQuestionId");
 
                     b.Property<bool>("IsActive");
 
@@ -1298,6 +1296,8 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<long?>("ParentId");
 
+                    b.Property<float>("Value");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EvaluationTemplateId");
@@ -1431,6 +1431,8 @@ namespace Yei3.PersonalEvaluation.Migrations
                 {
                     b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.Answer");
 
+                    b.Property<string>("Observations");
+
                     b.Property<decimal>("Real");
 
                     b.HasIndex("EvaluationQuestionId")
@@ -1447,10 +1449,9 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.Property<DateTime>("CommitmentTime");
 
-                    b.Property<long>("NotEvaluableQuestionId");
-
-                    b.HasIndex("NotEvaluableQuestionId")
-                        .IsUnique();
+                    b.HasIndex("EvaluationQuestionId")
+                        .IsUnique()
+                        .HasName("IX_Answers_EvaluationQuestionId1");
 
                     b.ToTable("NotEvaluableAnswer");
 
@@ -1464,36 +1465,22 @@ namespace Yei3.PersonalEvaluation.Migrations
 
                     b.HasIndex("EvaluationQuestionId")
                         .IsUnique()
-                        .HasName("IX_Answers_EvaluationQuestionId1");
+                        .HasName("IX_Answers_EvaluationQuestionId2");
 
                     b.ToTable("UnmeasuredAnswer");
 
                     b.HasDiscriminator().HasValue("UnmeasuredAnswer");
                 });
 
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion", b =>
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluableQuestion", b =>
                 {
                     b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion");
 
+                    b.Property<long>("EvaluationQuestionId");
 
-                    b.HasIndex("EvaluationQuestionId");
+                    b.ToTable("EvaluableQuestion");
 
-                    b.ToTable("EvaluationMeasuredQuestion");
-
-                    b.HasDiscriminator().HasValue("EvaluationMeasuredQuestion");
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationUnmeasuredQuestion", b =>
-                {
-                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion");
-
-
-                    b.HasIndex("EvaluationQuestionId")
-                        .HasName("IX_EvaluationQuestions_EvaluationQuestionId1");
-
-                    b.ToTable("EvaluationUnmeasuredQuestion");
-
-                    b.HasDiscriminator().HasValue("EvaluationUnmeasuredQuestion");
+                    b.HasDiscriminator().HasValue("EvaluableQuestion");
                 });
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.NotEvaluableQuestion", b =>
@@ -1541,6 +1528,31 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.ToTable("UnmeasuredQuestion");
 
                     b.HasDiscriminator().HasValue("UnmeasuredQuestion");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion", b =>
+                {
+                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluableQuestion");
+
+
+                    b.HasIndex("EvaluationQuestionId");
+
+                    b.ToTable("EvaluationMeasuredQuestion");
+
+                    b.HasDiscriminator().HasValue("EvaluationMeasuredQuestion");
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationUnmeasuredQuestion", b =>
+                {
+                    b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluableQuestion");
+
+
+                    b.HasIndex("EvaluationQuestionId")
+                        .HasName("IX_EvaluationQuestions_EvaluationQuestionId1");
+
+                    b.ToTable("EvaluationUnmeasuredQuestion");
+
+                    b.HasDiscriminator().HasValue("EvaluationUnmeasuredQuestion");
                 });
 
             modelBuilder.Entity("Abp.Authorization.Roles.RoleClaim", b =>
@@ -1645,9 +1657,9 @@ namespace Yei3.PersonalEvaluation.Migrations
 
             modelBuilder.Entity("Yei3.PersonalEvaluation.Binnacle.ObjectiveBinnacle", b =>
                 {
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion", "EvaluationMeasuredQuestion")
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationQuestion", "EvaluationQuestion")
                         .WithMany("Binnacle")
-                        .HasForeignKey("EvaluationMeasuredQuestionId")
+                        .HasForeignKey("EvaluationQuestionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -1752,7 +1764,8 @@ namespace Yei3.PersonalEvaluation.Migrations
                 {
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.NotEvaluableQuestion", "NotEvaluableQuestion")
                         .WithOne("NotEvaluableAnswer")
-                        .HasForeignKey("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.NotEvaluableAnswer", "NotEvaluableQuestionId")
+                        .HasForeignKey("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.NotEvaluableAnswer", "EvaluationQuestionId")
+                        .HasConstraintName("FK_Answers_EvaluationQuestions_EvaluationQuestionId1")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -1761,24 +1774,7 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.HasOne("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationUnmeasuredQuestion", "EvaluationUnmeasuredQuestion")
                         .WithOne("UnmeasuredAnswer")
                         .HasForeignKey("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.UnmeasuredAnswer", "EvaluationQuestionId")
-                        .HasConstraintName("FK_Answers_EvaluationQuestions_EvaluationQuestionId1")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion", b =>
-                {
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.MeasuredQuestion", "MeasuredQuestion")
-                        .WithMany("EvaluationMeasuredQuestions")
-                        .HasForeignKey("EvaluationQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationUnmeasuredQuestion", b =>
-                {
-                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion", "UnmeasuredQuestion")
-                        .WithMany("EvaluationUnmeasuredQuestions")
-                        .HasForeignKey("EvaluationQuestionId")
-                        .HasConstraintName("FK_EvaluationQuestions_Questions_EvaluationQuestionId1")
+                        .HasConstraintName("FK_Answers_EvaluationQuestions_EvaluationQuestionId2")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -1804,6 +1800,23 @@ namespace Yei3.PersonalEvaluation.Migrations
                         .WithMany("UnmeasuredQuestions")
                         .HasForeignKey("SectionId")
                         .HasConstraintName("FK_Questions_Sections_SectionId1")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion", b =>
+                {
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.MeasuredQuestion", "MeasuredQuestion")
+                        .WithMany("EvaluationMeasuredQuestions")
+                        .HasForeignKey("EvaluationQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions.EvaluationUnmeasuredQuestion", b =>
+                {
+                    b.HasOne("Yei3.PersonalEvaluation.Evaluations.Questions.UnmeasuredQuestion", "UnmeasuredQuestion")
+                        .WithMany("EvaluationUnmeasuredQuestions")
+                        .HasForeignKey("EvaluationQuestionId")
+                        .HasConstraintName("FK_EvaluationQuestions_Questions_EvaluationQuestionId1")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
