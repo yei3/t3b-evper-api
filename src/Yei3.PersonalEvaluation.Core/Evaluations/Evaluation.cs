@@ -25,6 +25,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         }
 
         public virtual string Name { get; protected set; }
+        public virtual string ClosingComment { get; set; }
         public virtual long EvaluationId { get; protected set; }
         [ForeignKey("EvaluationId")]
         public virtual EvaluationTemplate Template { get; protected set; }
@@ -64,6 +65,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
         public void InvalidateEvaluation()
         {
             Status = EvaluationStatus.Finished;
+        }
+
+        public void ScheduleReview()
+        {
+            Status = EvaluationStatus.PendingReview;
         }
     }
 }

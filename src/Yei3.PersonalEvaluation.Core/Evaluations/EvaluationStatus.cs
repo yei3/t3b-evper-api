@@ -2,6 +2,6 @@
 {
     public enum EvaluationStatus
     {
-        NonInitiated, Pending, Finished, Validated
+        NonInitiated, Pending, Finished, Validated, PendingReview
     }
 }

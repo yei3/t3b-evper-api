@@ -7,11 +7,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
     public interface IEvaluationAppService
     {
-        Task ApplyEvaluationTemplate(CreateEvaluationDto input);
-        Task<ICollection<EvaluationDto>> GetAll();
-
+        Task ApplyEvaluationTemplate(CreateEvaluationDto input);        
         Task Delete(long id);
         Task<EvaluationDto> Get(long id);
+        Task<ICollection<EvaluationDto>> GetAll();
+        Task ClosingComment(EvaluationCloseDto inpunt);
         Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
     }
 }

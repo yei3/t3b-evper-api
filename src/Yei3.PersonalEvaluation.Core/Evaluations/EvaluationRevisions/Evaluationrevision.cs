@@ -26,14 +26,14 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
 
         public void MarkAsRevised()
         {
-            Status = EvaluationRevisionStatus.Revised;
             Evaluation.ValidateEvaluation();
+            //Status = EvaluationRevisionStatus.Revised;
         }
 
         public void MarkAsPending()
         {
-            Status = EvaluationRevisionStatus.Pending;
-            Evaluation.InvalidateEvaluation();
+            Evaluation.ScheduleReview();
+            //Status = EvaluationRevisionStatus.Pending;
         }
 
         public void SetRevisionTime(DateTime revisionTime)

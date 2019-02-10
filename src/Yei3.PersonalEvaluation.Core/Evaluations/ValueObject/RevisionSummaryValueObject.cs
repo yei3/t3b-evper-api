@@ -8,7 +8,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
     public class RevisionSummaryValueObject : ValueObject<RevisionSummaryValueObject>
     {
         public long EvaluationId { get; set; }
-        public EvaluationRevisionStatus Status { get; set; }
+        public EvaluationStatus Status { get; set; }
         public EvaluationTerm Term { get; set; }
         public string Name { get; set; }
         public string CollaboratorFullName { get; set; }

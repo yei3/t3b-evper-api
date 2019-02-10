@@ -12,13 +12,14 @@ using Yei3.PersonalEvaluation.Sessions;
 using Abp.Collections.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Abp.UI;
+using Yei3.PersonalEvaluation.Evaluations;
 
 namespace Yei3.PersonalEvaluation.Notifications
 {
     public class NotificationsAppService : ApplicationService, INotificationsAppService
     {
         private readonly INotificationPublisher _notiticationPublisher;
-
+        private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IUserNotificationManager  _userNotificationManager;
 
         private readonly INotificationSubscriptionManager _notificationSubscriptionManager;
@@ -27,13 +28,14 @@ namespace Yei3.PersonalEvaluation.Notifications
 
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
 
-         public NotificationsAppService(INotificationSubscriptionManager notificationSubscriptionManager, UserManager userManager, INotificationPublisher notiticationPublisher, IUserNotificationManager  userNotificationManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
+         public NotificationsAppService(INotificationSubscriptionManager notificationSubscriptionManager, UserManager userManager, INotificationPublisher notiticationPublisher, IUserNotificationManager  userNotificationManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<Evaluation, long> evaluationRepository)
         {
             _notificationSubscriptionManager = notificationSubscriptionManager;
             UserManager = userManager;
             _notiticationPublisher = notiticationPublisher;
             _userNotificationManager = userNotificationManager;
             OrganizationUnitRepository = organizationUnitRepository;
+            EvaluationRepository = evaluationRepository;
         }
 
         public async Task<List<UserNotification>> getAll()
@@ -119,6 +121,35 @@ namespace Yei3.PersonalEvaluation.Notifications
             }
 
             
+        }
+
+        public async Task Publish_SentReviewNotification(SentReviewNotificationData input)
+        {
+            User supervisor = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(input.EvaluationId);
+            User collaborator = await UserManager
+            .GetUserByIdAsync(evaluation.UserId);
+            UserIdentifier targetUserId = new UserIdentifier(supervisor.TenantId, collaborator.Id);
+            string dateReview = input.DateReview.Substring(0,10) + " " + input.DateReview.Substring(11,5);
+            await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData(supervisor.FullName, "Se agendó la revisión de tu evaluación en la fecha " + dateReview), userIds: new[] { targetUserId });
+        }
+
+        public async Task Publish_SendBossCloseEvaluationNotification()
+        {
+            User userLogged = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            if(!string.IsNullOrEmpty(userLogged.ImmediateSupervisor))
+            {
+                List<User> users = await UserManager
+                .Users
+                .Where(user => userLogged.ImmediateSupervisor.Equals(user.JobDescription) ) 
+                .ToListAsync();
+                if(!users.IsNullOrEmpty<User>())
+                {
+                    User bossUser = users[0];
+                    UserIdentifier targetUserId = new UserIdentifier(bossUser.TenantId, bossUser.Id);
+                    await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Cierre de evaluación.", "El evaluado "+userLogged.FullName+" ha modificado sus próximos objetivos."), userIds: new[] { targetUserId });
+                }   
+            }
         }
 
     }
