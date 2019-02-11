@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 using Abp.Runtime.Session;
@@ -199,6 +200,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             IQueryable<Evaluation> pendingEvaluations = EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.Questions)
+                .ThenInclude(question => ((NotEvaluableQuestion)question).Section)
+                .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now);
@@ -212,6 +215,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 pendingObjectivesCountAsync += pendingEvaluation
                     .Questions
                     .OfType<NotEvaluableQuestion>()
+                    .Where(question => question.Evaluation.Template.IsAutoEvaluation)
+                    .Where(question => question.Section.Name != "Próximos Objetivos")
                     .Count(question => question.Status != EvaluationQuestionStatus.Validated);
             }
 
