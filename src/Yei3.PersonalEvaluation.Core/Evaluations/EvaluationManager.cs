@@ -186,7 +186,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.PendingReview)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .CountAsync();
