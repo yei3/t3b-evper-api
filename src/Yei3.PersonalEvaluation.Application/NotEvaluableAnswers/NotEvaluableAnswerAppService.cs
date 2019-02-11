@@ -53,6 +53,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
             }
 
             input.Id = pairAnswer.Id;
+            input.EvaluationQuestionId = pairAnswer.EvaluationQuestionId;
 
             await base.Update(input);
 
