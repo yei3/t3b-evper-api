@@ -203,6 +203,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(question => ((NotEvaluableQuestion)question).Section)
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now);
 
