@@ -10,9 +10,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         {
         }
 
-        public NotEvaluableAnswer(long evaluationQuestionId) : base(evaluationQuestionId)
+        public NotEvaluableAnswer(long evaluationQuestionId, DateTime commitmentTime) : base(evaluationQuestionId)
         {
-            
+            CommitmentTime = commitmentTime;
         }
 
         [ForeignKey("EvaluationQuestionId")]
