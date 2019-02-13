@@ -270,7 +270,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
 
             return pendingRevisions;
-        }
+        }   
 
         public async Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync(long? userId = null)
         {

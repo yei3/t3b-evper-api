@@ -30,7 +30,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
         public virtual NotEvaluableAnswer NotEvaluableAnswer { get; protected set; }
         public void SetAnswer(long questionId)
         {
-            NotEvaluableAnswer = new NotEvaluableAnswer(questionId);
+            NotEvaluableAnswer = new NotEvaluableAnswer(questionId, TerminationDateTime);
         }
     }
 }
