@@ -50,7 +50,6 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                     .Include(evaluationQuestion => evaluationQuestion.Section)
                     .ThenInclude(section => section.ParentSection)
                     .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == evaluationId)
-                    .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                     .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                     .Where(evaluationQuestion => evaluationQuestion.Section.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
                     .Where(evaluationQuestion => evaluationQuestion.Section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
