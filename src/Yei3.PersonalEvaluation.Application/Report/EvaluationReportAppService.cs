@@ -36,6 +36,22 @@ namespace Yei3.PersonalEvaluation.Report
             UserManager = userManager;
         }
 
+        public async Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport()
+        {
+            return new CollaboratorObjectivesReportDto
+            {
+                PreviousTotal = 4, // total de objetivos de la Evaluación anterior
+                PreviousValidated = 1,
+                CurrentTotal = 4, // total de la evaluación actual
+                CurrentValidated = 0
+            };
+        }
+
+        public async Task<ICollection<CollaboratorCompetencesReportDto>> GetCollaboratorCompetencesReport()
+        {
+            return new List<CollaboratorCompetencesReportDto>();
+        }
+
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
         {
             var groupedEvaluations = EvaluationRepository
