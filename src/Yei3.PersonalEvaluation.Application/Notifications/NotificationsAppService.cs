@@ -152,5 +152,14 @@ namespace Yei3.PersonalEvaluation.Notifications
             }
         }
 
+        public async Task Publish_SendValidateEvaluationNotification(SentReviewNotificationData input)
+        {
+            User supervisor = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(input.EvaluationId);
+            User collaborator = await UserManager
+            .GetUserByIdAsync(evaluation.UserId);
+            UserIdentifier targetUserId = new UserIdentifier(supervisor.TenantId, collaborator.Id);
+            await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Cierre de evaluación", "Se validó el cierre de tu evaluación."), userIds: new[] { targetUserId });
+        }
     }
 }

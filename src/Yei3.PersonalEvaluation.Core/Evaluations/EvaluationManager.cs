@@ -81,6 +81,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
+                .Where(Evaluation => Evaluation.Status == EvaluationStatus.PendingReview)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
@@ -185,7 +186,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.PendingReview)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .CountAsync();
@@ -202,6 +203,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ThenInclude(question => ((NotEvaluableQuestion)question).Section)
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.Status == EvaluationStatus.NonInitiated || evaluation.Status == EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now);
 
