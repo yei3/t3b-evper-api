@@ -26,24 +26,47 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
+        private readonly IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
         private readonly UserManager UserManager;
 
-        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, UserManager userManager)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, UserManager userManager, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
             SectionRepository = sectionRepository;
             UserManager = userManager;
+            NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
         }
 
         public async Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport()
         {
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+                .OrderBy(evaluation => evaluation.CreationTime)
+                .Take(2);
+
+            Evaluation currentEvaluation = evaluations.FirstOrDefault();
+
+            Evaluation lastEvaluation = evaluations.LastOrDefault();
+
             return new CollaboratorObjectivesReportDto
             {
-                PreviousTotal = 4, // total de objetivos de la Evaluación anterior
-                PreviousValidated = 1,
-                CurrentTotal = 4, // total de la evaluación actual
-                CurrentValidated = 0
+                PreviousTotal = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Count(question => question.EvaluationId == lastEvaluation.Id), // total de objetivos de la Evaluación anterior
+                PreviousValidated = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Where(question => question.EvaluationId == lastEvaluation.Id)
+                    .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                CurrentTotal = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Count(question => question.EvaluationId == currentEvaluation.Id), // total de la evaluación actual
+                CurrentValidated = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Where(question => question.EvaluationId == currentEvaluation.Id)
+                    .Count(question => question.Status == EvaluationQuestionStatus.Validated)
             };
         }
 
