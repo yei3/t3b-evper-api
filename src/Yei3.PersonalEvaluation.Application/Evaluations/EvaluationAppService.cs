@@ -26,17 +26,19 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IEvaluationManager EvaluationManager;
         private readonly IRepository<EvaluationTemplates.EvaluationTemplate, long> EvaluationTemplateRepository;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
+        private readonly IRepository<Sections.Section, long> SectionRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Sections.Section, long> sectionRepository)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
             UserManager = userManager;
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
+            SectionRepository = sectionRepository;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -261,16 +263,52 @@ namespace Yei3.PersonalEvaluation.Evaluations
             await EvaluationRepository.DeleteAsync(evaluation);
         }
 
-        public async Task ClosingComment(EvaluationCloseDto evaluationClose )
+        public Task ClosingComment(EvaluationCloseDto evaluationClose )
         {
-            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.EvaluationId);
+            Evaluation currentEvaluation = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .ThenInclude(template => template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .FirstOrDefault(evaluation => evaluation.Id == evaluationClose.Id);
 
-            if (evaluation.IsNullOrDeleted())
+            if (currentEvaluation.IsNullOrDeleted())
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            evaluation.ClosingComment = evaluationClose.Comment;
+            currentEvaluation.ClosingComment = evaluationClose.Comment;
+
+            Evaluation pairEvaluation = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .ThenInclude(template => template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Where(evaluation => evaluation.Term == currentEvaluation.Term)
+                .Where(evaluation => evaluation.UserId == currentEvaluation.UserId)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .FirstOrDefault(evaluation => evaluation.Id != currentEvaluation.Id);
+
+            if (pairEvaluation.IsNullOrDeleted())
+            {
+                return Task.CompletedTask;
+            }
+
+            Sections.Section nextObjectivesSection = pairEvaluation
+                .Template
+                .Sections
+                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+
+            Sections.Section currentSection = currentEvaluation
+                .Template
+                .Sections
+                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+
+            SectionRepository.Delete(currentSection.Id);
+
+            SectionRepository.Insert(nextObjectivesSection.NoTracking(currentEvaluation.Id));
+
+            return Task.CompletedTask;
         }
 
         public async Task<EvaluationDto> Get(long id)
