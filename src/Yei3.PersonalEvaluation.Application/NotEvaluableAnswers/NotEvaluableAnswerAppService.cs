@@ -39,9 +39,8 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
                         .Where(answer => answer.Text == currentEvaluableAnswer.Text)
                         .Where(answer => answer.Id != currentEvaluableAnswer.Id)
                         .Where(answer => answer.NotEvaluableQuestion.Evaluation.Term == currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
-                        .SingleOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
+                        .FirstOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
                                                    currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
-
                 }
             }
             
