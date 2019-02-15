@@ -32,7 +32,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
             {
                 if (!currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.IsNullOrDeleted())
                 {
-                    var x = Repository
+                    pairAnswer = Repository
                         .GetAll()
                         .Include(answer => answer.NotEvaluableQuestion)
                         .ThenInclude(question => question.Evaluation)
@@ -41,9 +41,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
                         .Where(answer =>
                             answer.NotEvaluableQuestion.Evaluation.Term ==
                             currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
-                        .OrderByDescending(answer => answer.CreationTime);
-
-                    pairAnswer = x
+                        .OrderByDescending(answer => answer.CreationTime)
                         .FirstOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
                                                    currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
                 }
@@ -58,6 +56,8 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
 
             input.Id = pairAnswer.Id;
             input.EvaluationQuestionId = pairAnswer.EvaluationQuestionId;
+
+            pairAnswer.NotEvaluableQuestion.Status = currentEvaluableAnswer.NotEvaluableQuestion.Status;
 
             await base.Update(input);
 
