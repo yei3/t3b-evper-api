@@ -38,7 +38,7 @@ namespace Yei3.PersonalEvaluation.Report
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
         }
 
-        public async Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport()
+        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport()
         {
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
@@ -51,32 +51,86 @@ namespace Yei3.PersonalEvaluation.Report
 
             Evaluation lastEvaluation = evaluations.LastOrDefault();
 
-            return new CollaboratorObjectivesReportDto
-            {
-                PreviousTotal = NotEvaluableQuestionRepository
-                    .GetAll()
-                    .Where(question => question.Section.Name == "Objetivos")
-                    .Count(question => question.EvaluationId == lastEvaluation.Id),
-                PreviousValidated = NotEvaluableQuestionRepository
-                    .GetAll()
-                    .Where(question => question.EvaluationId == lastEvaluation.Id)
-                    .Where(question => question.Section.Name == "Objetivos")
-                    .Count(question => question.Status == EvaluationQuestionStatus.Validated),
-                CurrentTotal = NotEvaluableQuestionRepository
-                    .GetAll()
-                    .Where(question => question.Section.Name == "Objetivos")
-                    .Count(question => question.EvaluationId == currentEvaluation.Id),
-                CurrentValidated = NotEvaluableQuestionRepository
-                    .GetAll()
-                    .Where(question => question.Section.Name == "Objetivos")
-                    .Where(question => question.EvaluationId == currentEvaluation.Id)
-                    .Count(question => question.Status == EvaluationQuestionStatus.Validated)
-            };
+            return Task.FromResult(
+                new CollaboratorObjectivesReportDto
+                {
+                    PreviousTotal = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.EvaluationId == lastEvaluation.Id),
+                    PreviousValidated = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.EvaluationId == lastEvaluation.Id)
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                    CurrentTotal = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.EvaluationId == currentEvaluation.Id),
+                    CurrentValidated = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.EvaluationId == currentEvaluation.Id)
+                        .Count(question => question.Status == EvaluationQuestionStatus.Validated)
+                }
+            );
         }
 
-        public async Task<ICollection<CollaboratorCompetencesReportDto>> GetCollaboratorCompetencesReport()
+        public Task<List<CollaboratorCompetencesReportDto>> GetCollaboratorCompetencesReport()
         {
-            return new List<CollaboratorCompetencesReportDto>();
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+               .GetAll()
+               .Include(evaluation => evaluation.Template)
+               .ThenInclude(template => template.Sections)
+               .ThenInclude(section => section.ChildSections)
+               .ThenInclude(section => section.UnmeasuredQuestions)
+               .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+               .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+               .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+               .OrderBy(evaluation => evaluation.CreationTime)
+               .Take(2);
+
+            Evaluation currentEvaluation = evaluations.FirstOrDefault();
+
+            Evaluation lastEvaluation = evaluations.LastOrDefault();
+
+            Evaluations.Sections.Section currentSection = currentEvaluation
+                .Template
+                .Sections
+                .FirstOrDefault(section => section.Name == "Competencias a evaluar");
+
+            Evaluations.Sections.Section lastSection = lastEvaluation
+                .Template
+                .Sections
+                .FirstOrDefault(section => section.Name == "Competencias a evaluar");
+
+            return Task.FromResult(currentSection
+                .ChildSections
+                .Select(section => new CollaboratorCompetencesReportDto
+                {
+                    CurrentEvaluationTitle = section.Name,
+                    CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question =>
+                        question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
+                            evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Sum(),
+                    CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question =>
+                        question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
+                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Sum(),
+                    CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question =>
+                        question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
+                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Sum()
+                })
+                .Concat(
+                    lastSection
+                        .ChildSections
+                        .Select(section => new CollaboratorCompetencesReportDto
+                        {
+                            CurrentEvaluationTitle = section.Name,
+                            CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Sum(),
+                            CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Sum(),
+                            CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Sum()
+                        })
+                    ).ToList()
+            );
         }
 
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
