@@ -32,13 +32,18 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
             {
                 if (!currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.IsNullOrDeleted())
                 {
-                    pairAnswer = Repository
+                    var x = Repository
                         .GetAll()
                         .Include(answer => answer.NotEvaluableQuestion)
                         .ThenInclude(question => question.Evaluation)
-                        .Where(answer => answer.Text == currentEvaluableAnswer.Text)
+                        .Where(answer => answer.NotEvaluableQuestion.Text == currentEvaluableAnswer.NotEvaluableQuestion.Text)
                         .Where(answer => answer.Id != currentEvaluableAnswer.Id)
-                        .Where(answer => answer.NotEvaluableQuestion.Evaluation.Term == currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
+                        .Where(answer =>
+                            answer.NotEvaluableQuestion.Evaluation.Term ==
+                            currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
+                        .OrderByDescending(answer => answer.CreationTime);
+
+                    pairAnswer = x
                         .FirstOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
                                                    currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
                 }
