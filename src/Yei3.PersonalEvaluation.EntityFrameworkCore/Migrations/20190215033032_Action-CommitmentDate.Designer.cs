@@ -9,8 +9,8 @@ using Yei3.PersonalEvaluation.EntityFrameworkCore;
 namespace Yei3.PersonalEvaluation.Migrations
 {
     [DbContext(typeof(PersonalEvaluationDbContext))]
-    [Migration("20190214192420_update_model")]
-    partial class update_model
+    [Migration("20190215033032_Action-CommitmentDate")]
+    partial class ActionCommitmentDate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1097,6 +1097,10 @@ namespace Yei3.PersonalEvaluation.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Action");
+
+                    b.Property<DateTime>("CommitmentDate");
+
                     b.Property<DateTime>("CreationTime");
 
                     b.Property<long?>("CreatorUserId");
@@ -1463,8 +1467,6 @@ namespace Yei3.PersonalEvaluation.Migrations
             modelBuilder.Entity("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.UnmeasuredAnswer", b =>
                 {
                     b.HasBaseType("Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers.Answer");
-
-                    b.Property<string>("Action");
 
                     b.Property<DateTime>("CommitmentTime")
                         .HasColumnName("UnmeasuredAnswer_CommitmentTime");

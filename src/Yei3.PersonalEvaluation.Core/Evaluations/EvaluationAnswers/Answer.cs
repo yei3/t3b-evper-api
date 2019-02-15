@@ -1,4 +1,5 @@
-﻿using Abp.Domain.Entities.Auditing;
+﻿using System;
+using Abp.Domain.Entities.Auditing;
 
 namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
 {
@@ -12,8 +13,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         protected Answer()
         {
         }
-
+        
         public virtual string Text { get; protected set; }
+        public virtual string Action { get; protected set; }        
+        public virtual DateTime CommitmentDate { get; protected set; }
         public virtual long EvaluationQuestionId { get; protected set; }
     }
 }

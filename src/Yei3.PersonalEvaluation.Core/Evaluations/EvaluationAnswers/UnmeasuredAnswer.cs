@@ -9,7 +9,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         [ForeignKey("EvaluationQuestionId")]
         public virtual EvaluationUnmeasuredQuestion EvaluationUnmeasuredQuestion{ get; protected set; }
         public string Action { get; set; }
-        public DateTime CommitmentTime { get; set; }
+        public DateTime CommitmentDate { get; set; }
 
         public UnmeasuredAnswer(long evaluationQuestionId) : base(evaluationQuestionId)
         {

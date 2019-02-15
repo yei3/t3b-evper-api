@@ -3,29 +3,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Yei3.PersonalEvaluation.Migrations
 {
-    public partial class update_model : Migration
+    public partial class ActionCommitmentDate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Action",
-                table: "Answers",
-                nullable: true);
-
             migrationBuilder.AddColumn<DateTime>(
-                name: "UnmeasuredAnswer_CommitmentTime",
+                name: "CommitmentDate",
                 table: "Answers",
-                nullable: true);
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Action",
-                table: "Answers");
-
-            migrationBuilder.DropColumn(
-                name: "UnmeasuredAnswer_CommitmentTime",
+                name: "CommitmentDate",
                 table: "Answers");
         }
     }

@@ -55,16 +55,20 @@ namespace Yei3.PersonalEvaluation.Report
             {
                 PreviousTotal = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Count(question => question.EvaluationId == lastEvaluation.Id), // total de objetivos de la Evaluación anterior
+                    .Where(question => question.Section.Name == "Objetivos")
+                    .Count(question => question.EvaluationId == lastEvaluation.Id),
                 PreviousValidated = NotEvaluableQuestionRepository
                     .GetAll()
                     .Where(question => question.EvaluationId == lastEvaluation.Id)
+                    .Where(question => question.Section.Name == "Objetivos")
                     .Count(question => question.Status == EvaluationQuestionStatus.Validated),
                 CurrentTotal = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Count(question => question.EvaluationId == currentEvaluation.Id), // total de la evaluación actual
+                    .Where(question => question.Section.Name == "Objetivos")
+                    .Count(question => question.EvaluationId == currentEvaluation.Id),
                 CurrentValidated = NotEvaluableQuestionRepository
                     .GetAll()
+                    .Where(question => question.Section.Name == "Objetivos")
                     .Where(question => question.EvaluationId == currentEvaluation.Id)
                     .Count(question => question.Status == EvaluationQuestionStatus.Validated)
             };
