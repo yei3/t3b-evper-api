@@ -265,49 +265,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public Task ClosingComment(EvaluationCloseDto evaluationClose )
         {
-            Evaluation currentEvaluation = EvaluationRepository
-                .GetAll()
-                .Include(evaluation => evaluation.Template)
-                .ThenInclude(template => template.Sections)
-                .ThenInclude(section => section.ChildSections)
-                .FirstOrDefault(evaluation => evaluation.Id == evaluationClose.Id);
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
 
-            if (currentEvaluation.IsNullOrDeleted())
+            if (!evaluation.IsNullOrDeleted())
             {
-                return Task.CompletedTask;
+                evaluation.ClosingComment = evaluationClose.Comment;   
             }
-
-            currentEvaluation.ClosingComment = evaluationClose.Comment;
-
-            Evaluation pairEvaluation = EvaluationRepository
-                .GetAll()
-                .Include(evaluation => evaluation.Template)
-                .ThenInclude(template => template.Sections)
-                .ThenInclude(section => section.ChildSections)
-                .Where(evaluation => evaluation.Term == currentEvaluation.Term)
-                .Where(evaluation => evaluation.UserId == currentEvaluation.UserId)
-                .OrderByDescending(evaluation => evaluation.CreationTime)
-                .FirstOrDefault(evaluation => evaluation.Id != currentEvaluation.Id);
-
-            if (pairEvaluation.IsNullOrDeleted())
-            {
-                return Task.CompletedTask;
-            }
-
-            Sections.Section nextObjectivesSection = pairEvaluation
-                .Template
-                .Sections
-                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
-
-            Sections.Section currentSection = currentEvaluation
-                .Template
-                .Sections
-                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
-
-            SectionRepository.Delete(currentSection.Id);
-
-            SectionRepository.Insert(nextObjectivesSection.NoTracking(currentEvaluation.Id));
-
             return Task.CompletedTask;
         }
 
