@@ -9,6 +9,8 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
     public class EvaluationAnswerDto : EntityDto<long>
     {
         public decimal Real { get; set; }
+        public string Action { get; set; }
+        public DateTime CommitmentDate { get; set; }
         public DateTime CommitmentTime { get; set; }
         public string Text { get; set; }
         public string Observations { get; set; }
