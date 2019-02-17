@@ -169,17 +169,22 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     //.Where(evaluation => evaluation.EvaluationId == evaluationTemplate.Id)
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
+                    .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                     .OrderBy(evaluation => evaluation.CreationTime)
-                    .WhereIf(currentEvaluation.Template.IsAutoEvaluation,
-                        evaluation => evaluation.Template.IsAutoEvaluation)
-                    .Skip(currentEvaluation.Template.IsAutoEvaluation ? 0 : 1)
+                    //.WhereIf(currentEvaluation.Template.IsAutoEvaluation,
+                    //    evaluation => evaluation.Template.IsAutoEvaluation)
+                    //.Skip(currentEvaluation.Template.IsAutoEvaluation ? 0 : 1)
                     .FirstOrDefault();
 
                 if (lastEvaluation.IsNullOrDeleted()) continue;
 
+                string objectivesToLoad = currentEvaluation.Template.IsAutoEvaluation
+                    ? AppConsts.SectionNextObjectivesName
+                    : AppConsts.SectionObjectivesName;
+
                 long? lastEvaluationNextObjectiveSectionId = lastEvaluation.Template.Sections
                     .Where(section => section.ParentId.HasValue)
-                    .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionNextObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                    .Where(section => section.ParentSection.Name.StartsWith(objectivesToLoad, StringComparison.CurrentCultureIgnoreCase))
                     .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)?.Id;
 
                 long? currentEvaluationObjectivesSectionId = currentEvaluation.Template.Sections
