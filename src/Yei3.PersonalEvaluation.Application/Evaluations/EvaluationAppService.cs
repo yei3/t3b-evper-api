@@ -269,7 +269,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             await EvaluationRepository.DeleteAsync(evaluation);
         }
 
-        public Task ClosingComment(EvaluationCloseDto evaluationClose )
+        public Task ClosingComment(EvaluationCloseDto evaluationClose)
         {
             Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
 
