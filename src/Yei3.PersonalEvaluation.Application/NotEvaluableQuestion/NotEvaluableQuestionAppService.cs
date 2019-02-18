@@ -6,7 +6,6 @@ using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Users;
-using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.ValueObject;
 using Yei3.PersonalEvaluation.NotEvaluableQuestion.Dto;
 using Yei3.PersonalEvaluation.Question.Dto;
@@ -32,7 +31,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                 .GetAll()
                 .SingleAsync(question => question.Id == notEvaluableQuestion.Id);
 
-            currentQuestion.SetAnswer(notEvaluableQuestion.Id);
+            currentQuestion.SetAnswer(notEvaluableQuestion.Id, input.NotEvaluableAnswer.Text, input.NotEvaluableAnswer.CommitmentTime);
 
             await CurrentUnitOfWork.SaveChangesAsync();
 

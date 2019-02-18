@@ -28,9 +28,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
         public virtual Section Section { get; protected set; }
         public virtual string Text { get; protected set; }
         public virtual NotEvaluableAnswer NotEvaluableAnswer { get; protected set; }
-        public void SetAnswer(long questionId)
+        public void SetAnswer(long questionId, string text, DateTime terminationDateTime)
         {
-            NotEvaluableAnswer = new NotEvaluableAnswer(questionId, TerminationDateTime);
+            NotEvaluableAnswer = new NotEvaluableAnswer(questionId, text, terminationDateTime);
         }
     }
 }

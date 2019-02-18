@@ -170,7 +170,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .Where(evaluation => evaluation.UserId == user.Id)
                     .Where(evaluation => evaluation.Id != evaluationId)
                     .Where(evaluation => evaluation.Template.IsAutoEvaluation)
-                    .OrderBy(evaluation => evaluation.CreationTime)
+                    .OrderByDescending(evaluation => evaluation.CreationTime)
                     //.WhereIf(currentEvaluation.Template.IsAutoEvaluation,
                     //    evaluation => evaluation.Template.IsAutoEvaluation)
                     //.Skip(currentEvaluation.Template.IsAutoEvaluation ? 0 : 1)
@@ -196,6 +196,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
                     .GetAll()
+                    .Include(question => question.NotEvaluableAnswer)
                     .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId.Value)
                     .Where(question => question.EvaluationId == lastEvaluation.Id);
 
@@ -206,13 +207,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluationObjectivesSectionId.Value,
                         notEvaluableQuestion.Text,
                         currentEvaluation.Id,
-                        notEvaluableQuestion.TerminationDateTime,
+                        notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime,
                         EvaluationQuestionStatus.Unanswered)
                     {
                         SectionId = currentEvaluationObjectivesSectionId.Value
                     };
 
-                    currentQuestion.SetAnswer(currentEvaluation.Id);
+                    currentQuestion.SetAnswer(currentEvaluation.Id, notEvaluableQuestion.NotEvaluableAnswer.Text, notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime);
 
                     await NotEvaluableQuestionRepository.InsertAsync(currentQuestion);
                 }
