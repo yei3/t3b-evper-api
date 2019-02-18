@@ -31,7 +31,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                 .GetAll()
                 .SingleAsync(question => question.Id == notEvaluableQuestion.Id);
 
-            currentQuestion.SetAnswer(notEvaluableQuestion.Id, input.NotEvaluableAnswer.Text, input.NotEvaluableAnswer.CommitmentTime);
+            currentQuestion.SetAnswer(notEvaluableQuestion.Id, String.Empty, DateTime.Now);
 
             await CurrentUnitOfWork.SaveChangesAsync();
 
