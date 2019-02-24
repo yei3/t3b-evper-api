@@ -1,6 +1,5 @@
 ﻿using System;
 using Abp.Domain.Values;
-using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 using Yei3.PersonalEvaluation.Evaluations.Terms;
 
 namespace Yei3.PersonalEvaluation.Evaluations.ValueObject

@@ -7,7 +7,7 @@ namespace Yei3.PersonalEvaluation.Report
 {
     public interface IEvaluationReportAppService : IApplicationService
     {
-        Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport();
+        Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? userId = null);
         Task<List<CollaboratorCompetencesReportDto>> GetCollaboratorCompetencesReport();
         Task<ICollection<EvaluationResultsDto>> GetEvaluationResults();
         Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults();

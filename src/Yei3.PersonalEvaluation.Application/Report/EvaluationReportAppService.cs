@@ -38,13 +38,14 @@ namespace Yei3.PersonalEvaluation.Report
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
         }
 
-        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport()
+        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? userId = null)
         {
+            userId = userId ?? AbpSession.GetUserId();
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
-                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
-                .OrderBy(evaluation => evaluation.CreationTime)
+                .Where(evaluation => evaluation.UserId == userId)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
                 .Take(2);
 
             Evaluation currentEvaluation = evaluations.FirstOrDefault();
@@ -87,22 +88,46 @@ namespace Yei3.PersonalEvaluation.Report
                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
-               .OrderBy(evaluation => evaluation.CreationTime)
+               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+               .OrderByDescending(evaluation => evaluation.CreationTime)
                .Take(2);
 
             Evaluation currentEvaluation = evaluations.FirstOrDefault();
 
-            Evaluation lastEvaluation = evaluations.LastOrDefault();
+            Evaluation previousEvaluation = evaluations.LastOrDefault();
 
             Evaluations.Sections.Section currentSection = currentEvaluation
                 .Template
                 .Sections
-                .FirstOrDefault(section => section.Name == "Competencias a evaluar");
+                .FirstOrDefault(section => section.Name.Equals("competencias a evaluar", StringComparison.InvariantCultureIgnoreCase));
 
-            Evaluations.Sections.Section lastSection = lastEvaluation
+            Evaluations.Sections.Section previousSection = previousEvaluation
                 .Template
                 .Sections
-                .FirstOrDefault(section => section.Name == "Competencias a evaluar");
+                .FirstOrDefault(section => section.Name.Equals("competencias a evaluar", StringComparison.InvariantCultureIgnoreCase));
+
+
+
+            if (currentEvaluation.Id.Equals(previousEvaluation.Id) || previousSection == null)
+            {
+                return Task.FromResult(
+                    currentSection
+                    .ChildSections
+                    .Select(section => new CollaboratorCompetencesReportDto
+                    {
+                        CurrentEvaluationTitle = section.Name,
+                        CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question =>
+                            question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                                evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
+                        CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question =>
+                            question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                                evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
+                        CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question =>
+                            question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                                evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count()
+                    }).ToList()
+                );
+            }
 
             return Task.FromResult(currentSection
                 .ChildSections
@@ -111,28 +136,28 @@ namespace Yei3.PersonalEvaluation.Report
                     CurrentEvaluationTitle = section.Name,
                     CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question =>
                         question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Sum(),
+                            evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
                     CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question =>
                         question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Sum(),
+                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
                     CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question =>
                         question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Sum()
+                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count()
                 })
                 .Concat(
-                    lastSection
+                    previousSection
                         .ChildSections
                         .Select(section => new CollaboratorCompetencesReportDto
                         {
                             CurrentEvaluationTitle = section.Name,
-                            CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Sum(),
-                            CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Sum(),
-                            CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Sum()
+                            CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
+                            CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
+                            CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question => question.EvaluationUnmeasuredQuestions.Count(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count()
                         })
-                    ).ToList()
+                ).ToList()
             );
         }
-
+        [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
         {
             var groupedEvaluations = EvaluationRepository
@@ -171,7 +196,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             return await Task.FromResult(evaluations);
         }
-
+        [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults()
         {
             IQueryable<EvaluationResultsDto> evaluations = EvaluationRepository

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
@@ -17,19 +18,57 @@ namespace Yei3.PersonalEvaluation.Revision
             EvaluationRepository = evaluationRepository;
         }
 
-        public async Task ReviseEvaluation(long evaluationId)
+        public Task ReviseEvaluation(long evaluationId)
         {
-            Evaluation evaluation = await EvaluationRepository
-                .GetAll()
-                .Include(currentEvaluation => currentEvaluation.Revision)
-                .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == evaluationId);
+            Evaluation currentEvaluation = EvaluationRepository
+               .GetAll()
+               .Include(evaluation => evaluation.Template)
+               .ThenInclude(template => template.Sections)
+               .ThenInclude(section => section.ChildSections)
+               .FirstOrDefault(evaluation => evaluation.Id == evaluationId);
 
-            if (evaluation.IsNullOrDeleted())
+            if (currentEvaluation.IsNullOrDeleted())
             {
                 throw new EntityNotFoundException(typeof(Evaluation), evaluationId);
-            }
+            }            
 
-            evaluation.Revision.MarkAsRevised();
+            //if (currentEvaluation.IsNullOrDeleted())
+            //{
+            //    return Task.CompletedTask;
+            //}
+
+            //currentEvaluation.ClosingComment = evaluationClose.Comment;
+
+            //Evaluation pairEvaluation = EvaluationRepository
+            //    .GetAll()
+            //    .Include(evaluation => evaluation.Template)
+            //    .ThenInclude(template => template.Sections)
+            //    .ThenInclude(section => section.ChildSections)
+            //    .Where(evaluation => evaluation.Term == currentEvaluation.Term)
+            //    .Where(evaluation => evaluation.UserId == currentEvaluation.UserId)
+            //    .OrderByDescending(evaluation => evaluation.CreationTime)
+            //    .FirstOrDefault(evaluation => evaluation.Id != currentEvaluation.Id);
+
+            //if (pairEvaluation.IsNullOrDeleted())
+            //{
+            //    return Task.CompletedTask;
+            //}
+
+            //Sections.Section nextObjectivesSection = pairEvaluation
+            //    .Template
+            //    .Sections
+            //    .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+
+            //Sections.Section currentSection = currentEvaluation
+            //    .Template
+            //    .Sections
+            //    .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+
+            ////SectionRepository.Delete(currentSection.Id);
+
+            ////SectionRepository.Insert(nextObjectivesSection.NoTracking(currentEvaluation.Id));
+            currentEvaluation.Revision.MarkAsRevised();
+            return Task.CompletedTask;
         }
 
         public async Task UnreviseEvaluation(long evaluationId)
