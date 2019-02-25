@@ -106,8 +106,6 @@ namespace Yei3.PersonalEvaluation.Report
                 .Sections
                 .FirstOrDefault(section => section.Name.Equals("competencias a evaluar", StringComparison.InvariantCultureIgnoreCase));
 
-
-
             if (currentEvaluation.Id.Equals(previousEvaluation.Id) || previousSection == null)
             {
                 return Task.FromResult(
@@ -157,6 +155,12 @@ namespace Yei3.PersonalEvaluation.Report
                 ).ToList()
             );
         }
+
+        public async Task GetEvaluationAdministratorResults()
+        {
+            
+        }
+
         [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
         {
