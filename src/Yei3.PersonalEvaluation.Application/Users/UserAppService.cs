@@ -151,16 +151,16 @@ namespace Yei3.PersonalEvaluation.Users
             await _emailSender.SendAsync(new MailMessage(
                 from: "soporte@yei.com",
                 to: user.EmailAddress,
-                subject: "Recuperacion de Contraseña",
-                body: $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.")
+                subject: "Recuperacion de Contraseï¿½a",
+                body: $"Su nueva contraseï¿½a es {newPassword}. Al iniciar debe cambiarla.")
             );
 
             var sendGridClient = new SendGridClient("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");
             var from = new EmailAddress("soporte@yei3.com", "Soporte");
             var subject = "Soporte";
             var to = new EmailAddress(user.EmailAddress, user.FullName);
-            var plainTextContent = $"Su nueva contraseña es { newPassword}. Al iniciar debe cambiarla.";
-            var htmlContent = $"Su nueva contraseña es <strong>{ newPassword}<strong/>. Al iniciar debe cambiarla.";
+            var plainTextContent = $"Su nueva contraseï¿½a es { newPassword}. Al iniciar debe cambiarla.";
+            var htmlContent = $"Su nueva contraseï¿½a es <strong>{ newPassword}<strong/>. Al iniciar debe cambiarla.";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await sendGridClient.SendEmailAsync(msg);
         }
@@ -243,6 +243,21 @@ namespace Yei3.PersonalEvaluation.Users
             }
 
             return new string(chars);
+        }
+
+        public async Task<ICollection<User>> GetCollaborators()
+        {
+            User supervisorUser = await _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+            bool isSupervisor = await _userManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
+            if (!isSupervisor)
+            {
+                throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
+            }
+            List<User> users = _userManager
+                .Users
+                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                .ToList();
+            return users;
         }
     }
 }
