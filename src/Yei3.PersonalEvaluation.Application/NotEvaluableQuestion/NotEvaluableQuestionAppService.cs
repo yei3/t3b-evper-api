@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -74,9 +75,31 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
 
         public async Task UpdateStatus(UpdateStatusInputDto input)
         {
-            Evaluations.EvaluationQuestions.NotEvaluableQuestion question = await GetEntityByIdAsync(input.Id);
-            question.Status = input.Status;
-            await Repository.UpdateAsync(question);
+            Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion = Repository
+                        .GetAll()
+                        .Include(question => question.Evaluation)
+                        .FirstOrDefault(question => question.Id == input.Id);
+
+            Evaluations.EvaluationQuestions.NotEvaluableQuestion pairQuestion = null;
+
+            if (!currentQuestion.IsNullOrDeleted())
+            {
+                pairQuestion = Repository
+                    .GetAll()
+                    .Include(question => question.Evaluation)
+                    .Where(question => question.Text == currentQuestion.Text)
+                    .Where(question => question.Id != currentQuestion.Id)
+                    .OrderByDescending(question => question.CreationTime)
+                    .FirstOrDefault(question => question.Evaluation.UserId == currentQuestion.Evaluation.UserId);
+                if (!pairQuestion.IsNullOrDeleted())
+                {
+                    pairQuestion.Status = input.Status;
+                    await Repository.UpdateAsync(pairQuestion);
+                }
+            }
+
+            currentQuestion.Status = input.Status;
+            await Repository.UpdateAsync(currentQuestion);
         }
 
         protected override IQueryable<Evaluations.EvaluationQuestions.NotEvaluableQuestion> CreateFilteredQuery(QuestionGetAllInputDto input)
