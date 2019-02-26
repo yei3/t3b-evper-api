@@ -625,5 +625,69 @@ namespace Yei3.PersonalEvaluation.Report
 
             return await Task.FromResult(reportDto);
         }
+
+        public async Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResultsById(UserEvaluationResultDto input)
+        {
+            IQueryable<EvaluationResultsDto> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == input.UserId)
+                .OrderBy(evaluation => evaluation.CreationTime)
+                .Select(evaluation => new EvaluationResultsDto
+                {
+                    Term = evaluation.Term,
+                    Status = evaluation.Status,
+                    Id = evaluation.Id,
+                    CreationTime = evaluation.CreationTime,
+                    EvaluationTemplateId = evaluation.EvaluationId,
+                    EndDateTime = evaluation.EndDateTime,
+                    StartDateTime = evaluation.StartDateTime,
+                    Total = evaluation.Questions.OfType<EvaluationMeasuredQuestion>().Count(),
+                    Finished = evaluation.Questions
+                        .OfType<EvaluationMeasuredQuestion>()
+                        .Where(evaluationMeasuredQuestion => evaluationMeasuredQuestion.IsActive)
+                        .Count(evaluationMeasuredQuestion => evaluationMeasuredQuestion.Status == EvaluationQuestionStatus.Validated)
+                })
+                .Skip(0)
+                .Take(2);
+
+            return await evaluations.ToListAsync();
+        }
+
+        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReportById(UserEvaluationResultDto input)
+        {
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == input.UserId)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Take(2);
+
+            Evaluation currentEvaluation = evaluations.FirstOrDefault();
+
+            Evaluation lastEvaluation = evaluations.LastOrDefault();
+
+            return Task.FromResult(
+                new CollaboratorObjectivesReportDto
+                {
+                    PreviousTotal = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.EvaluationId == lastEvaluation.Id),
+                    PreviousValidated = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.EvaluationId == lastEvaluation.Id)
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                    CurrentTotal = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Count(question => question.EvaluationId == currentEvaluation.Id),
+                    CurrentValidated = NotEvaluableQuestionRepository
+                        .GetAll()
+                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.EvaluationId == currentEvaluation.Id)
+                        .Count(question => question.Status == EvaluationQuestionStatus.Validated)
+                }
+            );
+        }
     }
 }
