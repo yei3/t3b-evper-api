@@ -30,7 +30,9 @@ namespace Yei3.PersonalEvaluation.Revision
             if (currentEvaluation.IsNullOrDeleted())
             {
                 throw new EntityNotFoundException(typeof(Evaluation), evaluationId);
-            }            
+            }
+
+            //Planchar Objetivos
 
             //if (currentEvaluation.IsNullOrDeleted())
             //{
