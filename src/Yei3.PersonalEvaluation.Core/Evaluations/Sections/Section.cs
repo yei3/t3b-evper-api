@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
@@ -47,23 +48,25 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
         public virtual ICollection<MeasuredQuestion> MeasuredQuestions { get; protected set; }
         public virtual ICollection<NotEvaluableQuestion> NotEvaluableQuestions { get; protected set; }
 
-        public Section NoTracking(long evaluationId, bool trackParent = false)
+        public Section NoTracking(long sourceTemplateId, long sourceEvaluationId, long destinyTemplateId, long destinyEvaluationId, bool trackParent = false)
         {
             Section noTrackedSection = new Section(
                 Name,
                 DisplayName,
-                evaluationId,
+                destinyTemplateId,
                 ParentId,
                 IsActive,
                 Value);
 
             if (trackParent)
             {
-                noTrackedSection.ParentSection = ParentSection?.NoTracking(evaluationId);
+                noTrackedSection.ParentSection = ParentSection?.NoTracking(sourceTemplateId, sourceEvaluationId, destinyTemplateId, destinyEvaluationId);
             }
 
             if (!MeasuredQuestions.IsNullOrEmpty())
             {
+                noTrackedSection.MeasuredQuestions = new List<MeasuredQuestion>();
+
                 foreach (MeasuredQuestion measuredQuestion in MeasuredQuestions)
                 {
                     noTrackedSection.MeasuredQuestions.Add(new MeasuredQuestion(
@@ -79,6 +82,8 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
 
             if (!UnmeasuredQuestions.IsNullOrEmpty())
             {
+                noTrackedSection.UnmeasuredQuestions = new List<UnmeasuredQuestion>();
+
                 foreach (UnmeasuredQuestion unmeasuredQuestion in UnmeasuredQuestions)
                 {
                     noTrackedSection.UnmeasuredQuestions.Add(new UnmeasuredQuestion(
@@ -88,10 +93,26 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
                 }
             }
 
+            if (!NotEvaluableQuestions.IsNullOrEmpty())
+            {
+                noTrackedSection.NotEvaluableQuestions = new List<NotEvaluableQuestion>();
+
+                foreach (NotEvaluableQuestion question in NotEvaluableQuestions.Where(question => question.EvaluationId == sourceEvaluationId))
+                {
+                    noTrackedSection.NotEvaluableQuestions.Add(new NotEvaluableQuestion(
+                        0,
+                        question.Text,
+                        destinyEvaluationId,
+                        question.TerminationDateTime,
+                        EvaluationQuestionStatus.Unanswered
+                        ));
+                }
+            }
+
             if (ChildSections.IsNullOrEmpty()) return noTrackedSection;
             foreach (Section childSection in ChildSections)
             {
-                noTrackedSection.ChildSections.Add(childSection.NoTracking(evaluationId));
+                noTrackedSection.ChildSections.Add(childSection.NoTracking(sourceTemplateId, sourceEvaluationId, destinyTemplateId, destinyEvaluationId));
             }
 
             return noTrackedSection;

@@ -7,6 +7,7 @@ using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Section;
 using Yei3.PersonalEvaluation.Evaluations;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Revision.Dto;
 
 namespace Yei3.PersonalEvaluation.Revision
@@ -38,9 +39,23 @@ namespace Yei3.PersonalEvaluation.Revision
 
             Evaluation autoEvaluation = EvaluationRepository
                 .GetAll()
+                .Include(evaluations => evaluations.User)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((Evaluations.EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
                 .Include(evaluations => evaluations.Template)
-                .ThenInclude(templates => templates.Sections)
-                .ThenInclude(sections => sections.ChildSections)
+                .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.NotEvaluableQuestions)
                 .Where(evaluations => evaluations.Term == evaluation.Term)
                 .Where(evaluations => evaluations.UserId == evaluation.UserId)
                 .OrderByDescending(evaluations => evaluations.CreationTime)
@@ -61,9 +76,16 @@ namespace Yei3.PersonalEvaluation.Revision
                 .Sections
                 .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
+            foreach (Evaluations.Sections.Section currentSectionChildSection in currentSection.ChildSections)
+            {
+                SectionRepository.Delete(currentSectionChildSection.Id);
+            }
+
             SectionRepository.Delete(currentSection.Id);
-            // No works! :(
-            SectionRepository.Insert(nextObjectivesSection.NoTracking(evaluation.Id));
+
+            var importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
+
+            SectionRepository.Insert(importedSection);
 
             //evaluation.Revision.MarkAsRevised();
             return Task.CompletedTask;
