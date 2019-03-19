@@ -142,25 +142,21 @@ namespace Yei3.PersonalEvaluation.Users
                 throw new UserFriendlyException(501,
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
-
+            // 007?
             string newPassword = $"{CreateRandomPassword(12)}007";
+            // var x???
             var x = await _userManager.ChangePasswordAsync(user, newPassword);
 
             user.IsEmailConfirmed = false;
 
-            await _emailSender.SendAsync(new MailMessage(
-                from: "soporte@yei.com",
-                to: user.EmailAddress,
-                subject: "Recuperacion de Contrase�a",
-                body: $"Su nueva contrase�a es {newPassword}. Al iniciar debe cambiarla.")
-            );
-
-            var sendGridClient = new SendGridClient("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");
-            var from = new EmailAddress("soporte@yei3.com", "Soporte");
-            var subject = "Soporte";
+            // Temporary solution the key must be in the appsettings
+            var sendGridClient = new SendGridClient("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");
+            var from = new EmailAddress("soporte@yei3.com", "Soporte Yei3");
+            var subject = "Soporte Yei3 - Recovery Password";
             var to = new EmailAddress(user.EmailAddress, user.FullName);
-            var plainTextContent = $"Su nueva contrase�a es { newPassword}. Al iniciar debe cambiarla.";
-            var htmlContent = $"Su nueva contrase�a es <strong>{ newPassword}<strong/>. Al iniciar debe cambiarla.";
+            var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
+            // We need create a email template
+            var htmlContent = $"Su nueva contraseña es <strong>{newPassword}.</strong> Al iniciar sesión debe volver a cambiarla.";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await sendGridClient.SendEmailAsync(msg);
         }
