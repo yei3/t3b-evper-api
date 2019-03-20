@@ -155,7 +155,7 @@ namespace Yei3.PersonalEvaluation.Users
                 var to = new EmailAddress(user.EmailAddress, user.FullName);
                 var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
                 // We need create a email template
-                var htmlContent = $"Su nueva contraseña es <strong>{newPassword}.</strong> Al iniciar sesión debe volver a cambiarla.";
+                var htmlContent = $"Su nueva contraseña es: <strong>{newPassword}</strong> Al iniciar sesión debe volver a cambiarla.";
                 var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
 
                 try
