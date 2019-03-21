@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -124,7 +125,7 @@ namespace Yei3.PersonalEvaluation.Users
 
         public async Task RecoverPassword(RecoverPasswordDto recoverPassword)
         {
-
+            // for what?
             CurrentUnitOfWork.SetTenantId(1);
 
             User user;
@@ -142,23 +143,30 @@ namespace Yei3.PersonalEvaluation.Users
                 throw new UserFriendlyException(501,
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
-            // 007?
-            string newPassword = $"{CreateRandomPassword(12)}007";
-            // var x???
-            var x = await _userManager.ChangePasswordAsync(user, newPassword);
+            string newPassword = $"{CreateRandomPassword(8)}_t3B";
 
-            user.IsEmailConfirmed = false;
+            if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
+            {
+                user.IsEmailConfirmed = false;
+                // Temporary solution the key must be in the appsettings
+                var sendGridClient = new SendGridClient("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");
+                var from = new EmailAddress("soporte@yei3.com", "Soporte Yei3");
+                var subject = "Soporte Yei3 - Recuperación de contraseña";
+                var to = new EmailAddress(user.EmailAddress, user.FullName);
+                var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
+                // We need create a email template
+                var htmlContent = $"Su nueva contraseña es: <strong>{newPassword}</strong> Al iniciar sesión debe volver a cambiarla.";
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
 
-            // Temporary solution the key must be in the appsettings
-            var sendGridClient = new SendGridClient("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");
-            var from = new EmailAddress("soporte@yei3.com", "Soporte Yei3");
-            var subject = "Soporte Yei3 - Recovery Password";
-            var to = new EmailAddress(user.EmailAddress, user.FullName);
-            var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
-            // We need create a email template
-            var htmlContent = $"Su nueva contraseña es <strong>{newPassword}.</strong> Al iniciar sesión debe volver a cambiarla.";
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-            var response = await sendGridClient.SendEmailAsync(msg);
+                try
+                {
+                    await sendGridClient.SendEmailAsync(msg);
+                }
+                catch (Exception e)
+                {
+                    throw new UserFriendlyException(501, $"Hubo un error al en enviar el email, tu nueva contraseña es: {newPassword}");
+                }                
+            }
         }
 
         public async Task<ICollection<string>> GetAllJobDescriptions()
