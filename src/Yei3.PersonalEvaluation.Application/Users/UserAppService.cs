@@ -125,7 +125,7 @@ namespace Yei3.PersonalEvaluation.Users
 
         public async Task RecoverPassword(RecoverPasswordDto recoverPassword)
         {
-
+            // for what?
             CurrentUnitOfWork.SetTenantId(1);
 
             User user;
@@ -164,7 +164,7 @@ namespace Yei3.PersonalEvaluation.Users
                 }
                 catch (Exception e)
                 {
-                    throw new UserFriendlyException(501,$"Hubo un error al en enviar el email {e}");
+                    throw new UserFriendlyException(501, $"Hubo un error al en enviar el email, tu nueva contraseña es: {newPassword}");
                 }                
             }
         }
