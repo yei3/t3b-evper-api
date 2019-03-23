@@ -87,7 +87,8 @@ namespace Yei3.PersonalEvaluation.Revision
 
             SectionRepository.Insert(importedSection);
 
-            //evaluation.Revision.MarkAsRevised();
+            evaluation.Revision.MarkAsRevised();
+            
             return Task.CompletedTask;
         }
 
