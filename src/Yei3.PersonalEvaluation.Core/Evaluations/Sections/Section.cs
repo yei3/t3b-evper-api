@@ -99,13 +99,22 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
 
                 foreach (NotEvaluableQuestion question in NotEvaluableQuestions.Where(question => question.EvaluationId == sourceEvaluationId))
                 {
-                    noTrackedSection.NotEvaluableQuestions.Add(new NotEvaluableQuestion(
+
+                    NotEvaluableQuestion currentQuestion = new NotEvaluableQuestion(
                         0,
                         question.Text,
                         destinyEvaluationId,
                         question.TerminationDateTime,
                         EvaluationQuestionStatus.Unanswered
-                        ));
+                    );
+
+                    currentQuestion.SetAnswer(
+                        currentQuestion.Id,
+                        question.NotEvaluableAnswer.Text,
+                        question.NotEvaluableAnswer.CommitmentTime
+                    );
+
+                    noTrackedSection.NotEvaluableQuestions.Add(currentQuestion);
                 }
             }
 
