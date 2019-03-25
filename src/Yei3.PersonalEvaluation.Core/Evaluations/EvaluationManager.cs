@@ -82,6 +82,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.Finished)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.PendingReview)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.Validated)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
@@ -380,6 +383,32 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
 
             return collaboratorsPendingObjectivesSummary;
+        }
+
+        public async Task<List<EvaluationSummaryValueObject>> GetUserEvaluationsHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            User user = await UserManager.GetUserByIdAsync(userId.Value);
+
+            return await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
+                .Select(evaluation => new EvaluationSummaryValueObject
+                {
+                    Term = evaluation.Term,
+                    Id = evaluation.Id,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
+                    Status = evaluation.Status,
+                    EndDateTime = evaluation.EndDateTime,
+                    CollaboratorName = user.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                }).ToListAsync();
         }
     }
 }

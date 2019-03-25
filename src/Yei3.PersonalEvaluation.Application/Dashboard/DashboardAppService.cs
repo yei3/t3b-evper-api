@@ -52,7 +52,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
         {
             return new CollaboratorUserDashboardDto
             {
-                EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),                
+                EvaluationSummary = (await EvaluationManager.GetUserEvaluationsHistoryAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),                
             };
         }
     }
