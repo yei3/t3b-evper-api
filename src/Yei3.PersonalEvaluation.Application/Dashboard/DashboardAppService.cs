@@ -26,7 +26,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
                 ToDoesSummary = (await EvaluationManager.GetUserToDoesSummary()).MapTo<ToDoesSummaryDto>(),
                 EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).Where(evaluation => evaluation.IsAutoEvaluation).MapTo<ICollection<EvaluationSummaryDto>>(),
                 RevisionSummary = (await EvaluationManager.GetUserPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
-                ObjectiveSummary = (await EvaluationManager.GetUserPendingObjectiveAsync()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
+                ObjectiveSummary = (await EvaluationManager.GetUserObjectivesHome()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
             };
         }
 
@@ -53,6 +53,17 @@ namespace Yei3.PersonalEvaluation.Dashboard
             return new CollaboratorUserDashboardDto
             {
                 EvaluationSummary = (await EvaluationManager.GetUserEvaluationsHistoryAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),                
+            };
+        }
+
+        [HttpGet]
+        public async Task<SupervisorUserDashboardDto> SupervisorHistory()
+        {
+            return new SupervisorUserDashboardDto
+            {
+                NextEvaluationTerm = await EvaluationManager.GetUserNextEvaluationTermAsync(),
+                CollaboratorsEvaluationSummary = (await EvaluationManager.GetUserOrganizationUnitCollaboratorsEvaluationsHistoryAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),
+                CollaboratorsObjectivesSummary = (await EvaluationManager.GetUserOrganizationUnitObjectivesHistoryAsync()).MapTo<ICollection<CollaboratorsObjectivesSummaryDto>>()
             };
         }
     }
