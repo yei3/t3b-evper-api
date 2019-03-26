@@ -181,6 +181,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ToList();
         }
 
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHome(long? userId = null){
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserPendingObjectiveAsync(userId);
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .Where(dashboard => dashboard.DeliveryDate.Year == DateTime.Now.Year)
+                .ToList();
+        }
+
         public async Task<int> GetUserPendingEvaluationsCountAsync(long? userId = null)
         {
             userId = userId ?? AbpSession.GetUserId();
@@ -365,7 +373,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 foreach (User user in users)
                 {
-                    List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserPendingObjectiveAsync(user.Id);
+                    List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserObjectivesHome(user.Id);
 
                     collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
                     {
@@ -395,7 +403,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
                 .Select(evaluation => new EvaluationSummaryValueObject
@@ -409,6 +416,136 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     CollaboratorName = user.FullName,
                     IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
+        }
+
+        public async Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsEvaluationsHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+
+            List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
+
+            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+            {
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
+                    .Distinct()
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    .ToList();
+
+                foreach (User user in users)
+                {
+                    List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserEvaluationsHistoryAsync(user.Id))
+                        .ToList();
+                    evaluationsSummary.AddRange(currentUserEvaluations);
+                }
+            }
+
+            return evaluationsSummary;
+        }
+
+        public async Task<ICollection<CollaboratorsPendingObjectivesSummaryValueObject>> GetUserOrganizationUnitObjectivesHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
+
+            bool isSupervisor = await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
+
+            if (!isSupervisor)
+            {
+                throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
+            }
+
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+
+            List<CollaboratorsPendingObjectivesSummaryValueObject> collaboratorsPendingObjectivesSummary = new List<CollaboratorsPendingObjectivesSummaryValueObject>();
+
+            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+            {
+                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
+                    .Distinct()
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    .ToList();
+
+                foreach (User user in users)
+                {
+                    List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserObjectivesHistoryAsync(user.Id);
+
+                    collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
+                    {
+                        CollaboratorFullName = user.FullName,
+                        CollaboratorEmployeeNumber = user.EmployeeNumber,
+                        ObjectivesSummary = userObjectivesSummary,
+                        TotalPendingObjectives = userObjectivesSummary
+                            .Where(objective => objective.Status != EvaluationQuestionStatus.Answered)
+                            .Count(objective => objective.Status != EvaluationQuestionStatus.Validated),
+                        AccomplishedObjectives = userObjectivesSummary
+                            .Where(objective => objective.Status == EvaluationQuestionStatus.Answered)
+                            .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
+                    });
+                }
+            }
+
+            return collaboratorsPendingObjectivesSummary;
+        }
+
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .ThenInclude(evaluation => evaluation.Template)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
+                .OfType<NotEvaluableQuestion>()
+                .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                {
+                    Status = evaluationQuestion.Status,
+                    Name = evaluationQuestion.Text,
+                    DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
+                    Id = evaluationQuestion.Id,
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    {
+                        Id = objectiveBinnacle.Id,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime,
+                        UserName = UserManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
+                    }).ToList(),
+                    isNotEvaluable = true
+                }).ToListAsync();
+
+            evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
+                .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
+                .OfType<EvaluationMeasuredQuestion>()
+                .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
+                {
+                    Status = evaluationQuestion.Status,
+                    Name = evaluationQuestion.MeasuredQuestion.Text,
+                    Deliverable = evaluationQuestion.MeasuredQuestion.Deliverable,
+                    DeliveryDate = evaluationQuestion.TerminationDateTime,
+                    Id = evaluationQuestion.Id,
+                    Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
+                    {
+                        Id = objectiveBinnacle.Id,
+                        EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
+                        Text = objectiveBinnacle.Text,
+                        CreationTime = objectiveBinnacle.CreationTime
+                    }).ToList(),
+                    isNotEvaluable = false
+                }).ToListAsync());
+
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
+                .ToList();
         }
     }
 }

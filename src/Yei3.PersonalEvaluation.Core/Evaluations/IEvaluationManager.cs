@@ -25,5 +25,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<ICollection<RevisionSummaryValueObject>> GetUserOrganizationUnitPendingEvaluationRevisionsAsync(long? userId = null);
         Task<ICollection<CollaboratorsPendingObjectivesSummaryValueObject>> GetUserOrganizationUnitObjectivesSummaryAsync(long? userId = null);
 
+        Task<ICollection<CollaboratorsPendingObjectivesSummaryValueObject>> GetUserOrganizationUnitObjectivesHistoryAsync(long? userId = null);
+
+        Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHistoryAsync(long? userId = null);
+
     }
 }
