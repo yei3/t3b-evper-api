@@ -24,16 +24,9 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
         public virtual EvaluationRevisionStatus Status { get; protected set; }
         public virtual DateTime RevisionDateTime { get; protected set; }
 
-        public void MarkAsRevised()
-        {
-            Evaluation.ValidateEvaluation();
-            //Status = EvaluationRevisionStatus.Revised;
-        }
-
         public void MarkAsPending()
         {
             Evaluation.ScheduleReview();
-            //Status = EvaluationRevisionStatus.Pending;
         }
 
         public void SetRevisionTime(DateTime revisionTime)

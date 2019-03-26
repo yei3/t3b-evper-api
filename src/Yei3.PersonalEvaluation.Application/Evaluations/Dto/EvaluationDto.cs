@@ -7,6 +7,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
     using Abp.AutoMapper;
     using Abp.Application.Services.Dto;
     using System;
+    using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 
     [AutoMap(typeof(Evaluation))]
     public class EvaluationDto : EntityDto<long>
@@ -14,6 +15,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public string Name { get; set; }
         public string ClosingComment { get; set; }
         public EvaluationUserDto User { get; set; }
+        public virtual EvaluationRevision Revision { get; protected set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
         public EvaluationTerm Term { get; set; }
