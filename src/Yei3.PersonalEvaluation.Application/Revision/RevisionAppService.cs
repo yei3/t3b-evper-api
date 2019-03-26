@@ -83,11 +83,11 @@ namespace Yei3.PersonalEvaluation.Revision
 
             SectionRepository.Delete(currentSection.Id);
 
-            var importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
+            Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
 
             SectionRepository.Insert(importedSection);
 
-            evaluation.Revision.MarkAsRevised();
+            evaluation.ValidateEvaluation();
             
             return Task.CompletedTask;
         }
@@ -104,7 +104,7 @@ namespace Yei3.PersonalEvaluation.Revision
                 throw new EntityNotFoundException(typeof(Evaluation), evaluationId);
             }
 
-            evaluation.Revision.MarkAsPending();
+            evaluation.ScheduleReview();
         }
 
         public async Task FinishEvaluation(long evaluationId)

@@ -101,11 +101,11 @@ namespace Yei3.PersonalEvaluation.Evaluations.Sections
                 {
 
                     NotEvaluableQuestion currentQuestion = new NotEvaluableQuestion(
-                        0,
+                        noTrackedSection.Id,
                         question.Text,
                         destinyEvaluationId,
                         question.TerminationDateTime,
-                        EvaluationQuestionStatus.Unanswered
+                        question.Status
                     );
 
                     currentQuestion.SetAnswer(
