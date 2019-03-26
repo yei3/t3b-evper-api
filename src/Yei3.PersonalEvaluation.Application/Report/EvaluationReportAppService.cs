@@ -156,11 +156,6 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public async Task GetEvaluationAdministratorResults()
-        {
-            
-        }
-
         [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationResults()
         {
@@ -200,6 +195,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             return await Task.FromResult(evaluations);
         }
+
         [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults()
         {
@@ -228,6 +224,7 @@ namespace Yei3.PersonalEvaluation.Report
             return await evaluations.ToListAsync();
         }
 
+        [Obsolete]
         public async Task<ICollection<EvaluationResultsDto>> GetEvaluationSupervisorResults()
         {
             User supervisorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
