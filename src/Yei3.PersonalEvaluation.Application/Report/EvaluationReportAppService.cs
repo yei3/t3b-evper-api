@@ -8,7 +8,9 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Abp.UI;
+using Abp.Zero.Configuration;
 using Castle.Core.Internal;
+using Castle.MicroKernel.ModelBuilder.Descriptors;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -28,14 +30,16 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
         private readonly IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
         private readonly UserManager UserManager;
+        private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
 
-        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, UserManager userManager, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, UserManager userManager, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
             SectionRepository = sectionRepository;
             UserManager = userManager;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
+            OrganizationUnitsRepository = organizationUnitsRepository;
         }
 
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? userId = null)
@@ -437,6 +441,86 @@ namespace Yei3.PersonalEvaluation.Report
             }
 
             return collaboratorComparisons;
+        }
+
+        public async Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorObjectiveReportInputDto input)
+        {
+            User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            if (!await UserManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
+            {
+                throw new UserFriendlyException($"Usuario {administratorUser.FullName} no es un Administrador.");
+            }
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.CreationTime >= input.StarTime)
+                .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
+
+            List<long> evaluationIds = new List<long>();
+
+            if (input.UserId.HasValue)
+            {
+                evaluations = evaluations
+                    .Where(evaluation => evaluation.UserId == input.UserId.Value);
+            }
+            else
+            {
+                List<long> userIds = new List<long>();
+
+                if (!input.OrganizationUnitId.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
+                {
+                    List<Abp.Organizations.OrganizationUnit> organizationUnits =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Where(organizationUnit => input.OrganizationUnitId.Contains(organizationUnit.Id))
+                            .ToList();
+
+                    foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+                    {
+                        userIds.AddRange(
+                            (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
+                            .Select(user => user.Id)
+                            .ToList());
+                    }
+                }
+                else if (!input.OrganizationUnitId.IsNullOrEmpty() && !input.JobDescription.IsNullOrEmpty())
+                {
+                    Abp.Organizations.OrganizationUnit areaOrganizationUnit =
+                        await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
+                            input.OrganizationUnitId.Contains(organizationUnit.Id));
+
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+                else if (!input.JobDescription.IsNullOrEmpty() && input.OrganizationUnitId.IsNullOrEmpty())
+                {
+                    userIds = UserManager.Users.Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+
+                evaluationIds = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
+            }
+
+            return new AdministratorObjectiveReportDto
+            {
+                TotalObjectives = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Count(question => evaluationIds.Contains(question.EvaluationId)),
+                ValidatedObjectives = NotEvaluableQuestionRepository
+                    .GetAll()
+                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Where(question => evaluationIds.Contains(question.EvaluationId))
+                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+            };
         }
 
         protected bool IsObjectiveCompleted(MeasuredAnswer answer, MeasuredQuestion question)
