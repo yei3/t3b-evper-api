@@ -150,8 +150,8 @@ namespace Yei3.PersonalEvaluation.Users
                 user.IsEmailConfirmed = false;
                 // Temporary solution the key must be in the appsettings
                 var sendGridClient = new SendGridClient("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");
-                var from = new EmailAddress("soporte@yei3.com", "Soporte Yei3");
-                var subject = "Soporte Yei3 - Recuperación de contraseña";
+                var from = new EmailAddress("soporte@yei3.com", " Yei3");
+                var subject = "Recuperación de contraseña - Soporte Tiendas 3B";
                 var to = new EmailAddress(user.EmailAddress, user.FullName);
                 var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
                 // We need create a email template

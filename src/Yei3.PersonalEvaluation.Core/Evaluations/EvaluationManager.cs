@@ -547,5 +547,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
                 .ToList();
         }
+
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHistory(long? userId = null){
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserPendingObjectiveAsync(userId);
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
+                .ToList();
+        }
     }
 }
