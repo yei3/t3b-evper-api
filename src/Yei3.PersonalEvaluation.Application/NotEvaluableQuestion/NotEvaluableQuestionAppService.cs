@@ -91,6 +91,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableQuestion
                     .Where(question => question.Id != currentQuestion.Id)
                     .OrderByDescending(question => question.CreationTime)
                     .FirstOrDefault(question => question.Evaluation.UserId == currentQuestion.Evaluation.UserId);
+                    
                 if (!pairQuestion.IsNullOrDeleted())
                 {
                     pairQuestion.Status = input.Status;
