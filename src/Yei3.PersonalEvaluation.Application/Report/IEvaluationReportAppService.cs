@@ -17,6 +17,6 @@ namespace Yei3.PersonalEvaluation.Report
         Task<EvaluationsComparisonDto> GetCollaboratorEvaluationComparision(UserEvaluationsComparisonInputDto input);
         Task<ICollection<EvaluationsCollaboratorComparisonDto>> GetSupervisorEvaluationComparision(UserEvaluationsComparisonInputDto input);
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorObjectiveReportInputDto input);
-        Task<CollaboratorCompetencesReportDto> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input);
+        Task<List<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input);
     }
 }

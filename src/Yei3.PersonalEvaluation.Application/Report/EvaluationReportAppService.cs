@@ -507,6 +507,8 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
             }
+            // harcoded SeniorityAverage
+            Random rd = new Random();
 
             return new AdministratorObjectiveReportDto
             {
@@ -519,10 +521,11 @@ namespace Yei3.PersonalEvaluation.Report
                     .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
                     .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                SeniorityAverage = rd.Next(0,5),
             };
         }
 
-        public async Task<CollaboratorCompetencesReportDto> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
+        public async Task<List<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
@@ -599,28 +602,25 @@ namespace Yei3.PersonalEvaluation.Report
 
 
 
-            CollaboratorCompetencesReportDto result = new CollaboratorCompetencesReportDto
-            {
-                CurrentEvaluationTitle = String.Empty,
-                LastEvaluationTitle = String.Empty,
-                CurrentEvaluationExceeds = 0,
-                CurrentEvaluationSatisfactory = 0,
-                CurrentEvaluationUnsatisfactory = 0
-            };
-
+            List<CapabilitiesReportDto> result = new List<CapabilitiesReportDto>();
+            
             foreach (Evaluations.Sections.Section section in sections)
             {
-                result.CurrentEvaluationExceeds = section.UnmeasuredQuestions.Select(question =>
-                    question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                        evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count();
+                result.Add(new CapabilitiesReportDto {
+                    Name = section.Name,
 
-                result.CurrentEvaluationSatisfactory = section.UnmeasuredQuestions.Select(question =>
-                    question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                        evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count();
+                    Unsatisfactory = section.UnmeasuredQuestions.Select(question =>
+                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count(),
 
-                result.CurrentEvaluationUnsatisfactory = section.UnmeasuredQuestions.Select(question =>
+                    Satisfactory = section.UnmeasuredQuestions.Select(question =>
+                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
+                    
+                    Exceeds = section.UnmeasuredQuestions.Select(question =>
                     question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                        evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count();
+                        evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
+                });
             }
 
             return result;
