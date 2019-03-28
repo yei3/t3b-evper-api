@@ -1,4 +1,4 @@
 {
-    "appService.defaultWebAppToDeploy": "/subscriptions/e6c22008-821a-445a-affc-1f017cdb2026/resourceGroups/T3B/providers/Microsoft.Web/sites/T3B-PersonalEvaluation-API",
-    "appService.deploySubpath": "src\\Yei3.PersonalEvaluation.Web.Host\\bin\\Release\\netcoreapp2.1\\publish"
+    "appService.deploySubpath": "src/Yei3.PersonalEvaluation.Web.Host/bin/Release/netcoreapp2.1/publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/e6c22008-821a-445a-affc-1f017cdb2026/resourceGroups/T3B/providers/Microsoft.Web/sites/T3B-API-EvPer-QA"
 }
