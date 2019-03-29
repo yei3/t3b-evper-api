@@ -176,7 +176,7 @@ namespace Yei3.PersonalEvaluation.Notifications
                 var sendGridClient = new SendGridClient("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");
                 var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
                 var subject = "Contactar al administrador - Evaluación de desempeño";
-                var to = new EmailAddress("omar@yei3.com", "Omar Meléndez López");
+                var to = new EmailAddress("desarrollo@tiendas3b.com", "Desarrollo Tiendas 3B");
                 var plainTextContent = $"El empleado {userLogged.FullName} ha contactado al administrador desde la plataforma de Evaluación de desempeño. Mensaje: {input.GeneralMessage}";
                 // We need create a email template
                 var htmlContent = $"El empleado <strong>{userLogged.FullName}</strong> ha contactado al administrador desde la plataforma de Evaluación de desempeño. <br><br>Mensaje: {input.GeneralMessage}";
