@@ -13,6 +13,8 @@ using Abp.Collections.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Abp.UI;
 using Yei3.PersonalEvaluation.Evaluations;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace Yei3.PersonalEvaluation.Notifications
 {
@@ -160,6 +162,29 @@ namespace Yei3.PersonalEvaluation.Notifications
             .GetUserByIdAsync(evaluation.UserId);
             UserIdentifier targetUserId = new UserIdentifier(supervisor.TenantId, collaborator.Id);
             await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Cierre de evaluación", "Se validó el cierre de tu evaluación."), userIds: new[] { targetUserId });
+        }
+
+        public async Task Publish_SentGeneralMessageToAdminMail(CreateNotificationDto input)
+        {
+            if(string.IsNullOrEmpty(input.GeneralMessage)){
+                throw new UserFriendlyException($"Por favor ingrese un mensaje.");
+            }
+
+            User userLogged = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            // Temporary solution the key must be in the appsettings
+                var sendGridClient = new SendGridClient("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");
+                var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
+                var subject = "Contactar al administrador - Evaluación de desempeño";
+                var to = new EmailAddress("omar@yei3.com", "Omar Meléndez López");
+                var plainTextContent = $"El empleado {userLogged.FullName} ha contactado al administrador desde la plataforma de Evaluación de desempeño. Mensaje: {input.GeneralMessage}";
+                // We need create a email template
+                var htmlContent = $"El empleado <strong>{userLogged.FullName}</strong> ha contactado al administrador desde la plataforma de Evaluación de desempeño. <br><br>Mensaje: {input.GeneralMessage}";
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+
+               
+                await sendGridClient.SendEmailAsync(msg);
+                
         }
     }
 }
