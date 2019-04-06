@@ -454,7 +454,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
-                .Where(evaluation => evaluation.CreationTime >= input.StarTime)
+                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
             List<long> evaluationIds = new List<long>();
@@ -525,7 +525,7 @@ namespace Yei3.PersonalEvaluation.Report
             };
         }
 
-        public async Task<List<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
+        public async Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
@@ -536,9 +536,12 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
-                .Where(evaluation => evaluation.CreationTime >= input.StarTime)
+                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
+            if(input.OrganizationUnitId.IsNullOrEmpty()){
+                input.OrganizationUnitId = new List<long>() { OrganizationUnitsRepository.Single(organizationUnit => organizationUnit.Code.Equals("00001")).Id };
+            }
             List<long> evaluationTemplatesIds = new List<long>();
 
             if (input.UserId.HasValue)
@@ -598,29 +601,97 @@ namespace Yei3.PersonalEvaluation.Report
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
-                .ToList();
+                .ToList();            
+                        
+            IList<CapabilitiesReportDto> result = 
+                new List<CapabilitiesReportDto>() {
+                    new CapabilitiesReportDto {
+                        Name = "Orientación a resultados",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Eficiencia",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Orientación al detalle",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Comunicación",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Capacidad de análisis y solución de problemas",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Cultura 3B",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    }
+                };
 
-
-
-            List<CapabilitiesReportDto> result = new List<CapabilitiesReportDto>();
+            List<Evaluations.Sections.Section> subsections = new List<Evaluations.Sections.Section>();
             
             foreach (Evaluations.Sections.Section section in sections)
             {
-                result.Add(new CapabilitiesReportDto {
-                    Name = section.Name,
+                // IEnumerable<Evaluations.Sections.Section> cleanSections = section.ChildSections
+                //     .Where(subsection => subsection.ParentId != null)
+                //     .Select(subsection =>
+                //             new
+                //             {
+                //                 Name = subsection.Name,
+                //                 unmeasuredQuestions = subsection.UnmeasuredQuestions
+                //             }
+                //     );
+                
+                // subsections.Add(cleanSections);
+                // var competences = section.ChildSections
+                //     .Select(subsection => subsection.UnmeasuredQuestions);
+                // var x = competences.EvaluationUnmeasuredQuestions
+                //         .Select(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer);
 
-                    Unsatisfactory = section.UnmeasuredQuestions.Select(question =>
-                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count(),
+                // var xx = section.ChildSections
+                //     .Select(subsection => subsection.UnmeasuredQuestions)
+                //     .Select(question => question.EvaluationUnmeasuredQuestions)
+                //     .Select(
+                //         evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "71-99"
+                //     );
+                // foreach (Evaluations.Sections.Section subsection in section.ChildSections)
+                // {
+                //     var answers = subsection.UnmeasuredQuestions.Select(
+                //         question => question.EvaluationUnmeasuredQuestions.Select(
+                //             evaluationUnmeasuredQuestion => evaluationUnmeasuredQuestion.UnmeasuredAnswer.Text == "71-99")
+                //         );
 
-                    Satisfactory = section.UnmeasuredQuestions.Select(question =>
-                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
-                    
-                    Exceeds = section.UnmeasuredQuestions.Select(question =>
-                    question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                        evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
-                });
+                //     result.Add(new CapabilitiesReportDto {
+                //         Name = subsection.Name,
+
+                //         Unsatisfactory = subsection.UnmeasuredQuestions.Select(question =>
+                //             question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                //                 evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count(),
+
+                //         Satisfactory = subsection.UnmeasuredQuestions.Select(question =>
+                //             question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                //                 evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
+                        
+                //         Exceeds = subsection.UnmeasuredQuestions.Select(question =>
+                //         question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
+                //             evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
+                //     });
+                // }                
             }
 
             return result;
