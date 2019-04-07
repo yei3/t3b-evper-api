@@ -539,9 +539,6 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
-            if(input.OrganizationUnitId.IsNullOrEmpty()){
-                input.OrganizationUnitId = new List<long>() { OrganizationUnitsRepository.Single(organizationUnit => organizationUnit.Code.Equals("00001")).Id };
-            }
             List<long> evaluationTemplatesIds = new List<long>();
 
             if (input.UserId.HasValue)
@@ -596,12 +593,13 @@ namespace Yei3.PersonalEvaluation.Report
 
             List<Evaluations.Sections.Section> sections = SectionRepository
                 .GetAll()
-                .Include(section => section.UnmeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
-                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)             
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
-                .ToList();            
+                .ToList();         
                         
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
@@ -643,20 +641,19 @@ namespace Yei3.PersonalEvaluation.Report
                     }
                 };
 
-            List<Evaluations.Sections.Section> subsections = new List<Evaluations.Sections.Section>();
-            
             foreach (Evaluations.Sections.Section section in sections)
             {
-                // IEnumerable<Evaluations.Sections.Section> cleanSections = section.ChildSections
-                //     .Where(subsection => subsection.ParentId != null)
-                //     .Select(subsection =>
-                //             new
-                //             {
-                //                 Name = subsection.Name,
-                //                 unmeasuredQuestions = subsection.UnmeasuredQuestions
-                //             }
-                //     );
-                
+                var cleanSections = section.ChildSections
+                    .Where(subsection => subsection.ParentId != null)
+                    .Select(subsection =>
+                            new
+                            {
+                                Name = subsection.Name,
+                                unmeasuredQuestions = subsection.UnmeasuredQuestions
+                            }
+                    );
+            }
+
                 // subsections.Add(cleanSections);
                 // var competences = section.ChildSections
                 //     .Select(subsection => subsection.UnmeasuredQuestions);
@@ -692,7 +689,6 @@ namespace Yei3.PersonalEvaluation.Report
                 //             evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
                 //     });
                 // }                
-            }
 
             return result;
         }
