@@ -653,7 +653,6 @@ namespace Yei3.PersonalEvaluation.Report
                             }
                     );
             }
-
                 // subsections.Add(cleanSections);
                 // var competences = section.ChildSections
                 //     .Select(subsection => subsection.UnmeasuredQuestions);
