@@ -454,7 +454,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
-                .Where(evaluation => evaluation.CreationTime >= input.StarTime)
+                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
             List<long> evaluationIds = new List<long>();
@@ -525,7 +525,7 @@ namespace Yei3.PersonalEvaluation.Report
             };
         }
 
-        public async Task<List<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
+        public async Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorObjectiveReportInputDto input)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
@@ -536,7 +536,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
-                .Where(evaluation => evaluation.CreationTime >= input.StarTime)
+                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
             List<long> evaluationTemplatesIds = new List<long>();
@@ -593,35 +593,94 @@ namespace Yei3.PersonalEvaluation.Report
 
             List<Evaluations.Sections.Section> sections = SectionRepository
                 .GetAll()
-                .Include(section => section.UnmeasuredQuestions)
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
                 .ToList();
+                
+            // I'm sorry for this was also to deliver yesterday
+            IList<CapabilitiesReportDto> result = 
+                new List<CapabilitiesReportDto>() {
+                    new CapabilitiesReportDto {
+                        Name = "Orientación a resultados",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Eficiencia",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Orientación al detalle",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Comunicación",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Capacidad de análisis y solución de problemas",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Cultura 3B",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    }
+                };
 
-
-
-            List<CapabilitiesReportDto> result = new List<CapabilitiesReportDto>();
             
             foreach (Evaluations.Sections.Section section in sections)
             {
-                result.Add(new CapabilitiesReportDto {
-                    Name = section.Name,
+                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
+                {
+                    var Unsatisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "-70").Count()
+                            }
+                        ).ToList();
 
-                    Unsatisfactory = section.UnmeasuredQuestions.Select(question =>
-                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count(),
+                    var Satisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "71-99").Count()
+                            }
+                        ).ToList();
 
-                    Satisfactory = section.UnmeasuredQuestions.Select(question =>
-                        question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                            evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
-                    
-                    Exceeds = section.UnmeasuredQuestions.Select(question =>
-                    question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                        evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
-                });
+                    var Exceeds = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "+100").Count()
+                            }
+                        ).ToList();
+
+                    //sorry for this too ¯\_(ツ)_/¯
+                    for (int i = 0; i < 6; i++)
+                    {
+                        result[i].Unsatisfactory += Unsatisfactory[i].Value;
+                        result[i].Satisfactory += Satisfactory[i].Value;
+                        result[i].Exceeds += Exceeds[i].Value;
+                    }
+                }
             }
+            
 
             return result;
         }
