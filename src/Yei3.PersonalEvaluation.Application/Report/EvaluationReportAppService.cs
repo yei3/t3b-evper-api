@@ -596,11 +596,12 @@ namespace Yei3.PersonalEvaluation.Report
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
-                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)             
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
-                .ToList();         
-                        
+                .ToList();
+                
+            // I'm sorry for this was also to deliver yesterday
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
                     new CapabilitiesReportDto {
@@ -641,53 +642,45 @@ namespace Yei3.PersonalEvaluation.Report
                     }
                 };
 
+            
             foreach (Evaluations.Sections.Section section in sections)
             {
-                var cleanSections = section.ChildSections
-                    .Where(subsection => subsection.ParentId != null)
-                    .Select(subsection =>
-                            new
-                            {
-                                Name = subsection.Name,
-                                unmeasuredQuestions = subsection.UnmeasuredQuestions
+                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
+                {
+                    var Unsatisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "-70").Count()
                             }
-                    );
+                        ).ToList();
+
+                    var Satisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "71-99").Count()
+                            }
+                        ).ToList();
+
+                    var Exceeds = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "+100").Count()
+                            }
+                        ).ToList();
+
+                    //sorry for this too ¯\_(ツ)_/¯
+                    for (int i = 0; i < 6; i++)
+                    {
+                        result[i].Unsatisfactory += Unsatisfactory[i].Value;
+                        result[i].Satisfactory += Satisfactory[i].Value;
+                        result[i].Exceeds += Exceeds[i].Value;
+                    }
+                }
             }
-                // subsections.Add(cleanSections);
-                // var competences = section.ChildSections
-                //     .Select(subsection => subsection.UnmeasuredQuestions);
-                // var x = competences.EvaluationUnmeasuredQuestions
-                //         .Select(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer);
-
-                // var xx = section.ChildSections
-                //     .Select(subsection => subsection.UnmeasuredQuestions)
-                //     .Select(question => question.EvaluationUnmeasuredQuestions)
-                //     .Select(
-                //         evaluationQuestion => evaluationQuestion.UnmeasuredAnswer.Text == "71-99"
-                //     );
-                // foreach (Evaluations.Sections.Section subsection in section.ChildSections)
-                // {
-                //     var answers = subsection.UnmeasuredQuestions.Select(
-                //         question => question.EvaluationUnmeasuredQuestions.Select(
-                //             evaluationUnmeasuredQuestion => evaluationUnmeasuredQuestion.UnmeasuredAnswer.Text == "71-99")
-                //         );
-
-                //     result.Add(new CapabilitiesReportDto {
-                //         Name = subsection.Name,
-
-                //         Unsatisfactory = subsection.UnmeasuredQuestions.Select(question =>
-                //             question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                //                 evaluationQuestion.UnmeasuredAnswer.Text == "-70")).Count(),
-
-                //         Satisfactory = subsection.UnmeasuredQuestions.Select(question =>
-                //             question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                //                 evaluationQuestion.UnmeasuredAnswer.Text == "71-99")).Count(),
-                        
-                //         Exceeds = subsection.UnmeasuredQuestions.Select(question =>
-                //         question.EvaluationUnmeasuredQuestions.Select(evaluationQuestion =>
-                //             evaluationQuestion.UnmeasuredAnswer.Text == "+100")).Count(),
-                //     });
-                // }                
+            
 
             return result;
         }
