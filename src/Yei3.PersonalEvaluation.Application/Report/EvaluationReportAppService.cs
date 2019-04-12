@@ -648,6 +648,12 @@ namespace Yei3.PersonalEvaluation.Report
                         Exceeds = 0,
                     },
                     new CapabilitiesReportDto {
+                        Name = "Negociación",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
                         Name = "Cultura 3B",
                         Unsatisfactory = 0,
                         Satisfactory = 0,
@@ -658,8 +664,6 @@ namespace Yei3.PersonalEvaluation.Report
             
             foreach (Evaluations.Sections.Section section in sections)
             {   
-                int i = 0;
-                //sorry for this too ¯\_(ツ)_/¯
                 foreach (Evaluations.Sections.Section subSection in section.ChildSections)
                 {                    
                     var Unsatisfactory = subSection?.UnmeasuredQuestions
@@ -689,13 +693,19 @@ namespace Yei3.PersonalEvaluation.Report
                             }.Value
                         ).ToList();
 
-                    for (int j = 0; j < 5; j++)
+                    //sorry for this too ¯\_(ツ)_/¯
+                    for (int i = 0; i < result.Count; i++)
                     {
-                        result[i].Unsatisfactory += Unsatisfactory[j];
-                        result[i].Satisfactory += Satisfactory[j];
-                        result[i].Exceeds += Exceeds[j];
+                        if (subSection.Name.Equals(result[i].Name, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            for (int j = 0; j < Exceeds.Count; j++)
+                            {
+                                result[i].Unsatisfactory += Unsatisfactory[j];
+                                result[i].Satisfactory += Satisfactory[j];
+                                result[i].Exceeds += Exceeds[j];
+                            } break;
+                        }
                     }
-                    i++;                    
                 }                
             }
 
