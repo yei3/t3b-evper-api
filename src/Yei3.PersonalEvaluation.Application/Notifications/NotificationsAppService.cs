@@ -179,7 +179,7 @@ namespace Yei3.PersonalEvaluation.Notifications
                 var to = new EmailAddress("desarrollo@tiendas3b.com", "Desarrollo Tiendas 3B");
                 var plainTextContent = $"El empleado {userLogged.FullName} ha contactado al administrador desde la plataforma de Evaluación de desempeño. Mensaje: {input.GeneralMessage}";
                 // We need create a email template
-                var htmlContent = $"El empleado <strong>{userLogged.FullName}</strong> ha contactado al administrador desde la plataforma de Evaluación de desempeño. <br><br>Mensaje: {input.GeneralMessage}";
+                var htmlContent = $"El empleado <strong>{userLogged.FullName}</strong> ha contactado al administrador desde la plataforma de Evaluación de desempeño. <br><br>Mensaje: <br> <strong>{input.GeneralMessage}</strong>";
                 var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
 
                
