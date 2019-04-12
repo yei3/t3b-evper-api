@@ -539,12 +539,21 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
+            List<long> evaluationIds = new List<long>();
             List<long> evaluationTemplatesIds = new List<long>();
 
             if (input.UserId.HasValue)
             {
                 evaluations = evaluations
                     .Where(evaluation => evaluation.UserId == input.UserId.Value);
+
+                evaluationIds = evaluations
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
+                
+                evaluationTemplatesIds = evaluations
+                    .Select(evaluation => evaluation.EvaluationId)
+                    .ToList();
             }
             else
             {
@@ -583,6 +592,10 @@ namespace Yei3.PersonalEvaluation.Report
                         .Select(user => user.Id)
                         .ToList();
                 }
+
+                evaluationIds = evaluations
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
 
                 evaluationTemplatesIds = evaluations
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
@@ -644,43 +657,47 @@ namespace Yei3.PersonalEvaluation.Report
 
             
             foreach (Evaluations.Sections.Section section in sections)
-            {
+            {   
+                int i = 0;
+                //sorry for this too ¯\_(ツ)_/¯
                 foreach (Evaluations.Sections.Section subSection in section.ChildSections)
-                {
+                {                    
                     var Unsatisfactory = subSection?.UnmeasuredQuestions
                         .Select(uq =>
                             new {
                                 Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
                                     .Where(euq => euq?.UnmeasuredAnswer?.Text == "-70").Count()
-                            }
+                            }.Value
                         ).ToList();
 
                     var Satisfactory = subSection?.UnmeasuredQuestions
                         .Select(uq =>
                             new {
                                 Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
                                     .Where(euq => euq?.UnmeasuredAnswer?.Text == "71-99").Count()
-                            }
+                            }.Value
                         ).ToList();
 
                     var Exceeds = subSection?.UnmeasuredQuestions
                         .Select(uq =>
                             new {
                                 Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
                                     .Where(euq => euq?.UnmeasuredAnswer?.Text == "+100").Count()
-                            }
+                            }.Value
                         ).ToList();
 
-                    //sorry for this too ¯\_(ツ)_/¯
-                    for (int i = 0; i < 6; i++)
+                    for (int j = 0; j < 5; j++)
                     {
-                        result[i].Unsatisfactory += Unsatisfactory[i].Value;
-                        result[i].Satisfactory += Satisfactory[i].Value;
-                        result[i].Exceeds += Exceeds[i].Value;
+                        result[i].Unsatisfactory += Unsatisfactory[j];
+                        result[i].Satisfactory += Satisfactory[j];
+                        result[i].Exceeds += Exceeds[j];
                     }
-                }
+                    i++;                    
+                }                
             }
-            
 
             return result;
         }
