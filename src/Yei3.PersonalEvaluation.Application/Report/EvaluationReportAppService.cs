@@ -81,7 +81,7 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public async Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport()
+        public Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport()
         {
             IQueryable<Evaluation> evaluations = EvaluationRepository
                .GetAll()
@@ -165,7 +165,6 @@ namespace Yei3.PersonalEvaluation.Report
                         Exceeds = 0,
                     }
                 };
-
             
             foreach (Evaluations.Sections.Section section in sections)
             {   
@@ -198,22 +197,23 @@ namespace Yei3.PersonalEvaluation.Report
                             }.Value
                         ).ToList();
 
-                    for (int i = 0; i < result.Count; i++)
+                    //sorry for this too ¯\_(ツ)_/¯
+                    foreach (var capabilitie in result)
                     {
-                        if (subSection.Name.Equals(result[i].Name, StringComparison.InvariantCultureIgnoreCase))
+                        if (subSection.Name.StartsWith(capabilitie.Name, StringComparison.InvariantCultureIgnoreCase))
                         {
                             for (int j = 0; j < Exceeds.Count; j++)
                             {
-                                result[i].Unsatisfactory += Unsatisfactory[j];
-                                result[i].Satisfactory += Satisfactory[j];
-                                result[i].Exceeds += Exceeds[j];
+                                capabilitie.Unsatisfactory += Unsatisfactory[j];
+                                capabilitie.Satisfactory += Satisfactory[j];
+                                capabilitie.Exceeds += Exceeds[j];
                             } break;
                         }
                     }
-                }                
+                }
             }
 
-            return result;
+            return Task.FromResult(result);
         }
 
         [Obsolete]
@@ -596,6 +596,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 

@@ -23,7 +23,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
     public class EvaluationAppService : ApplicationService, IEvaluationAppService
     {
-        private readonly IEvaluationManager EvaluationManager;
         private readonly IRepository<EvaluationTemplates.EvaluationTemplate, long> EvaluationTemplateRepository;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Sections.Section, long> SectionRepository;
