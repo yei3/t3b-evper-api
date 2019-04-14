@@ -120,7 +120,6 @@ namespace Yei3.PersonalEvaluation.Report
             sections.Add(currentSection);
             sections.Add(previousSection);            
                 
-            // I'm sorry for this was also to deliver yesterday
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
                     new CapabilitiesReportDto {
@@ -199,7 +198,6 @@ namespace Yei3.PersonalEvaluation.Report
                             }.Value
                         ).ToList();
 
-                    //sorry for this too ¯\_(ツ)_/¯
                     for (int i = 0; i < result.Count; i++)
                     {
                         if (subSection.Name.Equals(result[i].Name, StringComparison.InvariantCultureIgnoreCase))
@@ -501,7 +499,7 @@ namespace Yei3.PersonalEvaluation.Report
             return collaboratorComparisons;
         }
 
-        public async Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorObjectiveReportInputDto input)
+        public async Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
@@ -525,13 +523,17 @@ namespace Yei3.PersonalEvaluation.Report
             else
             {
                 List<long> userIds = new List<long>();
+                List<long?> organizationUnitIds = new List<long?>();
 
-                if (!input.OrganizationUnitId.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
+                if (input.AreaId.HasValue) organizationUnitIds.Add(input.AreaId);
+                if (input.RegionId.HasValue) organizationUnitIds.Add(input.RegionId);
+
+                if (!organizationUnitIds.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
                 {
                     List<Abp.Organizations.OrganizationUnit> organizationUnits =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => input.OrganizationUnitId.Contains(organizationUnit.Id))
+                            .Where(organizationUnit => organizationUnitIds.Contains(organizationUnit.Id))
                             .ToList();
 
                     foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
@@ -542,18 +544,18 @@ namespace Yei3.PersonalEvaluation.Report
                             .ToList());
                     }
                 }
-                else if (!input.OrganizationUnitId.IsNullOrEmpty() && !input.JobDescription.IsNullOrEmpty())
+                else if (!organizationUnitIds.IsNullOrEmpty() && !input.JobDescription.IsNullOrEmpty())
                 {
                     Abp.Organizations.OrganizationUnit areaOrganizationUnit =
                         await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
-                            input.OrganizationUnitId.Contains(organizationUnit.Id));
+                            organizationUnitIds.Contains(organizationUnit.Id));
 
                     userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
                 }
-                else if (!input.JobDescription.IsNullOrEmpty() && input.OrganizationUnitId.IsNullOrEmpty())
+                else if (!input.JobDescription.IsNullOrEmpty() && organizationUnitIds.IsNullOrEmpty())
                 {
                     userIds = UserManager.Users.Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
@@ -619,7 +621,7 @@ namespace Yei3.PersonalEvaluation.Report
                 List<long?> organizationUnitIds = new List<long?>();
 
                 if (input.AreaId.HasValue) organizationUnitIds.Add(input.AreaId);
-                if (input.RegionId.HasValue) organizationUnitIds.Add(input.RegionId);       
+                if (input.RegionId.HasValue) organizationUnitIds.Add(input.RegionId);
 
                 if (!organizationUnitIds.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
                 {
