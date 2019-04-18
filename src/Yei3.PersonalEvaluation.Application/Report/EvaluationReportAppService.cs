@@ -526,7 +526,7 @@ namespace Yei3.PersonalEvaluation.Report
                 long? organizationUnitId = 0;
                 List<long> userIds = new List<long>();                
 
-                organizationUnitId = (input.AreaId.HasValue) ? input.AreaId : input.RegionId;
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
@@ -618,7 +618,7 @@ namespace Yei3.PersonalEvaluation.Report
                 long? organizationUnitId = 0;
                 List<long> userIds = new List<long>();
 
-                organizationUnitId = (input.AreaId.HasValue) ? input.AreaId : input.RegionId;
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
@@ -652,6 +652,7 @@ namespace Yei3.PersonalEvaluation.Report
                 }
 
                 evaluationIds = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
                     .Select(evaluation => evaluation.Id)
                     .ToList();
 
