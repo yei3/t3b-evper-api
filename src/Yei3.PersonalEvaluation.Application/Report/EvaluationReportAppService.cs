@@ -510,6 +510,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .Where(evaluation => evaluation.CreationTime >= input.StartTime)
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
@@ -522,40 +523,36 @@ namespace Yei3.PersonalEvaluation.Report
             }
             else
             {
-                List<long> userIds = new List<long>();
-                List<long?> organizationUnitIds = new List<long?>();
+                long? organizationUnitId = 0;
+                List<long> userIds = new List<long>();                
 
-                if (input.AreaId.HasValue) organizationUnitIds.Add(input.AreaId);
-                if (input.RegionId.HasValue) organizationUnitIds.Add(input.RegionId);
+                organizationUnitId = (input.AreaId.HasValue) ? input.AreaId : input.RegionId;
 
-                if (!organizationUnitIds.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
+                if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    List<Abp.Organizations.OrganizationUnit> organizationUnits =
+                    Abp.Organizations.OrganizationUnit _organizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitIds.Contains(organizationUnit.Id))
-                            .ToList();
+                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .First();
 
-                    foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
-                    {
                         userIds.AddRange(
-                            (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
+                            (await UserManager.GetUsersInOrganizationUnit(_organizationUnit, true))
                             .Select(user => user.Id)
                             .ToList());
-                    }
                 }
-                else if (!organizationUnitIds.IsNullOrEmpty() && !input.JobDescription.IsNullOrEmpty())
+                else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
                     Abp.Organizations.OrganizationUnit areaOrganizationUnit =
                         await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
-                            organizationUnitIds.Contains(organizationUnit.Id));
+                            organizationUnitId.Equals(organizationUnit.Id));
 
                     userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
                 }
-                else if (!input.JobDescription.IsNullOrEmpty() && organizationUnitIds.IsNullOrEmpty())
+                else if (!input.JobDescription.IsNullOrEmpty() && organizationUnitId.HasValue)
                 {
                     userIds = UserManager.Users.Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
@@ -618,40 +615,36 @@ namespace Yei3.PersonalEvaluation.Report
             }
             else
             {
+                long? organizationUnitId = 0;
                 List<long> userIds = new List<long>();
-                List<long?> organizationUnitIds = new List<long?>();
 
-                if (input.AreaId.HasValue) organizationUnitIds.Add(input.AreaId);
-                if (input.RegionId.HasValue) organizationUnitIds.Add(input.RegionId);
+                organizationUnitId = (input.AreaId.HasValue) ? input.AreaId : input.RegionId;
 
-                if (!organizationUnitIds.IsNullOrEmpty() && input.JobDescription.IsNullOrEmpty())
+                if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    List<Abp.Organizations.OrganizationUnit> organizationUnits =
+                    Abp.Organizations.OrganizationUnit _organizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitIds.Contains(organizationUnit.Id))
-                            .ToList();
+                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .First();
 
-                    foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
-                    {
                         userIds.AddRange(
-                            (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
+                            (await UserManager.GetUsersInOrganizationUnit(_organizationUnit, true))
                             .Select(user => user.Id)
                             .ToList());
-                    }
                 }
-                else if (!organizationUnitIds.IsNullOrEmpty() && !input.JobDescription.IsNullOrEmpty())
+                else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
                     Abp.Organizations.OrganizationUnit areaOrganizationUnit =
                         await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
-                            organizationUnitIds.Contains(organizationUnit.Id));
+                            organizationUnitId.Equals(organizationUnit.Id));
 
                     userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
                 }
-                else if (!input.JobDescription.IsNullOrEmpty() && organizationUnitIds.IsNullOrEmpty())
+                else if (!organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
                     userIds = UserManager.Users.Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
