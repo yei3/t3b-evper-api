@@ -162,7 +162,7 @@ namespace Yei3.PersonalEvaluation.Users
                 {
                     await sendGridClient.SendEmailAsync(msg);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new UserFriendlyException(501, $"Hubo un error al en enviar el email, tu nueva contraseña es: {newPassword}");
                 }                

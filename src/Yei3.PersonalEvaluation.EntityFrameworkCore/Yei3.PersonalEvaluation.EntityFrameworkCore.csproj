@@ -25,7 +25,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Yei3.PersonalEvaluation.Core\Yei3.PersonalEvaluation.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-  </ItemGroup>
 </Project>
