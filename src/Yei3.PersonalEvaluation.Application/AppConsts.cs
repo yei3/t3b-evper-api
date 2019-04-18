@@ -3,6 +3,11 @@
     public class AppConsts
     {
         /// <summary>
+        /// Int zero value for validations
+        /// </summary>
+        public const int Zero = 0;
+
+        /// <summary>
         /// Default pass phrase for SimpleStringCipher decrypt/encrypt operations
         /// </summary>
         public const string DefaultPassPhrase = "gsKxGZ012HLL3MI5";
