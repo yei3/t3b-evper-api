@@ -81,45 +81,37 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport()
+        public Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? userId = null)
         {
+            userId = userId ?? AbpSession.GetUserId();
+            List<long> evaluationIds = new List<long>();
+            List<long> evaluationTemplatesIds = new List<long>();
+
             IQueryable<Evaluation> evaluations = EvaluationRepository
                .GetAll()
-               .Include(evaluation => evaluation.Template)
-               .ThenInclude(template => template.Sections)
-               .ThenInclude(section => section.ChildSections)
-               .ThenInclude(section => section.UnmeasuredQuestions)
-               .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
-               .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
-               .Where(evaluation => evaluation.UserId == AbpSession.GetUserId())
+               .Where(evaluation => evaluation.UserId == userId)
                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-               .OrderByDescending(evaluation => evaluation.CreationTime)
-               .Take(2);
+               .OrderByDescending( evaluation => evaluation.CreationTime)
+               .Take(2);            
 
-            List<long> evaluationIds = new List<long>();
-
-            Evaluation currentEvaluation = evaluations.FirstOrDefault();
-
-            Evaluation previousEvaluation = evaluations.LastOrDefault();
-
-            evaluationIds.Add(currentEvaluation.Id);
-            evaluationIds.Add(previousEvaluation.Id);
-
-            Evaluations.Sections.Section currentSection = currentEvaluation
-                .Template
-                .Sections
-                .FirstOrDefault(section => section.Name.Equals(AppConsts.SectionCapability, StringComparison.InvariantCultureIgnoreCase));
-
-            Evaluations.Sections.Section previousSection = previousEvaluation
-                .Template
-                .Sections
-                .FirstOrDefault(section => section.Name.Equals(AppConsts.SectionCapability, StringComparison.InvariantCultureIgnoreCase));
-
-            List<Evaluations.Sections.Section> sections = new List<Evaluations.Sections.Section>();
-            
-            sections.Add(currentSection);
-            sections.Add(previousSection);            
+            evaluationIds = evaluations
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
                 
+            evaluationTemplatesIds = evaluations
+                .Select(evaluation => evaluation.EvaluationId)
+                .ToList();
+
+            List<Evaluations.Sections.Section> sections = SectionRepository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
+                .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
+                .ToList();
+
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
                     new CapabilitiesReportDto {
