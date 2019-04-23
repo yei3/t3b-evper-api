@@ -81,36 +81,12 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? userId = null)
+        public Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? period = null)
         {
-            userId = userId ?? AbpSession.GetUserId();
-            List<long> evaluationIds = new List<long>();
-            List<long> evaluationTemplatesIds = new List<long>();
-
-            IQueryable<Evaluation> evaluations = EvaluationRepository
-               .GetAll()
-               .Where(evaluation => evaluation.UserId == userId)
-               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-               .OrderByDescending( evaluation => evaluation.CreationTime)
-               .Take(2);            
-
-            evaluationIds = evaluations
-                    .Select(evaluation => evaluation.Id)
-                    .ToList();
-                
-            evaluationTemplatesIds = evaluations
-                .Select(evaluation => evaluation.EvaluationId)
-                .ToList();
-
-            List<Evaluations.Sections.Section> sections = SectionRepository
-                .GetAll()
-                .Include(section => section.ChildSections)
-                .ThenInclude(section => section.UnmeasuredQuestions)
-                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
-                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
-                .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
-                .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
-                .ToList();
+            long evaluationId = 0;
+            long evaluationTemplateId = 0;
+            long userId = AbpSession.GetUserId();
+            Evaluation _evaluation = null;
 
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
@@ -157,50 +133,90 @@ namespace Yei3.PersonalEvaluation.Report
                         Exceeds = 0,
                     }
                 };
+
+            if (period.HasValue && period == 1)
+            {
+                DateTime endDate = (DateTime.UtcNow).AddMonths(-6);
+                DateTime startDate = (DateTime.UtcNow).AddMonths(-12);
+
+                _evaluation = EvaluationRepository
+               .GetAll()
+               .Where(evaluation => evaluation.UserId == userId)
+               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+               .Where(evaluation => evaluation.CreationTime >= startDate)
+               .Where(evaluation => evaluation.CreationTime <= endDate)
+               .OrderByDescending(evaluation => evaluation.CreationTime)
+               .FirstOrDefault(); 
+            }
+            else
+            {
+                _evaluation = EvaluationRepository
+               .GetAll()
+               .Where(evaluation => evaluation.UserId == userId)
+               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+               .OrderByDescending(evaluation => evaluation.CreationTime)
+               .FirstOrDefault(); 
+            }
+
+            if (_evaluation == null)
+            {
+                return Task.FromResult(result);
+            }
+
+            evaluationId = _evaluation.Id;                
+            evaluationTemplateId = _evaluation.EvaluationId;
+
+            Evaluations.Sections.Section _section = SectionRepository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
+                .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
+                .FirstOrDefault();
+
             
-            foreach (Evaluations.Sections.Section section in sections)
-            {   
-                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
-                {                    
-                    var Unsatisfactory = subSection?.UnmeasuredQuestions
-                        .Select(uq =>
-                            new {
-                                Value = uq.EvaluationUnmeasuredQuestions
-                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
-                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "-70").Count()
-                            }.Value
-                        ).ToList();
+            
+            foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
+            {                    
+                var Unsatisfactory = subSection?.UnmeasuredQuestions
+                    .Select(uq =>
+                        new {
+                            Value = uq.EvaluationUnmeasuredQuestions
+                                .Where(euq => evaluationId == euq.EvaluationId)
+                                .Where(euq => euq?.UnmeasuredAnswer?.Text == "-70").Count()
+                        }.Value
+                    ).ToList();
 
-                    var Satisfactory = subSection?.UnmeasuredQuestions
-                        .Select(uq =>
-                            new {
-                                Value = uq.EvaluationUnmeasuredQuestions
-                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
-                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "71-99").Count()
-                            }.Value
-                        ).ToList();
+                var Satisfactory = subSection?.UnmeasuredQuestions
+                    .Select(uq =>
+                        new {
+                            Value = uq.EvaluationUnmeasuredQuestions
+                                .Where(euq => evaluationId == euq.EvaluationId)
+                                .Where(euq => euq?.UnmeasuredAnswer?.Text == "71-99").Count()
+                        }.Value
+                    ).ToList();
 
-                    var Exceeds = subSection?.UnmeasuredQuestions
-                        .Select(uq =>
-                            new {
-                                Value = uq.EvaluationUnmeasuredQuestions
-                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
-                                    .Where(euq => euq?.UnmeasuredAnswer?.Text == "+100").Count()
-                            }.Value
-                        ).ToList();
+                var Exceeds = subSection?.UnmeasuredQuestions
+                    .Select(uq =>
+                        new {
+                            Value = uq.EvaluationUnmeasuredQuestions
+                                .Where(euq => evaluationId == euq.EvaluationId)
+                                .Where(euq => euq?.UnmeasuredAnswer?.Text == "+100").Count()
+                        }.Value
+                    ).ToList();
 
-                    //sorry for this too ¯\_(ツ)_/¯
-                    foreach (var capabilitie in result)
+                foreach (var capabilitie in result)
+                {
+                    if (subSection.Name.StartsWith(capabilitie.Name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        if (subSection.Name.StartsWith(capabilitie.Name, StringComparison.InvariantCultureIgnoreCase))
+                        for (int j = 0; j < Exceeds.Count; j++)
                         {
-                            for (int j = 0; j < Exceeds.Count; j++)
-                            {
-                                capabilitie.Unsatisfactory += Unsatisfactory[j];
-                                capabilitie.Satisfactory += Satisfactory[j];
-                                capabilitie.Exceeds += Exceeds[j];
-                            } break;
-                        }
+                            capabilitie.Unsatisfactory += Unsatisfactory[j];
+                            capabilitie.Satisfactory += Satisfactory[j];
+                            capabilitie.Exceeds += Exceeds[j];
+                        } break;
                     }
                 }
             }
