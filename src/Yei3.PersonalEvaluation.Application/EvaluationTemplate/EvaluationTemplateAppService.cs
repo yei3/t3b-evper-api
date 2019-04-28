@@ -38,8 +38,9 @@ namespace Yei3.PersonalEvaluation.EvaluationTemplate
 
         public override async Task<PagedResultDto<EvaluationTemplateDto>> GetAll(GetAllEvaluationTemplateInputDto input)
         {
+            //Off course is not a good solution but i don't find any other yet
+            input.MaxResultCount = 100;
             var result = await base.GetAll(input);
-
             return result;
         }
 
