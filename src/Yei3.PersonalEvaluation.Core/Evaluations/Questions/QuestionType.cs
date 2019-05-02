@@ -2,6 +2,6 @@
 {
     public enum QuestionType
     {
-        Open, Multiple, Selection, Objective, Bool, Action
+        Open, Multiple, Selection, Objective, Bool, Action, Remarks
     }
 }
