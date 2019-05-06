@@ -52,29 +52,28 @@ namespace Yei3.PersonalEvaluation.Report
                 .OrderByDescending(evaluation => evaluation.CreationTime)
                 .Take(2);
 
-            Evaluation currentEvaluation = evaluations.FirstOrDefault();
-
             Evaluation lastEvaluation = evaluations.LastOrDefault();
+            Evaluation currentEvaluation = evaluations.FirstOrDefault();
 
             return Task.FromResult(
                 new CollaboratorObjectivesReportDto
                 {
                     PreviousTotal = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                         .Count(question => question.EvaluationId == lastEvaluation.Id),
                     PreviousValidated = NotEvaluableQuestionRepository
                         .GetAll()
                         .Where(question => question.EvaluationId == lastEvaluation.Id)
-                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                         .Count(question => question.Status == EvaluationQuestionStatus.Validated),
                     CurrentTotal = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                         .Count(question => question.EvaluationId == currentEvaluation.Id),
                     CurrentValidated = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == "Objetivos")
+                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                         .Where(question => question.EvaluationId == currentEvaluation.Id)
                         .Count(question => question.Status == EvaluationQuestionStatus.Validated)
                 }
@@ -526,8 +525,10 @@ namespace Yei3.PersonalEvaluation.Report
 
             if (input.UserId.HasValue)
             {
-                evaluations = evaluations
-                    .Where(evaluation => evaluation.UserId == input.UserId.Value);
+                evaluationIds = evaluations
+                    .Where(evaluation => evaluation.UserId == input.UserId.Value)
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
             }
             else
             {
