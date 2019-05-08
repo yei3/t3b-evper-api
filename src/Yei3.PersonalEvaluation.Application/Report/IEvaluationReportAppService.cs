@@ -7,15 +7,8 @@ namespace Yei3.PersonalEvaluation.Report
 {
     public interface IEvaluationReportAppService : IApplicationService
     {
-        Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? userId = null);
-        Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? userId = null);
-        Task<ICollection<EvaluationResultsDto>> GetEvaluationResults();
-        Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResults();
-        Task<ICollection<EvaluationResultsDto>> GetEvaluationSupervisorResults();
-        Task<EvaluationResultDetailsDto> GetEvaluationResultDetail(long evaluationTemplateId);
-        Task<EvaluationsComparisonDto> GetEvaluationComparision(EvaluationsComparisonInputDto input);
-        Task<EvaluationsComparisonDto> GetCollaboratorEvaluationComparision(UserEvaluationsComparisonInputDto input);
-        Task<ICollection<EvaluationsCollaboratorComparisonDto>> GetSupervisorEvaluationComparision(UserEvaluationsComparisonInputDto input);
+        Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null);
+        Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? period = null);
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input);
     }
