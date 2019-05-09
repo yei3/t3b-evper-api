@@ -26,7 +26,8 @@ namespace Yei3.PersonalEvaluation.Dashboard
                 ToDoesSummary = (await EvaluationManager.GetUserToDoesSummary()).MapTo<ToDoesSummaryDto>(),
                 EvaluationSummary = (await EvaluationManager.GetUserPendingEvaluationsAsync()).Where(evaluation => evaluation.IsAutoEvaluation).MapTo<ICollection<EvaluationSummaryDto>>(),
                 RevisionSummary = (await EvaluationManager.GetUserPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
-                ObjectiveSummary = (await EvaluationManager.GetUserObjectivesHome()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
+                ObjectiveSummary = (await EvaluationManager.GetUserObjectivesHome()).MapTo<ICollection<PendingObjectivesSummaryDto>>(),
+                ActionSummary = (await EvaluationManager.GetUserActionsAsync()).MapTo<ICollection<EvaluationActionDto>>()
             };
         }
 
