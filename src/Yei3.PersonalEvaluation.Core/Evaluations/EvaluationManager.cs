@@ -555,5 +555,27 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
                 .ToList();
         }
+
+        public async Task<List<EvaluationActionValueObject>> GetUserActionsAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            List<EvaluationActionValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .ThenInclude(evaluation => evaluation.Template)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .OfType<NotEvaluableQuestion>()
+                .Select(evaluationQuestion => new EvaluationActionValueObject
+                {
+                    Description = evaluationQuestion.Text,
+                }).ToListAsync();
+
+            return evaluationObjectivesSummaryValueObjects
+                .OrderBy(dashboard => dashboard.DeliveryDate)
+                .ToList();
+        }
     }
 }
