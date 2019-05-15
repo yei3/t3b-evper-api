@@ -564,14 +564,19 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
-                .OfType<NotEvaluableQuestion>()
+                .OfType<EvaluationUnmeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationActionValueObject
                 {
-                    Description = evaluationQuestion.Text,
-                }).ToListAsync();
+                    Description = evaluationQuestion.UnmeasuredAnswer.Action,
+                    Responsible = evaluationQuestion.UnmeasuredAnswer.Text,
+                    DeliveryDate = evaluationQuestion.UnmeasuredAnswer.CommitmentDate
+                })
+                .Where(evaluationQuestion => evaluationQuestion.Description != "true")
+                .Where(evaluationQuestion => evaluationQuestion.Description != "false")
+                .Where(evaluationQuestion => evaluationQuestion.Description != "")
+                .Where(evaluationQuestion => evaluationQuestion.Description != null)
+                .ToListAsync();
 
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
