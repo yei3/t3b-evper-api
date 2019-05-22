@@ -66,26 +66,28 @@ namespace Yei3.PersonalEvaluation.Revision
                 return Task.CompletedTask;
             }
 
-            Evaluations.Sections.Section nextObjectivesSection = autoEvaluation
-                .Template
-                .Sections
-                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+            if (evaluation.Template.IncludePastObjectives) {
+                Evaluations.Sections.Section nextObjectivesSection = autoEvaluation
+                    .Template
+                    .Sections
+                    .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
-            Evaluations.Sections.Section currentSection = evaluation
-                .Template
-                .Sections
-                .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+                Evaluations.Sections.Section currentSection = evaluation
+                    .Template
+                    .Sections
+                    .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
-            foreach (Evaluations.Sections.Section currentSectionChildSection in currentSection.ChildSections)
-            {
-                SectionRepository.Delete(currentSectionChildSection.Id);
+                foreach (Evaluations.Sections.Section currentSectionChildSection in currentSection.ChildSections)
+                {
+                    SectionRepository.Delete(currentSectionChildSection.Id);
+                }
+
+                SectionRepository.Delete(currentSection.Id);
+
+                Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
+
+                SectionRepository.Insert(importedSection);
             }
-
-            SectionRepository.Delete(currentSection.Id);
-
-            Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
-
-            SectionRepository.Insert(importedSection);
 
             evaluation.ValidateEvaluation();
             
