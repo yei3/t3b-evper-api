@@ -6,6 +6,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
 {
     public class EvaluationActionValueObject : ValueObject<EvaluationActionValueObject>
     {
+        public string User { get; set; }
         public string Description { get; set; }
         public string Responsible { get; set; }
         public DateTime DeliveryDate { get; set; }

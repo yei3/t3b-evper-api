@@ -10,5 +10,6 @@ namespace Yei3.PersonalEvaluation.Dashboard.Dto
         public ICollection<EvaluationSummaryDto> CollaboratorsEvaluationSummary { get; set; }
         public ICollection<RevisionSummaryDto> CollaboratorRevisionSummary { get; set; }
         public ICollection<CollaboratorsObjectivesSummaryDto> CollaboratorsObjectivesSummary { get; set; }
+        public ICollection<EvaluationActionDto> ActionSummary { get; set; }
     }
 }
