@@ -186,11 +186,33 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .Where(section => section.ParentSection.Name.StartsWith(objectivesToLoad, StringComparison.CurrentCultureIgnoreCase))
                     .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)?.Id;
 
-                long? currentEvaluationObjectivesSectionId = currentEvaluation.Template.Sections
-                    .Where(section => section.ParentId.HasValue)
-                    .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
-                    .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)?.Id;
-
+                // No utilizada la variable currentEvaluation porque no tiene los valores de la propiedad de navegacion ParentSection por ser muy profunda
+                // en cambio utilizamos el repositorio para que vaya a la base de datos a buscar el id del Parent Section
+                
+                long? currentEvaluationObjectivesSectionId = EvaluationRepository
+                    .GetAll()
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .ThenInclude(section => section.ChildSections)
+                    .Include(evaluation => evaluation.Template)
+                    .ThenInclude(template => template.Sections)
+                    .ThenInclude(section => section.ChildSections)
+                    .ThenInclude(section => section.ParentSection)
+                    .Where(evaluation => evaluation.Id == currentEvaluation.Id)
+                    .Select(evaluation => evaluation.Template)
+                    .Select(template => 
+                        template.Sections
+                                // Hasta aqui es exactamente el valor que esta en currentEvaluation, utilizamos el repo por lo explicado anteriormente
+                            .Where(section => section.ParentId.HasValue)
+                            .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                            .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)
+                        ).FirstOrDefault()?.Id;
+                    
+                    
+                    
+                
                 if(!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
