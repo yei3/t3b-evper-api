@@ -149,7 +149,7 @@ namespace Yei3.PersonalEvaluation.Notifications
                 {
                     User bossUser = users[0];
                     UserIdentifier targetUserId = new UserIdentifier(bossUser.TenantId, bossUser.Id);
-                    await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Cierre de evaluación.", "El evaluado "+userLogged.FullName+" ha modificado sus próximos objetivos."), userIds: new[] { targetUserId });
+                    await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Cierre de evaluación.", "El evaluado "+userLogged.FullName+" ha concluido el proceso de evaluación."), userIds: new[] { targetUserId });
                 }   
             }
         }
