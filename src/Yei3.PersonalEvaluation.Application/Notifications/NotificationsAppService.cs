@@ -132,8 +132,20 @@ namespace Yei3.PersonalEvaluation.Notifications
             User collaborator = await UserManager
             .GetUserByIdAsync(evaluation.UserId);
             UserIdentifier targetUserId = new UserIdentifier(supervisor.TenantId, collaborator.Id);
-            string dateReview = input.DateReview.Substring(0,10) + " " + input.DateReview.Substring(11,5);
+            string dateReview = input.DateReview;
             await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData(supervisor.FullName, "Se agendó la revisión de tu evaluación en la fecha " + dateReview), userIds: new[] { targetUserId });
+
+            // Temporary solution the key must be in the appsettings
+            var sendGridClient = new SendGridClient("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");
+            var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
+            var subject = "Revisión de evaluación - Evaluación de desempeño";
+            var to = new EmailAddress(collaborator.EmailAddress, collaborator.FullName);
+            var plainTextContent = $"Se agendó la revisión de tu evaluación en la siguiente fecha:  {dateReview}.";
+            // We need create a email template
+            var htmlContent = $"Hola {collaborator.Name} <br/>Se agendó la revisión de tu evaluación en la siguiente fecha: <strong>{dateReview}</strong>";
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            await sendGridClient.SendEmailAsync(msg);
+
         }
 
         public async Task Publish_SendBossCloseEvaluationNotification()
