@@ -44,8 +44,7 @@ namespace Yei3.PersonalEvaluation.Users
             RoleManager roleManager,
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
-            IEmailSender emailSender,
-            IHostingEnvironment env
+            IEmailSender emailSender
         )
             : base(repository)
         {
@@ -54,10 +53,7 @@ namespace Yei3.PersonalEvaluation.Users
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
             _emailSender = emailSender;
-            _appConfiguration = env.GetAppConfiguration();
         }
-
-
 
         public override async Task<UserDto> Create(CreateUserDto input)
         {
@@ -150,14 +146,13 @@ namespace Yei3.PersonalEvaluation.Users
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
             
-            var apiKey = _appConfiguration["Keys:Sengrid_Api"]
-            string newPassword = $"{CreateRandomPassword(8)}_t3B";            
+            string newPassword = $"{CreateRandomPassword(8)}_t3B";
 
             if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
             {
                 user.IsEmailConfirmed = false;
                 // Temporary solution the key must be in the appsettings
-                var sendGridClient = new SendGridClient(apiKey);
+                var sendGridClient = new SendGridClient("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");
                 var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
                 var subject = "Soporte Tiendas 3B - Recuperación de contraseña";
                 var to = new EmailAddress(user.EmailAddress, user.FullName);

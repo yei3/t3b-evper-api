@@ -10,13 +10,12 @@ using Microsoft.Extensions.Logging;
 using Castle.Facilities.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using Abp.AspNetCore;
+using Abp.AspNetCore.SignalR.Hubs;
 using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
 using Yei3.PersonalEvaluation.Authentication.JwtBearer;
 using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.Identity;
-
-using Abp.AspNetCore.SignalR.Hubs;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Startup
 {

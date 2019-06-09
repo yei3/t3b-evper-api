@@ -25,7 +25,6 @@ namespace Yei3.PersonalEvaluation.Notifications
         private readonly IUserNotificationManager  _userNotificationManager;
 
         private readonly INotificationSubscriptionManager _notificationSubscriptionManager;
-        private readonly ISessionAppService _sessionAppService;
         private readonly UserManager UserManager;
 
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
