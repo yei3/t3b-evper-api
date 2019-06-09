@@ -36,7 +36,6 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IRepository<Role> _roleRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
-        private readonly IConfigurationRoot _appConfiguration;
 
         public UserAppService(
             IRepository<User, long> repository,
