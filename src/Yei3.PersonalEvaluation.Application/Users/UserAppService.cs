@@ -150,7 +150,7 @@ namespace Yei3.PersonalEvaluation.Users
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
             
-            var apiKey = _appConfiguration["Keys:SENDGRID_API"]
+            var apiKey = _appConfiguration["Keys:Sengrid_Api"]
             string newPassword = $"{CreateRandomPassword(8)}_t3B";            
 
             if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
