@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 
+using Yei3.PersonalEvaluation.Authorization.Users;
+
 namespace Yei3.PersonalEvaluation.OrganizationUnits
 {
     using OrganizationUnit;
@@ -7,6 +9,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using System.Threading.Tasks;
     using Abp.Domain.Repositories;
     using Abp.Organizations;
+    using Abp.Runtime.Session;
     using Dto;
     using Abp.AutoMapper;
 
@@ -61,6 +64,22 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
                 .Where(organizationUnit => organizationUnit.Code.StartsWith(regionCode))
                 .ToList();
             List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
+            return organizationUnitDtos;
+        }
+
+        public async Task<ICollection<OrganizationUnitDto>> GetMyRegionOrganizationUnit()
+        {
+            User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(administratorUser);
+            List<Abp.Organizations.OrganizationUnit> regions = new List<OrganizationUnit>();
+            foreach (Abp.Organizations.OrganizationUnit area in organizationUnits)
+            {
+                if (area.ParentId != null)
+                {
+                    regions.Add(_regionOrganizationUnitRepository.Get(area.ParentId.Value));
+                }
+            }
+            List<OrganizationUnitDto> organizationUnitDtos = regions.MapTo<List<OrganizationUnitDto>>();
             return organizationUnitDtos;
         }
     }

@@ -254,11 +254,6 @@ namespace Yei3.PersonalEvaluation.Report
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
-            if (!await UserManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
-            {
-                throw new UserFriendlyException($"Usuario {administratorUser.FullName} no es un Administrador.");
-            }
-
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
@@ -338,11 +333,6 @@ namespace Yei3.PersonalEvaluation.Report
         public async Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input)
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
-
-            if (!await UserManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
-            {
-                throw new UserFriendlyException($"Usuario {administratorUser.FullName} no es un Administrador.");
-            }
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
