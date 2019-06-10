@@ -50,7 +50,6 @@ namespace Yei3.PersonalEvaluation.Report
             evaluationIds = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status != AppConsts.Zero)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .OrderByDescending(evaluation => evaluation.CreationTime)
                 .Select(evaluation => evaluation.Id)
@@ -164,7 +163,6 @@ namespace Yei3.PersonalEvaluation.Report
             evaluations = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status != AppConsts.Zero)
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
                 .OrderByDescending(evaluation => evaluation.CreationTime)
                 .Take(2)
