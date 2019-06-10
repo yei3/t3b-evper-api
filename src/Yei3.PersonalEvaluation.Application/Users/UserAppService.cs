@@ -22,6 +22,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
@@ -41,7 +42,9 @@ namespace Yei3.PersonalEvaluation.Users
             UserManager userManager,
             RoleManager roleManager,
             IRepository<Role> roleRepository,
-            IPasswordHasher<User> passwordHasher, IEmailSender emailSender)
+            IPasswordHasher<User> passwordHasher,
+            IEmailSender emailSender
+        )
             : base(repository)
         {
             _userManager = userManager;
@@ -50,8 +53,6 @@ namespace Yei3.PersonalEvaluation.Users
             _passwordHasher = passwordHasher;
             _emailSender = emailSender;
         }
-
-
 
         public override async Task<UserDto> Create(CreateUserDto input)
         {
@@ -143,13 +144,14 @@ namespace Yei3.PersonalEvaluation.Users
                 throw new UserFriendlyException(501,
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
+            
             string newPassword = $"{CreateRandomPassword(8)}_t3B";
 
             if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
             {
                 user.IsEmailConfirmed = false;
                 // Temporary solution the key must be in the appsettings
-                var sendGridClient = new SendGridClient("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");
+                var sendGridClient = new SendGridClient("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");
                 var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
                 var subject = "Soporte Tiendas 3B - Recuperación de contraseña";
                 var to = new EmailAddress(user.EmailAddress, user.FullName);
