@@ -82,7 +82,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
-                .Where(evaluation => evaluation.Status != EvaluationStatus.Finished)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.PendingReview)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.Validated)
                 .Select(evaluation => new EvaluationSummaryValueObject
