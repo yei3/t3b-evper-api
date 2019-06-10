@@ -45,7 +45,7 @@ namespace Yei3.PersonalEvaluation.Report
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null)
         {
             long userId = AbpSession.GetUserId();
-            List<long> evaluationIds = new List<long>();                
+            List<long> evaluationIds = new List<long>();
 
             evaluationIds = EvaluationRepository
                 .GetAll()
@@ -110,8 +110,11 @@ namespace Yei3.PersonalEvaluation.Report
             long evaluationId = 0;
             long evaluationTemplateId = 0;
             long userId = AbpSession.GetUserId();
-            Evaluation _evaluation = null;
+            Evaluation firstEvaluation = null;
+            Evaluation secondEvaluation = null;
+            List<Evaluation> evaluations = new List<Evaluation>();
 
+            // This must be refactor to a DTO to improve the code ;) @luiarhs
             IList<CapabilitiesReportDto> result = 
                 new List<CapabilitiesReportDto>() {
                     new CapabilitiesReportDto {
@@ -158,39 +161,35 @@ namespace Yei3.PersonalEvaluation.Report
                     }
                 };
 
+            evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Status != AppConsts.Zero)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Take(2)
+                .ToList();
+
+            firstEvaluation = evaluations.FirstOrDefault();
+            secondEvaluation = evaluations.LastOrDefault();
+
             if (period.HasValue && period == 1)
             {
-                DateTime endDate = (DateTime.UtcNow).AddMonths(-6);
-                DateTime startDate = (DateTime.UtcNow).AddMonths(-12);
-
-                _evaluation = EvaluationRepository
-               .GetAll()
-               .Where(evaluation => evaluation.UserId == userId)
-               .Where(evaluation => evaluation.Status != AppConsts.Zero)
-               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-               .Where(evaluation => evaluation.CreationTime >= startDate)
-               .Where(evaluation => evaluation.CreationTime <= endDate)
-               .OrderByDescending(evaluation => evaluation.CreationTime)
-               .FirstOrDefault(); 
+                if (firstEvaluation.Id == secondEvaluation.Id)
+                {
+                    return Task.FromResult(result);
+                }
+                else
+                {
+                    evaluationId = secondEvaluation.Id;                
+                    evaluationTemplateId = secondEvaluation.EvaluationId;
+                }
             }
             else
             {
-                _evaluation = EvaluationRepository
-               .GetAll()
-               .Where(evaluation => evaluation.UserId == userId)
-               .Where(evaluation => evaluation.Status != AppConsts.Zero)
-               .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-               .OrderByDescending(evaluation => evaluation.CreationTime)
-               .FirstOrDefault(); 
-            }
-
-            if (_evaluation == null)
-            {
-                return Task.FromResult(result);
-            }
-
-            evaluationId = _evaluation.Id;                
-            evaluationTemplateId = _evaluation.EvaluationId;
+                evaluationId = firstEvaluation.Id;                
+                evaluationTemplateId = firstEvaluation.EvaluationId;
+            }            
 
             Evaluations.Sections.Section _section = SectionRepository
                 .GetAll()
@@ -200,9 +199,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
-                .FirstOrDefault();
-
-            
+                .FirstOrDefault();            
             
             foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
             {                    
