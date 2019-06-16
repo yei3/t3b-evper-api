@@ -130,7 +130,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
+                .Where(evaluationQuestion => !evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
                 .OfType<NotEvaluableQuestion>()
