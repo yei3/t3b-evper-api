@@ -14,5 +14,7 @@ namespace Yei3.PersonalEvaluation.Sessions.Dto
         public string UserName { get; set; }
 
         public string EmailAddress { get; set; }
+
+        public virtual bool IsMale { get; set; }
     }
 }
