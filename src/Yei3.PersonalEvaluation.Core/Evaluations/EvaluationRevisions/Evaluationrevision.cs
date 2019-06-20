@@ -33,5 +33,10 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions
         {
             RevisionDateTime = revisionTime;
         }
+
+        public void UpdateReviewer(User user) {
+            ReviewerUserId = user.Id;
+            ReviewerUser = user;
+        }
     }
 }
