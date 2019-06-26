@@ -13,8 +13,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Roles
             public const string Administrator = "Administrator";
             public const string Supervisor = "Supervisor";
             public const string Collaborator = "Collaborator";
-
-            public const string SalesMan = "SalesMan"; // Assign this role to sales specific users
         }
     }
 }

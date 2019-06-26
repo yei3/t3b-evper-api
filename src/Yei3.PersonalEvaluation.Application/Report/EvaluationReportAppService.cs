@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,10 +7,8 @@ using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
-using Abp.UI;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
-using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
@@ -613,16 +610,7 @@ namespace Yei3.PersonalEvaluation.Report
         public async Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null)
         {
             long userId = AbpSession.GetUserId();
-            User currentUser = UserManager.Users.Single(user => user.Id == userId);
-
             List<long> evaluationIds = new List<long>();
-
-            bool userIsSalesMan = await UserManager.IsInRoleAsync(currentUser, StaticRoleNames.Tenants.SalesMan);
-
-            if (!userIsSalesMan)
-            {
-                throw new UserFriendlyException(403, "No Autorizado, el usuario no tiene el rol de 'Vendedor'");
-            }
 
             evaluationIds = EvaluationRepository
                 .GetAll()
