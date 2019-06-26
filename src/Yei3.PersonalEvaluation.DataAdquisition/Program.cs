@@ -32,7 +32,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
 
                     UserRegistrationManager userRegistrationManager = bootstrapper.IocManager.Resolve<UserRegistrationManager>();
 
-                    for (int row = 2; row < rowCount; row++) // start in row 3 cause data starts there, any template change can break this, is better if we provide the template
+                    for (int row = 2; row <= rowCount; row++) // start in row 3 cause data starts there, any template change can break this, is better if we provide the template
                     {
                         try
                          {
@@ -59,8 +59,9 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                 isMale: worksheet.Cells[row, 18].Value.ToString() == "MASCULINO"
                             );
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
+                            System.Console.WriteLine(e.Message);
                             System.Console.WriteLine($"Usuario {worksheet.Cells[row, 3].Value} fue agregado anteriormente.");
                         }
                     }
@@ -77,7 +78,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
             }
             catch (IndexOutOfRangeException)
             {
-                filePath = "C:\\Users\\hackergateII\\Downloads\\Layout Carga Empleados.xlsx";
+                filePath = "/home/epgeroy/Desktop/Layout Carga Empleados.xlsx";
             }
         }
     }
