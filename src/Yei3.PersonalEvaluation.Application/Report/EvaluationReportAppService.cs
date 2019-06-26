@@ -607,7 +607,7 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public async Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null)
+        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null)
         {
             long userId = AbpSession.GetUserId();
             List<long> evaluationIds = new List<long>();
@@ -627,7 +627,7 @@ namespace Yei3.PersonalEvaluation.Report
             if (lastEvaluationId == currentEvaluationId)
             {
                 return
-                    new CollaboratorObjectivesReportDto
+                    Task.FromResult(new CollaboratorObjectivesReportDto
                     {
                         PreviousTotal = 0,
                         PreviousValidated = 0,
@@ -639,42 +639,39 @@ namespace Yei3.PersonalEvaluation.Report
                             .Include(question => question.MeasuredQuestion)
                             .Include(question => question.MeasuredAnswer)
                             .Where(question => question.EvaluationId == currentEvaluationId)
-                            .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion.Expected, question.MeasuredAnswer.Real, question.MeasuredQuestion.Relation)
-                                || !question.MeasuredQuestion.ExpectedText.IsNullOrEmpty()
-                                && question.MeasuredQuestion.ExpectedText == question.MeasuredAnswer.Text)
-                    };
+                            .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer))
+                    });
             }
 
-            return new CollaboratorObjectivesReportDto
-            {
-                PreviousTotal = MeasuredQuestionRepository
+            return Task.FromResult(
+                new CollaboratorObjectivesReportDto
+                {
+                    PreviousTotal = MeasuredQuestionRepository
                         .GetAll()
                         .Count(question => question.EvaluationId == lastEvaluationId),
-                PreviousValidated = MeasuredQuestionRepository
+                    PreviousValidated = MeasuredQuestionRepository
                         .GetAll()
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
                         .Where(question => question.EvaluationId == lastEvaluationId)
-                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion.Expected, question.MeasuredAnswer.Real, question.MeasuredQuestion.Relation)
-                            || !question.MeasuredQuestion.ExpectedText.IsNullOrEmpty()
-                                && question.MeasuredQuestion.ExpectedText == question.MeasuredAnswer.Text),
-                CurrentTotal = MeasuredQuestionRepository
+                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer)),
+                    CurrentTotal = MeasuredQuestionRepository
                         .GetAll()
                         .Count(question => question.EvaluationId == currentEvaluationId),
-                CurrentValidated = MeasuredQuestionRepository
+                    CurrentValidated = MeasuredQuestionRepository
                         .GetAll()
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
                         .Where(question => question.EvaluationId == currentEvaluationId)
-                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion.Expected, question.MeasuredAnswer.Real, question.MeasuredQuestion.Relation)
-                            || !question.MeasuredQuestion.ExpectedText.IsNullOrEmpty()
-                                && question.MeasuredQuestion.ExpectedText == question.MeasuredAnswer.Text)
-            };
+                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer))
+                }
+            );
         }
 
-        protected bool IsObjectiveAccomplished(decimal expected, decimal real, MeasuredQuestionRelation relation)
+        protected bool IsObjectiveNumericAccomplished(decimal expected, decimal real, MeasuredQuestionRelation relation)
         {
-            switch (relation) {
+            switch (relation)
+            {
                 case MeasuredQuestionRelation.Equals: return expected == real;
                 case MeasuredQuestionRelation.Higher: return real > expected;
                 case MeasuredQuestionRelation.HigherOrEquals: return real >= expected;
@@ -683,6 +680,12 @@ namespace Yei3.PersonalEvaluation.Report
                 case MeasuredQuestionRelation.Undefined: return false;
                 default: return false;
             }
+        }
+
+        protected bool IsObjectiveAccomplished(MeasuredQuestion question, MeasuredAnswer answer) {
+            return question.ExpectedText.IsNullOrEmpty()
+                ? IsObjectiveNumericAccomplished(question.Expected, answer.Real, question.Relation)
+                : question.ExpectedText == answer.Text;
         }
     }
 }
