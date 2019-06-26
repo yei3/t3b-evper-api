@@ -265,14 +265,5 @@ namespace Yei3.PersonalEvaluation.Users
                 .ToList();
             return users;
         }
-
-        public async Task<bool> IsUserSalesMan()
-        {
-            User currentUser = await _userManager
-                .Users
-                .SingleAsync(user => user.Id == AbpSession.GetUserId());
-
-            return await _userManager.IsUserASalesMan(currentUser);
-        }
     }
 }

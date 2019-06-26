@@ -10,7 +10,7 @@ namespace Yei3.PersonalEvaluation.Core
         public const string ZoneManagerJobDescription = "Gerente de Zona";
         public const string RegionManagerJobDescription = "Director Regional";
 
-        public static readonly ReadOnlyCollection<string> SalesManJobDescriptions = new ReadOnlyCollection<string>(new List<string>
+        public static readonly ReadOnlyCollection<string> SalesManJobDescription = new ReadOnlyCollection<string>(new List<string>
         {
             StoreManagerJobDescription, DistrictManagerJobDescription, ZoneManagerJobDescription, RegionManagerJobDescription
         });

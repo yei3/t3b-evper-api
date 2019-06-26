@@ -14,7 +14,6 @@ namespace Yei3.PersonalEvaluation.Users
         Task UpdateScholarshipAndEmailAddress(UpdateUserDto updateUser);
 
         Task RecoverPassword(RecoverPasswordDto recoverPassword);
-        Task<bool> IsUserSalesMan();
 
         Task<ICollection<string>> GetAllJobDescriptions();
     }
