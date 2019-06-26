@@ -689,7 +689,7 @@ namespace Yei3.PersonalEvaluation.Report
             switch (relation) {
                 case MeasuredQuestionRelation.Equals: return expected == real;
                 case MeasuredQuestionRelation.Higher: return real > expected;
-                case MeasuredQuestionRelation.HigherOrEquals: return real > expected;
+                case MeasuredQuestionRelation.HigherOrEquals: return real >= expected;
                 case MeasuredQuestionRelation.Lower: return real < expected;
                 case MeasuredQuestionRelation.LowerOrEquals: return real <= expected;
                 case MeasuredQuestionRelation.Undefined: return false;
