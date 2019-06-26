@@ -144,7 +144,7 @@ namespace Yei3.PersonalEvaluation.Users
                 throw new UserFriendlyException(501,
                     $"Email {recoverPassword.EmailAddress} no coincide con el email del usuario {recoverPassword.EmployeeNumber}");
             }
-            
+
             string newPassword = $"{CreateRandomPassword(8)}_t3B";
 
             if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
@@ -167,7 +167,7 @@ namespace Yei3.PersonalEvaluation.Users
                 catch (Exception)
                 {
                     throw new UserFriendlyException(501, $"Hubo un error al en enviar el email, tu nueva contraseña es: {newPassword}");
-                }                
+                }
             }
         }
 
@@ -264,6 +264,14 @@ namespace Yei3.PersonalEvaluation.Users
                 .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                 .ToList();
             return users;
+        }
+
+        public async Task<bool> IsUserSalesMan()
+        {
+            User currentUser = await _userManager
+                .Users
+                .SingleAsync(user => user.Id == AbpSession.GetUserId());
+            return await _userManager.IsUserASalesMan(currentUser);
         }
     }
 }

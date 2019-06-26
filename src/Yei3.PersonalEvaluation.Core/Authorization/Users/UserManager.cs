@@ -16,6 +16,8 @@
     using Yei3.PersonalEvaluation.Authorization.Roles;
     using Microsoft.EntityFrameworkCore;
     using System.Threading.Tasks;
+    using System.Linq;
+    using Yei3.PersonalEvaluation.Core;
 
     public class UserManager : AbpUserManager<Role, User>
     {
@@ -61,6 +63,24 @@
         public async Task<User> FindByEmployeeNumberAsync(string employeeNumber)
         {
             return await this.Users.SingleAsync(users => users.EmployeeNumber == employeeNumber, CancellationToken);
+        }
+
+        public async Task<bool> IsUserASalesMan (User user)
+        {
+            bool isInsideOperationArea = (await GetOrganizationUnitsAsync(user))
+                .Any(organizationUnit => organizationUnit.DisplayName.Contains(BizConst.OperationsArea, StringComparison.InvariantCultureIgnoreCase));
+
+            bool hasSalesManJobDescription = false;
+            
+            foreach (string salesManJobDescription in BizConst.SalesManJobDescriptions)
+            {
+                if(user.JobDescription.Contains(salesManJobDescription, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    hasSalesManJobDescription = true;
+                    break;
+                }
+            }
+            return isInsideOperationArea && hasSalesManJobDescription;
         }
     }
 }
