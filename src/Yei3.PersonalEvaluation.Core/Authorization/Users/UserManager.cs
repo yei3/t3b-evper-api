@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
 
@@ -70,9 +71,18 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public async Task<bool> IsUserASalesMan (User user)
         {
             bool isInsideOperationArea = (await GetOrganizationUnitsAsync(user))
-                .Any(organizationUnit => organizationUnit.DisplayName.Equals(BizConst.OperationsArea, StringComparison.InvariantCultureIgnoreCase));
+                .Any(organizationUnit => organizationUnit.DisplayName.Contains(BizConst.OperationsArea, StringComparison.InvariantCultureIgnoreCase));
 
-            bool hasSalesManJobDescription = BizConst.SalesManJobDescription.Contains(user.JobDescription);
+            bool hasSalesManJobDescription = false;
+            
+            foreach (string salesManJobDescription in BizConst.SalesManJobDescriptions)
+            {
+                if(user.JobDescription.Contains(salesManJobDescription, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    hasSalesManJobDescription = true;
+                    break;
+                }
+            }
 
             return isInsideOperationArea && hasSalesManJobDescription;
         }
