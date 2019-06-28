@@ -778,7 +778,7 @@ namespace Yei3.PersonalEvaluation.Report
 
                 foreach (var capabilities in result)
                 {
-                    if (subSection.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
+                    if (_section.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
                     {
                         for (int j = 0; j < Satisfactory.Count; j++)
                         {
