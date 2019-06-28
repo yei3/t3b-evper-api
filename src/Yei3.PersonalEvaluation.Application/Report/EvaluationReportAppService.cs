@@ -687,5 +687,110 @@ namespace Yei3.PersonalEvaluation.Report
                 ? IsObjectiveNumericAccomplished(question.Expected, answer.Real, question.Relation)
                 : question.ExpectedText == answer.Text;
         }
+
+        public Task<IList<CapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null)
+        {
+            long evaluationId = 0;
+            long evaluationTemplateId = 0;
+            long userId = AbpSession.GetUserId();
+            Evaluation firstEvaluation = null;
+            Evaluation secondEvaluation = null;
+            List<Evaluation> evaluations = new List<Evaluation>();
+
+            // This must be refactor to a DTO to improve the code ;) @luiarhs
+            IList<CapabilitiesReportDto> result =
+                new List<CapabilitiesReportDto>() {
+                    
+                    new CapabilitiesReportDto {
+                        Name = "Competencias del puesto",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    },
+                    new CapabilitiesReportDto {
+                        Name = "Cultura 3B",
+                        Unsatisfactory = 0,
+                        Satisfactory = 0,
+                        Exceeds = 0,
+                    }
+                };
+
+            evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Take(2)
+                .ToList();
+
+            firstEvaluation = evaluations.FirstOrDefault();
+            secondEvaluation = evaluations.LastOrDefault();
+
+            if (period.HasValue && period == 1)
+            {
+                if (firstEvaluation.Id == secondEvaluation.Id)
+                {
+                    return Task.FromResult(result);
+                }
+                else
+                {
+                    evaluationId = secondEvaluation.Id;
+                    evaluationTemplateId = secondEvaluation.EvaluationId;
+                }
+            }
+            else
+            {
+                evaluationId = firstEvaluation.Id;
+                evaluationTemplateId = firstEvaluation.EvaluationId;
+            }
+
+            Evaluations.Sections.Section _section = SectionRepository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
+                .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
+                .FirstOrDefault();
+
+            foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
+            {
+                var Unsatisfactory = subSection?.UnmeasuredQuestions
+                    .Select(uq =>
+                        new
+                        {
+                            Value = uq.EvaluationUnmeasuredQuestions
+                                .Where(euq => evaluationId == euq.EvaluationId)
+                                .Where(euq => euq?.UnmeasuredAnswer?.Action == "false").Count()
+                        }.Value
+                    ).ToList();
+
+                var Satisfactory = subSection?.UnmeasuredQuestions
+                    .Select(uq =>
+                        new
+                        {
+                            Value = uq.EvaluationUnmeasuredQuestions
+                                .Where(euq => evaluationId == euq.EvaluationId)
+                                .Where(euq => euq?.UnmeasuredAnswer?.Action == "true").Count()
+                        }.Value
+                    ).ToList();
+
+                foreach (var capabilities in result)
+                {
+                    if (subSection.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        for (int j = 0; j < Satisfactory.Count; j++)
+                        {
+                            capabilities.Unsatisfactory += Unsatisfactory[j];
+                            capabilities.Satisfactory += Satisfactory[j];
+                        }
+                        break;
+                    }
+                }
+            }
+
+            return Task.FromResult(result);
+        }
     }
 }
