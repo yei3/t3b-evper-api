@@ -193,7 +193,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationTemplateId = firstEvaluation.EvaluationId;
             }
 
-            Evaluations.Sections.Section _section = SectionRepository
+            Evaluations.Sections.Section sections = SectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
@@ -203,7 +203,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
                 .FirstOrDefault();
 
-            foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
+            foreach (Evaluations.Sections.Section subSection in sections.ChildSections)
             {
                 var Unsatisfactory = subSection?.UnmeasuredQuestions
                     .Select(uq =>
@@ -686,6 +686,118 @@ namespace Yei3.PersonalEvaluation.Report
             return question.ExpectedText.IsNullOrEmpty()
                 ? IsObjectiveNumericAccomplished(question.Expected, answer.Real, question.Relation)
                 : question.ExpectedText == answer.Text;
+        }
+
+        public Task<IList<SalesCapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null)
+        {
+            long evaluationId = 0;
+            long evaluationTemplateId = 0;
+            long userId = AbpSession.GetUserId();
+            Evaluation firstEvaluation = null;
+            Evaluation secondEvaluation = null;
+            List<Evaluation> evaluations = new List<Evaluation>();
+
+            // This must be refactor to a DTO to improve the code ;) @luiarhs
+            IList<SalesCapabilitiesReportDto> result =
+                new List<SalesCapabilitiesReportDto>() {
+                    
+                    new SalesCapabilitiesReportDto {
+                        Name = "Competencias del puesto",
+                        Total = 0,
+                        Satisfactory = 0,
+                    },
+                    new SalesCapabilitiesReportDto {
+                        Name = "Cultura 3B",
+                        Total = 0,
+                        Satisfactory = 0,
+                    }
+                };
+
+            evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Take(2)
+                .ToList();
+
+            firstEvaluation = evaluations.FirstOrDefault();
+            secondEvaluation = evaluations.LastOrDefault();
+
+            if (period.HasValue && period == 1)
+            {
+                if (firstEvaluation.Id == secondEvaluation.Id)
+                {
+                    return Task.FromResult(result);
+                }
+                else
+                {
+                    evaluationId = secondEvaluation.Id;
+                    evaluationTemplateId = secondEvaluation.EvaluationId;
+                }
+            }
+            else
+            {
+                evaluationId = firstEvaluation.Id;
+                evaluationTemplateId = firstEvaluation.EvaluationId;
+            }
+
+            IList<Evaluations.Sections.Section> sections = SectionRepository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
+                .Where(
+                    section =>
+                        section.Name.StartsWith(AppConsts.Section3bCulture, StringComparison.CurrentCultureIgnoreCase)
+                        ||
+                        section.Name.StartsWith(AppConsts.SectionJobCapability, StringComparison.CurrentCultureIgnoreCase)
+                    )                
+                .Take(2)
+                .ToList();
+
+            foreach (var section in sections)
+            {
+                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
+                {
+                    var Unsatisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationId == euq.EvaluationId)
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Action == "false").Count()
+                            }.Value
+                        ).ToList();
+
+                    var Satisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationId == euq.EvaluationId)
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Action == "true").Count()
+                            }.Value
+                        ).ToList();
+
+                    foreach (var capabilities in result)
+                    {
+                        if (section.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            capabilities.Total = subSection.UnmeasuredQuestions.Count;
+                            for (int j = 0; j < Satisfactory.Count; j++)
+                            {
+                                capabilities.Satisfactory += Satisfactory[j];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return Task.FromResult(result);
         }
     }
 }

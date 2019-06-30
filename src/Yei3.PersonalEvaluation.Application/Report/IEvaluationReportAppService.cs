@@ -9,7 +9,7 @@ namespace Yei3.PersonalEvaluation.Report
     {
         Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null);
         Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null);
-        Task<IList<CapabilitiesReportDto>> GetCollaboratorCompetencesReport(long? period = null);
+        Task<IList<SalesCapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null);
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input);
         Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResultsById(UserEvaluationResultDto input);
