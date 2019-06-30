@@ -193,7 +193,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationTemplateId = firstEvaluation.EvaluationId;
             }
 
-            Evaluations.Sections.Section _section = SectionRepository
+            Evaluations.Sections.Section sections = SectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
@@ -203,7 +203,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
                 .FirstOrDefault();
 
-            foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
+            foreach (Evaluations.Sections.Section subSection in sections.ChildSections)
             {
                 var Unsatisfactory = subSection?.UnmeasuredQuestions
                     .Select(uq =>
@@ -688,7 +688,7 @@ namespace Yei3.PersonalEvaluation.Report
                 : question.ExpectedText == answer.Text;
         }
 
-        public Task<IList<CapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null)
+        public Task<IList<SalesCapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null)
         {
             long evaluationId = 0;
             long evaluationTemplateId = 0;
@@ -698,20 +698,18 @@ namespace Yei3.PersonalEvaluation.Report
             List<Evaluation> evaluations = new List<Evaluation>();
 
             // This must be refactor to a DTO to improve the code ;) @luiarhs
-            IList<CapabilitiesReportDto> result =
-                new List<CapabilitiesReportDto>() {
+            IList<SalesCapabilitiesReportDto> result =
+                new List<SalesCapabilitiesReportDto>() {
                     
-                    new CapabilitiesReportDto {
+                    new SalesCapabilitiesReportDto {
                         Name = "Competencias del puesto",
-                        Unsatisfactory = 0,
+                        Total = 0,
                         Satisfactory = 0,
-                        Exceeds = 0,
                     },
-                    new CapabilitiesReportDto {
+                    new SalesCapabilitiesReportDto {
                         Name = "Cultura 3B",
-                        Unsatisfactory = 0,
+                        Total = 0,
                         Satisfactory = 0,
-                        Exceeds = 0,
                     }
                 };
 
@@ -744,48 +742,57 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationTemplateId = firstEvaluation.EvaluationId;
             }
 
-            Evaluations.Sections.Section _section = SectionRepository
+            IList<Evaluations.Sections.Section> sections = SectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
-                .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
                 .Where(section => evaluationTemplateId == section.EvaluationTemplateId)
-                .FirstOrDefault();
+                .Where(
+                    section =>
+                        section.Name.StartsWith(AppConsts.Section3bCulture, StringComparison.CurrentCultureIgnoreCase)
+                        ||
+                        section.Name.StartsWith(AppConsts.SectionJobCapability, StringComparison.CurrentCultureIgnoreCase)
+                    )                
+                .Take(2)
+                .ToList();
 
-            foreach (Evaluations.Sections.Section subSection in _section.ChildSections)
+            foreach (var section in sections)
             {
-                var Unsatisfactory = subSection?.UnmeasuredQuestions
-                    .Select(uq =>
-                        new
-                        {
-                            Value = uq.EvaluationUnmeasuredQuestions
-                                .Where(euq => evaluationId == euq.EvaluationId)
-                                .Where(euq => euq?.UnmeasuredAnswer?.Action == "false").Count()
-                        }.Value
-                    ).ToList();
-
-                var Satisfactory = subSection?.UnmeasuredQuestions
-                    .Select(uq =>
-                        new
-                        {
-                            Value = uq.EvaluationUnmeasuredQuestions
-                                .Where(euq => evaluationId == euq.EvaluationId)
-                                .Where(euq => euq?.UnmeasuredAnswer?.Action == "true").Count()
-                        }.Value
-                    ).ToList();
-
-                foreach (var capabilities in result)
+                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
                 {
-                    if (_section.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
+                    var Unsatisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationId == euq.EvaluationId)
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Action == "false").Count()
+                            }.Value
+                        ).ToList();
+
+                    var Satisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationId == euq.EvaluationId)
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Action == "true").Count()
+                            }.Value
+                        ).ToList();
+
+                    foreach (var capabilities in result)
                     {
-                        for (int j = 0; j < Satisfactory.Count; j++)
+                        if (section.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
                         {
-                            capabilities.Unsatisfactory += Unsatisfactory[j];
-                            capabilities.Satisfactory += Satisfactory[j];
+                            capabilities.Total = subSection.UnmeasuredQuestions.Count;
+                            for (int j = 0; j < Satisfactory.Count; j++)
+                            {
+                                capabilities.Satisfactory += Satisfactory[j];
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
