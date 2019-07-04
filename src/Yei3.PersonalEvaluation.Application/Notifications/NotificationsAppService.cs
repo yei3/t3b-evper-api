@@ -135,7 +135,7 @@ namespace Yei3.PersonalEvaluation.Notifications
             await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData(supervisor.FullName, "Se agendó la revisión de tu evaluación en la fecha " + dateReview), userIds: new[] { targetUserId });
 
             // Temporary solution the key must be in the appsettings
-            var sendGridClient = new SendGridClient("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");
+            var sendGridClient = new SendGridClient("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");
             var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
             var subject = "Revisión de evaluación - Evaluación de desempeño";
             var to = new EmailAddress(collaborator.EmailAddress, collaborator.FullName);
@@ -184,7 +184,7 @@ namespace Yei3.PersonalEvaluation.Notifications
             User userLogged = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
             // Temporary solution the key must be in the appsettings
-                var sendGridClient = new SendGridClient("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");
+                var sendGridClient = new SendGridClient("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");
                 var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
                 var subject = "Contactar al administrador - Evaluación de desempeño";
                 var to = new EmailAddress("desarrollo@tiendas3b.com", "Desarrollo Tiendas 3B");

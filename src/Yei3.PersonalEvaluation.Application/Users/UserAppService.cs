@@ -151,7 +151,7 @@ namespace Yei3.PersonalEvaluation.Users
             {
                 user.IsEmailConfirmed = false;
                 // Temporary solution the key must be in the appsettings
-                var sendGridClient = new SendGridClient("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");
+                var sendGridClient = new SendGridClient("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");
                 var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
                 var subject = "Soporte Tiendas 3B - Recuperación de contraseña";
                 var to = new EmailAddress(user.EmailAddress, user.FullName);
