@@ -14,7 +14,7 @@
         public const string Section3bCulture = "cultura 3b";
         public const string SectionCapability = "competencias";
         public const string SectionJobCapability = "competencias del puesto";
-        public const string SectionObjectivesName = "objetivos";
-        public const string SectionNextObjectivesName = "próximos objetivos";
+        public const string SectionObjectivesName = "Objetivos";
+        public const string SectionNextObjectivesName = "Próximos Objetivos";
     }
 }
