@@ -37,6 +37,8 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
 
+        private new string DeletePermissionName = "";
+
         public UserAppService(
             IRepository<User, long> repository,
             UserManager userManager,

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
@@ -44,7 +45,12 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
         private void UpdateSupervisorSubordinateRelation(User eventUser)
         {
             // find user immediate superior
-            User immediateSupervisor = _userManager.Users.Single(user => user.JobDescription == eventUser.ImmediateSupervisor);
+            User immediateSupervisor = _userManager.Users.FirstOrDefault(user => user.JobDescription == eventUser.ImmediateSupervisor);
+
+            if (immediateSupervisor == null)
+            {
+                throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido.");
+            }
 
             // find subordinates
             IQueryable<User> subordinates = _userManager.Users
