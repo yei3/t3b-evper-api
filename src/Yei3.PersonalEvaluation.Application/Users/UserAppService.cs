@@ -22,7 +22,6 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
-using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
@@ -36,8 +35,6 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IRepository<Role> _roleRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
-
-        private new string DeletePermissionName = "";
 
         public UserAppService(
             IRepository<User, long> repository,
