@@ -578,43 +578,37 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+            
             List<EvaluationActionValueObject> actionSummaryValueObjects = new List<EvaluationActionValueObject>();
 
-            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
-            {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
-                    .Distinct()
+           List<User> users = UserManager.Users
                     .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
-                foreach (User user in users)
+            foreach (User user in users)
+            {
+                List<EvaluationActionValueObject>  newListActions = await EvaluationQuestionRepository
+                .GetAll()
+                .Include(evaluationQuestion => evaluationQuestion.Evaluation)
+                .ThenInclude(evaluation => evaluation.Template)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == user.Id)
+                .OfType<EvaluationUnmeasuredQuestion>()
+                .Select(evaluationQuestion => new EvaluationActionValueObject
                 {
-                    List<EvaluationActionValueObject>  newListActions = await EvaluationQuestionRepository
-                    .GetAll()
-                    .Include(evaluationQuestion => evaluationQuestion.Evaluation)
-                    .ThenInclude(evaluation => evaluation.Template)
-                    .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == user.Id)
-                    .OfType<EvaluationUnmeasuredQuestion>()
-                    .Select(evaluationQuestion => new EvaluationActionValueObject
-                    {
-                        User = user.FullName,
-                        Description = evaluationQuestion.UnmeasuredAnswer.Action,
-                        Responsible = evaluationQuestion.UnmeasuredAnswer.Text,
-                        DeliveryDate = evaluationQuestion.UnmeasuredAnswer.CommitmentDate
-                    })
-                    .Where(evaluationQuestion => evaluationQuestion.Description != "true")
-                    .Where(evaluationQuestion => evaluationQuestion.Description != "false")
-                    .Where(evaluationQuestion => evaluationQuestion.Description != "")
-                    .Where(evaluationQuestion => evaluationQuestion.Description != null)
-                    .ToListAsync();
+                    User = user.FullName,
+                    Description = evaluationQuestion.UnmeasuredAnswer.Action,
+                    Responsible = evaluationQuestion.UnmeasuredAnswer.Text,
+                    DeliveryDate = evaluationQuestion.UnmeasuredAnswer.CommitmentDate
+                })
+                .Where(evaluationQuestion => evaluationQuestion.Description != "true")
+                .Where(evaluationQuestion => evaluationQuestion.Description != "false")
+                .Where(evaluationQuestion => evaluationQuestion.Description != "")
+                .Where(evaluationQuestion => evaluationQuestion.Description != null)
+                .ToListAsync();
 
-                    actionSummaryValueObjects.AddRange(newListActions);
-                }
+                actionSummaryValueObjects.AddRange(newListActions);
             }
-
             
-
             return actionSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
                 .ToList();
