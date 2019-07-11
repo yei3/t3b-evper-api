@@ -134,10 +134,11 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return currentUser;
         }
 
-        public async Task<ICollection<UserFullNameDto>> GetUserTree()
+        public async Task<ICollection<UserFullNameDto>> GetUserTree(string jobDescription)
         {
             User currentUser = await GetCurrentUserIfAdmin();
-            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser))
+                .Where(user => user.JobDescription == jobDescription);
 
             return subordinates.MapTo<List<UserFullNameDto>>();
         }
