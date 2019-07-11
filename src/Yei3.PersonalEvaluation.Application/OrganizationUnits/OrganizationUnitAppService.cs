@@ -88,7 +88,6 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree()
         {
-            
             User currentUser = await GetCurrentUserIfAdmin();
 
             IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
@@ -135,6 +134,28 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
             return subordinates.MapTo<List<UserFullNameDto>>();
+        }
+
+        public async Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree()
+        {
+            User currentUser = await GetCurrentUserIfAdmin();
+
+            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+                .OfType<RegionOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+
+            foreach(User subordinate in subordinates)
+            {
+                var subordinateAreas = (await UserManager.GetOrganizationUnitsAsync(subordinate))
+                        .OfType<RegionOrganizationUnit>()
+                        .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+
+                areas.Concat(subordinateAreas);
+            }
+
+            return areas.Distinct().ToList();
         }
     }
 }
