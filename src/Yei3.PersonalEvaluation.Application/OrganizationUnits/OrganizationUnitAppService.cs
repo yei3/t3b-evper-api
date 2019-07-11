@@ -96,7 +96,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
             IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
-            foreach(User subordinate in subordinates)
+            foreach (User subordinate in subordinates)
             {
                 var subordinateAreas = (await UserManager.GetOrganizationUnitsAsync(subordinate))
                         .OfType<AreaOrganizationUnit>()
@@ -140,22 +140,31 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         {
             User currentUser = await GetCurrentUserIfAdmin();
 
-            IEnumerable<OrganizationUnitDto> regions = (await UserManager.GetOrganizationUnitsAsync(currentUser))
-                .OfType<RegionOrganizationUnit>()
-                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
-
             IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
-            foreach(User subordinate in subordinates)
-            {
-                var subordinateRegions = (await UserManager.GetOrganizationUnitsAsync(subordinate))
-                        .OfType<RegionOrganizationUnit>()
-                        .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+            List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
 
-                regions.Concat(subordinateRegions);
+            foreach (User subordinate in subordinates)
+            {
+                IEnumerable<string> regionCodes = (await UserManager.GetOrganizationUnitsAsync(subordinate))
+                    .Select(organizationUnit => organizationUnit.Code.Substring(0, 5))
+                    .Distinct();
+
+
+                foreach (string code in regionCodes)
+                {
+                    OrganizationUnitDto currentRegion = (await _regionOrganizationUnitRepository
+                        .SingleAsync(region => region.Code == code))
+                        .MapTo<OrganizationUnitDto>();
+
+                    if (regions.Contains(currentRegion))
+                        continue;
+
+                    regions.Add(currentRegion);
+                }
             }
 
-            return regions.Distinct().ToList();
+            return regions;
         }
     }
 }
