@@ -53,7 +53,7 @@ namespace Yei3.PersonalEvaluation.DataAdquisition
                                 reassignDate: worksheet.Cells[row, 14].Value == null
                                     ? null
                                     : worksheet.Cells[row, 14].Value.ToString(),
-                                birthDate: worksheet.Cells[row, 15].Value.ToString(),
+                                birthDate: worksheet.Cells[row, 15].Value?.ToString(),
                                 scholarship: worksheet.Cells[row, 16].Value.ToString(),
                                 email: worksheet.Cells[row, 17].Value.ToString(),
                                 isMale: worksheet.Cells[row, 18].Value.ToString() == "MASCULINO"
