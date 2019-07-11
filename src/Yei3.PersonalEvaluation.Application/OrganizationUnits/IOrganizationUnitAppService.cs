@@ -14,9 +14,9 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         Task<ICollection<OrganizationUnitDto>> GetAllAreasOrganizationUnitsByRegionCode(string regionCode);
         Task<ICollection<OrganizationUnitDto>> GetMyRegionOrganizationUnit();
 
-        Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree(long regionId);
+        Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree();
         Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree();
-        Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree(long areaId);
-        Task<ICollection<UserFullNameDto>> GetUserTree(string jobDescription);
+        Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree();
+        Task<ICollection<UserFullNameDto>> GetUserTree();
     }
 }
