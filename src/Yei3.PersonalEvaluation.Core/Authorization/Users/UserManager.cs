@@ -23,39 +23,39 @@
     {
         public UserManager(
             RoleManager roleManager,
-            UserStore store, 
-            IOptions<IdentityOptions> optionsAccessor, 
-            IPasswordHasher<User> passwordHasher, 
-            IEnumerable<IUserValidator<User>> userValidators, 
+            UserStore store,
+            IOptions<IdentityOptions> optionsAccessor,
+            IPasswordHasher<User> passwordHasher,
+            IEnumerable<IUserValidator<User>> userValidators,
             IEnumerable<IPasswordValidator<User>> passwordValidators,
-            ILookupNormalizer keyNormalizer, 
-            IdentityErrorDescriber errors, 
-            IServiceProvider services, 
-            ILogger<UserManager<User>> logger, 
-            IPermissionManager permissionManager, 
-            IUnitOfWorkManager unitOfWorkManager, 
-            ICacheManager cacheManager, 
-            IRepository<OrganizationUnit, long> organizationUnitRepository, 
-            IRepository<UserOrganizationUnit, long> userOrganizationUnitRepository, 
-            IOrganizationUnitSettings organizationUnitSettings, 
+            ILookupNormalizer keyNormalizer,
+            IdentityErrorDescriber errors,
+            IServiceProvider services,
+            ILogger<UserManager<User>> logger,
+            IPermissionManager permissionManager,
+            IUnitOfWorkManager unitOfWorkManager,
+            ICacheManager cacheManager,
+            IRepository<OrganizationUnit, long> organizationUnitRepository,
+            IRepository<UserOrganizationUnit, long> userOrganizationUnitRepository,
+            IOrganizationUnitSettings organizationUnitSettings,
             ISettingManager settingManager)
             : base(
-                roleManager, 
-                store, 
-                optionsAccessor, 
-                passwordHasher, 
-                userValidators, 
-                passwordValidators, 
-                keyNormalizer, 
-                errors, 
-                services, 
-                logger, 
-                permissionManager, 
-                unitOfWorkManager, 
+                roleManager,
+                store,
+                optionsAccessor,
+                passwordHasher,
+                userValidators,
+                passwordValidators,
+                keyNormalizer,
+                errors,
+                services,
+                logger,
+                permissionManager,
+                unitOfWorkManager,
                 cacheManager,
-                organizationUnitRepository, 
-                userOrganizationUnitRepository, 
-                organizationUnitSettings, 
+                organizationUnitRepository,
+                userOrganizationUnitRepository,
+                organizationUnitSettings,
                 settingManager)
         {
         }
@@ -65,22 +65,36 @@
             return await this.Users.SingleAsync(users => users.EmployeeNumber == employeeNumber, CancellationToken);
         }
 
-        public async Task<bool> IsUserASalesMan (User user)
+        public async Task<bool> IsUserASalesMan(User user)
         {
             bool isInsideOperationArea = (await GetOrganizationUnitsAsync(user))
                 .Any(organizationUnit => organizationUnit.DisplayName.Contains(BizConst.OperationsArea, StringComparison.InvariantCultureIgnoreCase));
 
             bool hasSalesManJobDescription = false;
-            
+
             foreach (string salesManJobDescription in BizConst.SalesManJobDescriptions)
             {
-                if(user.JobDescription.Contains(salesManJobDescription, StringComparison.InvariantCultureIgnoreCase))
+                if (user.JobDescription.Contains(salesManJobDescription, StringComparison.InvariantCultureIgnoreCase))
                 {
                     hasSalesManJobDescription = true;
                     break;
                 }
             }
             return isInsideOperationArea && hasSalesManJobDescription;
+        }
+
+        public async Task<IQueryable<User>> GetSubordinatesTree(User rootUser)
+        {
+            IQueryable<User> subordinates;
+            while ((subordinates = Users.Where(user => user.ImmediateSupervisor == rootUser.JobDescription)).Count() > 0)
+            {
+                foreach (User subordinate in subordinates)
+                {
+                    return subordinates.Concat(await GetSubordinatesTree(subordinate));
+                }
+            }
+
+            return subordinates;
         }
     }
 }

@@ -12,6 +12,9 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using Abp.Runtime.Session;
     using Dto;
     using Abp.AutoMapper;
+    using Yei3.PersonalEvaluation.Authorization.Roles;
+    using Abp.UI;
+    using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
 
     public class OrganizationUnitAppService : PersonalEvaluationAppServiceBase, IOrganizationUnitAppService
     {
@@ -81,6 +84,57 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             }
             List<OrganizationUnitDto> organizationUnitDtos = regions.MapTo<List<OrganizationUnitDto>>();
             return organizationUnitDtos;
+        }
+
+        public async Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree()
+        {
+            
+            User currentUser = await GetCurrentUserIfAdmin();
+
+            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+                .OfType<AreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+
+            foreach(User subordinate in subordinates)
+            {
+                var subordinateAreas = (await UserManager.GetOrganizationUnitsAsync(subordinate))
+                        .OfType<AreaOrganizationUnit>()
+                        .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+
+                areas.Concat(subordinateAreas);
+            }
+
+            return areas.Distinct().ToList();
+        }
+
+        public async Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree()
+        {
+            User currentUser = await GetCurrentUserIfAdmin();
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+
+            return subordinates.MapTo<List<UserJobDescriptionDto>>();
+        }
+
+        private async Task<User> GetCurrentUserIfAdmin()
+        {
+            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            if (!await UserManager.IsInRoleAsync(currentUser, StaticRoleNames.Tenants.Administrator))
+            {
+                throw new UserFriendlyException(403, $"Usuario {currentUser.FullName} no tiene autorizacion.");
+            }
+
+            return currentUser;
+        }
+
+        public async Task<ICollection<UserFullNameDto>> GetUserTree()
+        {
+            User currentUser = await GetCurrentUserIfAdmin();
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+
+            return subordinates.MapTo<List<UserFullNameDto>>();
         }
     }
 }
