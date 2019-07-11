@@ -140,7 +140,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         {
             User currentUser = await GetCurrentUserIfAdmin();
 
-            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+            IEnumerable<OrganizationUnitDto> regions = (await UserManager.GetOrganizationUnitsAsync(currentUser))
                 .OfType<RegionOrganizationUnit>()
                 .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
 
@@ -148,14 +148,14 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
             foreach(User subordinate in subordinates)
             {
-                var subordinateAreas = (await UserManager.GetOrganizationUnitsAsync(subordinate))
+                var subordinateRegions = (await UserManager.GetOrganizationUnitsAsync(subordinate))
                         .OfType<RegionOrganizationUnit>()
                         .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
 
-                areas.Concat(subordinateAreas);
+                regions.Concat(subordinateRegions);
             }
 
-            return areas.Distinct().ToList();
+            return regions.Distinct().ToList();
         }
     }
 }
