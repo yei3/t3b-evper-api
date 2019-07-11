@@ -112,10 +112,12 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return areas.Distinct().ToList();
         }
 
-        public async Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree()
+        public async Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree(long areaId)
         {
             User currentUser = await GetCurrentUserIfAdmin();
-            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+
+            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser))
+                .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, areaId).GetAwaiter().GetResult());
 
             return subordinates.MapTo<List<UserJobDescriptionDto>>();
         }
