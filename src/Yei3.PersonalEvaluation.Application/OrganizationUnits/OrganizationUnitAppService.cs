@@ -88,13 +88,13 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree()
         {
-            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            User currentUser = await GetCurrentUserIfSupervisor();
 
             IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
                 .OfType<AreaOrganizationUnit>()
                 .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
 
-            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+            List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
             foreach (User subordinate in subordinates)
             {
@@ -110,7 +110,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree()
         {
-            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            User currentUser = await GetCurrentUserIfSupervisor();
 
             List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser)).ToList();
             List<UserJobDescriptionDto> usersJobDescription = new List<UserJobDescriptionDto>();
@@ -129,11 +129,11 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return usersJobDescription;
         }
 
-        private async Task<User> GetCurrentUserIfAdmin()
+        private async Task<User> GetCurrentUserIfSupervisor()
         {
             User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
-            if (!await UserManager.IsInRoleAsync(currentUser, StaticRoleNames.Tenants.Administrator))
+            if (!await UserManager.IsInRoleAsync(currentUser, StaticRoleNames.Tenants.Supervisor))
             {
                 throw new UserFriendlyException(403, $"Usuario {currentUser.FullName} no tiene autorizacion.");
             }
@@ -143,17 +143,17 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<UserFullNameDto>> GetUserTree()
         {
-            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
-            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+            User currentUser = await GetCurrentUserIfSupervisor();
+            List<User> subordinates = await UserManager.GetSubordinatesTree(currentUser);
 
             return subordinates.MapTo<List<UserFullNameDto>>();
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree()
         {
-            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+            User currentUser = await GetCurrentUserIfSupervisor();
 
-            IQueryable<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
+            List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
             List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
 

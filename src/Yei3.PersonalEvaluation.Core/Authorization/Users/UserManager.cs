@@ -83,18 +83,16 @@
             return isInsideOperationArea && hasSalesManJobDescription;
         }
 
-        public async Task<IQueryable<User>> GetSubordinatesTree(User rootUser)
+        public async Task<List<User>> GetSubordinatesTree(User rootUser)
         {
-            IQueryable<User> subordinates;
-            while ((subordinates = Users.Where(user => user.ImmediateSupervisor == rootUser.JobDescription)).Count() > 0)
+            List<User> subordinates = Users.Where(user => user.ImmediateSupervisor == rootUser.JobDescription).ToList();
+            List<User> result = new List<User>(subordinates);
+            foreach (User currentUser in subordinates)
             {
-                foreach (User subordinate in subordinates)
-                {
-                    return subordinates.Concat(await GetSubordinatesTree(subordinate));
-                }
+                result.AddRange(await GetSubordinatesTree(currentUser));
             }
 
-            return subordinates;
+            return result;
         }
     }
 }
