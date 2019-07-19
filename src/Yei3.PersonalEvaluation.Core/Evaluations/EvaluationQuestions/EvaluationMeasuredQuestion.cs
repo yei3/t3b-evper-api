@@ -7,9 +7,12 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
 {
     public class EvaluationMeasuredQuestion : EvaluableQuestion
     {
-        
-        public EvaluationMeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status) : base(evaluationId, terminationDateTime, status, evaluationQuestionId)
+        public virtual decimal? Expected { get; set; }
+        public virtual string ExpectedText { get; set; }
+        public EvaluationMeasuredQuestion(long evaluationId, long evaluationQuestionId, DateTime terminationDateTime, EvaluationQuestionStatus status, decimal? expected, string expectedText) : base(evaluationId, terminationDateTime, status, evaluationQuestionId)
         {
+            Expected = expected;
+            ExpectedText = expectedText;
         }
 
         public new void SetAnswer(long questionId)

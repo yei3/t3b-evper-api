@@ -144,7 +144,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EvaluationId,
                         measuredQuestion.Id,
                         currentEvaluation.EndDateTime,
-                        EvaluationQuestionStatus.Unanswered);
+                        EvaluationQuestionStatus.Unanswered,
+                        measuredQuestion.Expected,
+                        measuredQuestion.ExpectedText);
 
                     evaluationMeasuredQuestion.SetAnswer(measuredQuestion.Id);
 
@@ -308,6 +310,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
+                .ThenInclude(answer => answer.EvaluationMeasuredQuestion)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
                 .Include(evaluation => evaluation.Questions)

@@ -14,5 +14,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public DateTime CommitmentTime { get; set; }
         public string Text { get; set; }
         public string Observations { get; set; }
+        public EvaluationMeasuredQuestionDto EvaluationMeasuredQuestion { get; set; }
     }
 }

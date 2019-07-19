@@ -808,8 +808,9 @@ namespace Yei3.PersonalEvaluation.Report
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
-                .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
 
             List<long> evaluationIds = new List<long>();
 
@@ -868,11 +869,11 @@ namespace Yei3.PersonalEvaluation.Report
             {
                 TotalObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Where(question => question.Section.Name.Contains(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Count(question => evaluationIds.Contains(question.EvaluationId)),
                 ValidatedObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Where(question => question.Section.Name.Contains(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
                     .Count(question => question.Status == EvaluationQuestionStatus.Validated),
                 SeniorityAverage = rd.Next(0, 5),
