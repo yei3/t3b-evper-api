@@ -63,7 +63,9 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives
         public async Task UpdateExpectedValues(UpdateExpectedValuesDto expectedValues)
         {
             EvaluationMeasuredQuestion currentQuestion = await _evaluationMeasuredQuestionRepository
-                .FirstOrDefaultAsync(expectedValues.Id);
+                .GetAll()
+                .Include(question => question.MeasuredAnswer)
+                .FirstOrDefaultAsync(question => question.Id == expectedValues.Id);
 
             if (currentQuestion.IsNullOrDeleted())
             {
@@ -75,9 +77,19 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives
                 currentQuestion.Expected = expectedValues.ExpectedQuestion.Value;
             }
 
+            if (expectedValues.ExpectedAnswer.HasValue)
+            {
+                currentQuestion.MeasuredAnswer.Real = expectedValues.ExpectedAnswer.Value;
+            }
+
             if (!string.IsNullOrEmpty(expectedValues.ExpectedQuestionText))
             {
                 currentQuestion.ExpectedText = expectedValues.ExpectedQuestionText;
+            }
+
+            if (!string.IsNullOrEmpty(expectedValues.ExpectedAnswerText))
+            {
+                currentQuestion.MeasuredAnswer.Text = expectedValues.ExpectedAnswerText;
             }
 
             await _evaluationMeasuredQuestionRepository.UpdateAsync(currentQuestion);

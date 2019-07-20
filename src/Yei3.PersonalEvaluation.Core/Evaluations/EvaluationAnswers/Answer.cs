@@ -13,7 +13,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers
         protected Answer()
         {
         }        
-        public virtual string Text { get; protected set; }
+        public virtual string Text { get; set; }
         public virtual long EvaluationQuestionId { get; protected set; }
     }
 }
