@@ -146,8 +146,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EndDateTime,
                         EvaluationQuestionStatus.Unanswered,
                         measuredQuestion.Expected,
-                        measuredQuestion.ExpectedText,
-                        measuredQuestion.Comment);
+                        measuredQuestion.ExpectedText);
 
                     evaluationMeasuredQuestion.SetAnswer(measuredQuestion.Id);
 
