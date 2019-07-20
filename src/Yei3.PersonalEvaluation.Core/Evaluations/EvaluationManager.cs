@@ -412,23 +412,20 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
-
+            
             List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
 
-            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
-            {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
-                    .Distinct()
-                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
-                    .ToList();
+            List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
+                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                .Select(user => user.Id)
+                .ToList();
 
-                foreach (User user in users)
-                {
-                    List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserEvaluationsHistoryAsync(user.Id))
-                        .ToList();
-                    evaluationsSummary.AddRange(currentUserEvaluations);
-                }
+
+            foreach (long idUser in userIds)
+            {
+                List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserEvaluationsHistoryAsync(idUser))
+                    .ToList();
+                evaluationsSummary.AddRange(currentUserEvaluations);
             }
 
             return evaluationsSummary;
@@ -447,35 +444,31 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
             }
 
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
-
             List<CollaboratorsPendingObjectivesSummaryValueObject> collaboratorsPendingObjectivesSummary = new List<CollaboratorsPendingObjectivesSummaryValueObject>();
 
-            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
+            List<User> users = UserManager.Users
+                .Distinct()
+                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                .ToList();
+
+            foreach (User user in users)
             {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
-                    .Distinct()
-                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
-                    .ToList();
+                List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserObjectivesHistoryAsync(user.Id);
 
-                foreach (User user in users)
+                collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
                 {
-                    List<EvaluationObjectivesSummaryValueObject> userObjectivesSummary = await GetUserObjectivesHistoryAsync(user.Id);
-
-                    collaboratorsPendingObjectivesSummary.Add(new CollaboratorsPendingObjectivesSummaryValueObject
-                    {
-                        CollaboratorFullName = user.FullName,
-                        CollaboratorEmployeeNumber = user.EmployeeNumber,
-                        ObjectivesSummary = userObjectivesSummary,
-                        TotalPendingObjectives = userObjectivesSummary
-                            .Where(objective => objective.Status != EvaluationQuestionStatus.Answered)
-                            .Count(objective => objective.Status != EvaluationQuestionStatus.Validated),
-                        AccomplishedObjectives = userObjectivesSummary
-                            .Where(objective => objective.Status == EvaluationQuestionStatus.Answered)
-                            .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
-                    });
-                }
+                    CollaboratorFullName = user.FullName,
+                    CollaboratorEmployeeNumber = user.EmployeeNumber,
+                    ObjectivesSummary = userObjectivesSummary,
+                    TotalPendingObjectives = userObjectivesSummary
+                        .Where(objective => objective.Status != EvaluationQuestionStatus.Answered)
+                        .Count(objective => objective.Status != EvaluationQuestionStatus.Validated),
+                    AccomplishedObjectives = userObjectivesSummary
+                        .Where(objective => objective.Status == EvaluationQuestionStatus.Answered)
+                        .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
+                });
             }
+        
 
             return collaboratorsPendingObjectivesSummary;
         }
