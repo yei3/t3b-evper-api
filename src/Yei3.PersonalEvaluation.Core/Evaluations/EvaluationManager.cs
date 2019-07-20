@@ -319,25 +319,24 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 throw new UserFriendlyException($"El usuario {supervisorUser.FullName} no autorizado.");
             }
 
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
+            //List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(supervisorUser);
 
             List<RevisionSummaryValueObject> revisionsSummary = new List<RevisionSummaryValueObject>();
 
-            foreach (Abp.Organizations.OrganizationUnit organizationUnit in organizationUnits)
-            {
-                List<User> users = (await UserManager.GetUsersInOrganizationUnit(organizationUnit, true))
-                    .Distinct()
+            
+                List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
                     .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    .Select(user => user.Id)
                     .ToList();
 
-                foreach (User user in users)
+                foreach (long idUser in userIds)
                 {
-                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(user.Id))
+                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(idUser))
                         .ToList();
 
                     revisionsSummary.AddRange(currentUserPendingRevisions);
                 }
-            }
+            
 
             return revisionsSummary;
         }
