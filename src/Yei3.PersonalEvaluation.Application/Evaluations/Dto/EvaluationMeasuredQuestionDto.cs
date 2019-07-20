@@ -9,6 +9,5 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
     {
         public decimal? Expected { get; set; }
         public string ExpectedText { get; set; }
-        public string Comment { get; set; }
     }
 }

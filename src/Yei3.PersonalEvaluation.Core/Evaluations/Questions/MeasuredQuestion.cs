@@ -21,7 +21,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.Questions
 
         public virtual decimal Expected { get; protected set; }
         public virtual string ExpectedText { get; protected set; }
-        public virtual string Comment { get; protected set; }
         public virtual MeasuredQuestionRelation Relation { get; protected set; }
         public virtual string Deliverable { get; protected set; }
         public virtual ICollection<EvaluationMeasuredQuestion> EvaluationMeasuredQuestions { get; protected set; }
