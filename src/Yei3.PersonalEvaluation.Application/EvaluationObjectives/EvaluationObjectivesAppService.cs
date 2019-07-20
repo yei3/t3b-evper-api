@@ -70,14 +70,14 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives
                 throw new UserFriendlyException(404, "Pregunta no encontrada");
             }
 
-            if (expectedValues.Expected.HasValue)
+            if (expectedValues.QuestionExpected.HasValue)
             {
-                currentQuestion.Expected = expectedValues.Expected.Value;
+                currentQuestion.Expected = expectedValues.QuestionExpected.Value;
             }
 
-            if (!string.IsNullOrEmpty(expectedValues.ExpectedText))
+            if (!string.IsNullOrEmpty(expectedValues.QuestionExpectedText))
             {
-                currentQuestion.ExpectedText = expectedValues.ExpectedText;
+                currentQuestion.ExpectedText = expectedValues.QuestionExpectedText;
             }
 
             await _evaluationMeasuredQuestionRepository.UpdateAsync(currentQuestion);
