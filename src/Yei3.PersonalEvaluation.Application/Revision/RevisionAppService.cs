@@ -94,21 +94,6 @@ namespace Yei3.PersonalEvaluation.Revision
             return Task.CompletedTask;
         }
 
-        public async Task UnreviseEvaluation(long evaluationId)
-        {
-            Evaluation evaluation = await EvaluationRepository
-                .GetAll()
-                .Include(currentEvaluation => currentEvaluation.Revision)
-                .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == evaluationId);
-
-            if (evaluation.IsNullOrDeleted())
-            {
-                throw new EntityNotFoundException(typeof(Evaluation), evaluationId);
-            }
-
-            evaluation.ScheduleReview();
-        }
-
         public async Task FinishEvaluation(long evaluationId)
         {
             Evaluation evaluation = await EvaluationRepository
@@ -136,6 +121,7 @@ namespace Yei3.PersonalEvaluation.Revision
                 .Include(currentEvaluation => currentEvaluation.Revision)
                 .FirstOrDefaultAsync(currentEvaluation => currentEvaluation.Id == input.EvaluationId);
 
+            evaluation.ScheduleReview();
             evaluation.Revision.SetRevisionTime(input.RevisionTime);
         }
     }

@@ -152,17 +152,14 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         public async Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree()
         {
             User currentUser = await GetCurrentUserIfSupervisor();
-
             List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
-
             List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
-
+            
             foreach (User subordinate in subordinates)
             {
                 IEnumerable<string> regionCodes = (await UserManager.GetOrganizationUnitsAsync(subordinate))
                     .Select(organizationUnit => organizationUnit.Code.Substring(0, 5))
                     .Distinct();
-
 
                 foreach (string code in regionCodes)
                 {
