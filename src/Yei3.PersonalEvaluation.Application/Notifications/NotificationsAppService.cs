@@ -128,23 +128,26 @@ namespace Yei3.PersonalEvaluation.Notifications
         {
             User supervisor = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
             Evaluation evaluation = EvaluationRepository.FirstOrDefault(input.EvaluationId);
-            User collaborator = await UserManager
-            .GetUserByIdAsync(evaluation.UserId);
+            User collaborator = await UserManager.GetUserByIdAsync(evaluation.UserId);
             UserIdentifier targetUserId = new UserIdentifier(supervisor.TenantId, collaborator.Id);
-            string dateReview = input.DateReview;
-            await _notiticationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData(supervisor.FullName, "Se agendó la revisión de tu evaluación en la fecha " + dateReview), userIds: new[] { targetUserId });
+            
+            await _notiticationPublisher.PublishAsync(
+                "GeneralNotification",
+                new SentGeneralUserNotificationData(supervisor.FullName, "Se agendó la revisión de tu evaluación en la fecha " + input.DateReview),
+                userIds: new[] { targetUserId }
+            );
 
             // Temporary solution the key must be in the appsettings
             var sendGridClient = new SendGridClient("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");
             var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
             var subject = "Revisión de evaluación - Evaluación de desempeño";
             var to = new EmailAddress(collaborator.EmailAddress, collaborator.FullName);
-            var plainTextContent = $"Se agendó la revisión de tu evaluación en la siguiente fecha:  {dateReview}.";
+            var plainTextContent = $"Se agendó la revisión de tu evaluación en la siguiente fecha: {input.DateReview}.";
             // We need create a email template
-            var htmlContent = $"Hola {collaborator.Name} <br/>Se agendó la revisión de tu evaluación en la siguiente fecha: <strong>{dateReview}</strong>";
+            var htmlContent = $"Hola {collaborator.Name} <br/>Se agendó la revisión de tu evaluación en la siguiente fecha: <strong>{input.DateReview}</strong>";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-            await sendGridClient.SendEmailAsync(msg);
 
+            await sendGridClient.SendEmailAsync(msg);
         }
 
         public async Task Publish_SendBossCloseEvaluationNotification()
