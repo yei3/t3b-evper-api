@@ -66,7 +66,8 @@ namespace Yei3.PersonalEvaluation.Revision
                 return Task.CompletedTask;
             }
 
-            if (evaluation.Template.IncludePastObjectives) {
+            if (evaluation.Template.IncludePastObjectives)
+            {
                 Evaluations.Sections.Section nextObjectivesSection = autoEvaluation
                     .Template
                     .Sections
@@ -76,7 +77,9 @@ namespace Yei3.PersonalEvaluation.Revision
                     .Template
                     .Sections
                     .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
-
+                // TODO: No se debe borrar la seccion ya que esta es unica y compartida con el resto Evaluacions que tengan el mismo TemplateId
+                // Lo que deberia suceder es que pinche Eddy tienes que borrar los MeasuredQuestion -> Objetivos -> Proximos Objetivos de CurrentEva(evalution)
+                // Clonar los objetivos -> Objetivos -> Proximos Objetivos de la AutoEvaluacion y ponerlos dentro de Objetivos -> Proximos Objetivos de CurrentEva(evalution)
                 foreach (Evaluations.Sections.Section currentSectionChildSection in currentSection.ChildSections)
                 {
                     SectionRepository.Delete(currentSectionChildSection.Id);
