@@ -109,6 +109,8 @@ namespace Yei3.PersonalEvaluation.Revision
                             )
                         );
 
+                        MeasuredQuestionRepository.Delete(measuredQuestion);
+
                         newMeasuredQuestion.SectionId = nextObjectivesSectionChildSection.Id;
                     }
 
