@@ -9,6 +9,8 @@ using Yei3.PersonalEvaluation.Section;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Revision.Dto;
+using Yei3.PersonalEvaluation.Evaluations.Sections;
+using Yei3.PersonalEvaluation.Evaluations.Questions;
 
 namespace Yei3.PersonalEvaluation.Revision
 {
@@ -16,11 +18,13 @@ namespace Yei3.PersonalEvaluation.Revision
     {
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
+        private readonly IRepository<MeasuredQuestion, long> MeasuredQuestionRepository;
 
-        public RevisionAppService(IRepository<Evaluation, long> evaluationRepository, IRepository<Evaluations.Sections.Section, long> sectionRepository)
+        public RevisionAppService(IRepository<Evaluation, long> evaluationRepository, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<MeasuredQuestion, long> measuredQuestionRepository)
         {
             EvaluationRepository = evaluationRepository;
             SectionRepository = sectionRepository;
+            MeasuredQuestionRepository = measuredQuestionRepository;
         }
 
         public Task ReviseEvaluation(long evaluationId)
@@ -34,7 +38,7 @@ namespace Yei3.PersonalEvaluation.Revision
 
             if (evaluation.IsNullOrDeleted())
             {
-               return Task.CompletedTask;
+                return Task.CompletedTask;
             }
 
             Evaluation autoEvaluation = EvaluationRepository
@@ -77,23 +81,49 @@ namespace Yei3.PersonalEvaluation.Revision
                     .Template
                     .Sections
                     .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
+
+                Evaluations.Sections.Section currentSectionChildSection = currentSection
+                    .ChildSections
+                    .Single(section => section.Name == AppConsts.SectionObjectivesName);
                 // TODO: No se debe borrar la seccion ya que esta es unica y compartida con el resto Evaluacions que tengan el mismo TemplateId
                 // Lo que deberia suceder es que pinche Eddy tienes que borrar los MeasuredQuestion -> Objetivos -> Proximos Objetivos de CurrentEva(evalution)
                 // Clonar los objetivos -> Objetivos -> Proximos Objetivos de la AutoEvaluacion y ponerlos dentro de Objetivos -> Proximos Objetivos de CurrentEva(evalution)
-                foreach (Evaluations.Sections.Section currentSectionChildSection in currentSection.ChildSections)
+                foreach (Evaluations.Sections.Section nextObjectivesSectionChildSection in nextObjectivesSection.ChildSections)
                 {
-                    SectionRepository.Delete(currentSectionChildSection.Id);
+                    // SectionRepository.Delete(currentSectionChildSection.Id);
+                    var currentMeasuredQuestions = MeasuredQuestionRepository
+                        .GetAll()
+                        .Where(question => question.SectionId == nextObjectivesSectionChildSection.Id);
+
+                    foreach (var measuredQuestion in currentMeasuredQuestions)
+                    {
+                        var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
+                            new MeasuredQuestion(
+                                measuredQuestion.Text,
+                                measuredQuestion.QuestionType,
+                                measuredQuestion.IsQualifiable,
+                                measuredQuestion.Expected,
+                                measuredQuestion.ExpectedText,
+                                measuredQuestion.Relation,
+                                measuredQuestion.Deliverable
+                            )
+                        );
+
+                        newMeasuredQuestion.SectionId = nextObjectivesSectionChildSection.Id;
+                    }
+
+                    CurrentUnitOfWork.SaveChanges();
                 }
 
-                SectionRepository.Delete(currentSection.Id);
+                // SectionRepository.Delete(currentSection.Id);
 
-                Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
+                // Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
 
-                SectionRepository.Insert(importedSection);
+                // SectionRepository.Insert(importedSection);
             }
 
             evaluation.ValidateEvaluation();
-            
+
             return Task.CompletedTask;
         }
 
