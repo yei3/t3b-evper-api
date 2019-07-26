@@ -19,12 +19,14 @@ namespace Yei3.PersonalEvaluation.Revision
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
         private readonly IRepository<MeasuredQuestion, long> MeasuredQuestionRepository;
+        private readonly IRepository<EvaluationMeasuredQuestion, long> _evaluationQuestionRepository;
 
-        public RevisionAppService(IRepository<Evaluation, long> evaluationRepository, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<MeasuredQuestion, long> measuredQuestionRepository)
+        public RevisionAppService(IRepository<Evaluation, long> evaluationRepository, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<MeasuredQuestion, long> measuredQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> evaluationQuestionRepository)
         {
             EvaluationRepository = evaluationRepository;
             SectionRepository = sectionRepository;
             MeasuredQuestionRepository = measuredQuestionRepository;
+            _evaluationQuestionRepository = evaluationQuestionRepository;
         }
 
         public Task ReviseEvaluation(long evaluationId)
@@ -72,51 +74,49 @@ namespace Yei3.PersonalEvaluation.Revision
 
             if (evaluation.Template.IncludePastObjectives)
             {
-                Evaluations.Sections.Section nextObjectivesSection = autoEvaluation
+                Evaluations.Sections.Section evaNextObjectivesSection = evaluation
                     .Template
                     .Sections
                     .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
-                Evaluations.Sections.Section currentSection = evaluation
+                Evaluations.Sections.Section autoNextObjectivesSection = autoEvaluation
                     .Template
                     .Sections
                     .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
-                Evaluations.Sections.Section currentSectionChildSection = currentSection
-                    .ChildSections
-                    .Single(section => section.Name == AppConsts.SectionObjectivesName);
-                // TODO: No se debe borrar la seccion ya que esta es unica y compartida con el resto Evaluacions que tengan el mismo TemplateId
-                // Lo que deberia suceder es que pinche Eddy tienes que borrar los MeasuredQuestion -> Objetivos -> Proximos Objetivos de CurrentEva(evalution)
-                // Clonar los objetivos -> Objetivos -> Proximos Objetivos de la AutoEvaluacion y ponerlos dentro de Objetivos -> Proximos Objetivos de CurrentEva(evalution)
-                foreach (Evaluations.Sections.Section nextObjectivesSectionChildSection in nextObjectivesSection.ChildSections)
+                Evaluations.Sections.Section evaNextObjectivesChildSection = evaNextObjectivesSection.ChildSections.Single();
+                
+                Evaluations.Sections.Section autoNextObjectivesChildSection = autoNextObjectivesSection.ChildSections.Single();
+
+                if (nextObjectivesChildSection.IsNullOrDeleted())
                 {
-                    // SectionRepository.Delete(currentSectionChildSection.Id);
-                    var currentMeasuredQuestions = MeasuredQuestionRepository
-                        .GetAll()
-                        .Where(question => question.SectionId == nextObjectivesSectionChildSection.Id);
-
-                    foreach (var measuredQuestion in currentMeasuredQuestions)
-                    {
-                        var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
-                            new MeasuredQuestion(
-                                measuredQuestion.Text,
-                                measuredQuestion.QuestionType,
-                                measuredQuestion.IsQualifiable,
-                                measuredQuestion.Expected,
-                                measuredQuestion.ExpectedText,
-                                measuredQuestion.Relation,
-                                measuredQuestion.Deliverable
-                            )
-                        );
-
-                        MeasuredQuestionRepository.Delete(measuredQuestion);
-
-                        newMeasuredQuestion.SectionId = nextObjectivesSectionChildSection.Id;
-                    }
-
-                    CurrentUnitOfWork.SaveChanges();
+                    // throw new UserFriendlyException($"No hay objetivos para clonar, revise la auto evalución {autoEvaluation.Id}.");
                 }
+                // TODO: Clonar Objetivos, aqu[i] esta la magia
+                var autoNotEvaluableQuestions = autoNextObjectivesChildSection?.NotEvaluableQuestions
+                    .Where(question => question.EvaluationId == autoEvaluation.Id)
+                    .ToList();
 
+                    // foreach (var measuredQuestion in currentMeasuredQuestions)
+                    // {
+                    //     var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
+                    //         new MeasuredQuestion(
+                    //             measuredQuestion.Text,
+                    //             measuredQuestion.QuestionType,
+                    //             measuredQuestion.IsQualifiable,
+                    //             measuredQuestion.Expected,
+                    //             measuredQuestion.ExpectedText,
+                    //             measuredQuestion.Relation,
+                    //             measuredQuestion.Deliverable
+                    //         )
+                    //     );
+
+                    //     MeasuredQuestionRepository.Delete(measuredQuestion);
+
+                    //     newMeasuredQuestion.SectionId = nextObjectivesChildSection.Id;
+                    // }
+
+                    // CurrentUnitOfWork.SaveChanges();
                 // SectionRepository.Delete(currentSection.Id);
 
                 // Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
