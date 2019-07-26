@@ -88,40 +88,42 @@ namespace Yei3.PersonalEvaluation.Revision
                 
                 Evaluations.Sections.Section autoNextObjectivesChildSection = autoNextObjectivesSection.ChildSections.Single();
 
-                if (nextObjectivesChildSection.IsNullOrDeleted())
+                if (autoNextObjectivesChildSection.IsNullOrDeleted())
                 {
                     // throw new UserFriendlyException($"No hay objetivos para clonar, revise la auto evalución {autoEvaluation.Id}.");
                 }
                 // TODO: Clonar Objetivos, aqu[i] esta la magia
+                var evaNotEvaluableQuestions = evaNextObjectivesChildSection?.NotEvaluableQuestions
+                    .Where(question => question.EvaluationId == autoEvaluation.Id)
+                    .ToList();
+
                 var autoNotEvaluableQuestions = autoNextObjectivesChildSection?.NotEvaluableQuestions
                     .Where(question => question.EvaluationId == autoEvaluation.Id)
                     .ToList();
 
-                    // foreach (var measuredQuestion in currentMeasuredQuestions)
-                    // {
-                    //     var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
-                    //         new MeasuredQuestion(
-                    //             measuredQuestion.Text,
-                    //             measuredQuestion.QuestionType,
-                    //             measuredQuestion.IsQualifiable,
-                    //             measuredQuestion.Expected,
-                    //             measuredQuestion.ExpectedText,
-                    //             measuredQuestion.Relation,
-                    //             measuredQuestion.Deliverable
-                    //         )
-                    //     );
+                foreach (var notEvaluableQuestion in autoNotEvaluableQuestions)
+                {
+                    // var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
+                    //     new MeasuredQuestion(
+                    //         measuredQuestion.Text,
+                    //         measuredQuestion.QuestionType,
+                    //         measuredQuestion.IsQualifiable,
+                    //         measuredQuestion.Expected,
+                    //         measuredQuestion.ExpectedText,
+                    //         measuredQuestion.Relation,
+                    //         measuredQuestion.Deliverable
+                    //     )
+                    // );
 
-                    //     MeasuredQuestionRepository.Delete(measuredQuestion);
+                    // newMeasuredQuestion.SectionId = nextObjectivesChildSection.Id;
+                }
 
-                    //     newMeasuredQuestion.SectionId = nextObjectivesChildSection.Id;
-                    // }
+                foreach (var notEvaluableQuestion in evaNotEvaluableQuestions)
+                {
+                    _evaluationQuestionRepository.Delete(notEvaluableQuestion);
+                }
 
                     // CurrentUnitOfWork.SaveChanges();
-                // SectionRepository.Delete(currentSection.Id);
-
-                // Evaluations.Sections.Section importedSection = nextObjectivesSection.NoTracking(autoEvaluation.EvaluationId, autoEvaluation.Id, evaluation.EvaluationId, evaluation.Id);
-
-                // SectionRepository.Insert(importedSection);
             }
 
             evaluation.ValidateEvaluation();
