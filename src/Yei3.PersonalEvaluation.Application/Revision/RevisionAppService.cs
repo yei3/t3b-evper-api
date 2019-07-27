@@ -20,17 +20,25 @@ namespace Yei3.PersonalEvaluation.Revision
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
         private readonly IRepository<MeasuredQuestion, long> MeasuredQuestionRepository;
-        private readonly IRepository<EvaluationMeasuredQuestion, long> _evaluationQuestionRepository;
+        private readonly IRepository<NotEvaluableAnswer, long> _notEvaluableAnswerRepository;
+        private readonly IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> _evaluationQuestionRepository;
 
-        public RevisionAppService(IRepository<Evaluation, long> evaluationRepository, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<MeasuredQuestion, long> measuredQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> evaluationQuestionRepository)
+        public RevisionAppService(
+            IRepository<Evaluation, long> evaluationRepository,
+            IRepository<Evaluations.Sections.Section, long> sectionRepository,
+            IRepository<MeasuredQuestion, long> measuredQuestionRepository,
+            IRepository<NotEvaluableAnswer, long> notEvaluableAnswerRepository,
+            IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> evaluationQuestionRepository
+        )
         {
             EvaluationRepository = evaluationRepository;
             SectionRepository = sectionRepository;
             MeasuredQuestionRepository = measuredQuestionRepository;
+            _notEvaluableAnswerRepository = notEvaluableAnswerRepository;
             _evaluationQuestionRepository = evaluationQuestionRepository;
         }
 
-        public Task ReviseEvaluation(long evaluationId)
+        public async Task ReviseEvaluation(long evaluationId)
         {
             Evaluation evaluation = EvaluationRepository
                 .GetAll()
@@ -55,7 +63,7 @@ namespace Yei3.PersonalEvaluation.Revision
 
             if (evaluation.IsNullOrDeleted())
             {
-                return Task.CompletedTask;
+                // return Task.CompletedTask;
             }
 
             Evaluation autoEvaluation = EvaluationRepository
@@ -84,7 +92,7 @@ namespace Yei3.PersonalEvaluation.Revision
 
             if (autoEvaluation.IsNullOrDeleted())
             {
-                return Task.CompletedTask;
+                // return Task.CompletedTask;
             }
 
             if (evaluation.Template.IncludePastObjectives)
@@ -109,41 +117,45 @@ namespace Yei3.PersonalEvaluation.Revision
                 }
                 // TODO: Clone Objectives, here is da magic
                 var evaNotEvaluableQuestions = evaObjectivesSection?.NotEvaluableQuestions
-                    .Where(question => question.EvaluationId == autoEvaluation.Id);
+                    .Where(question => question.EvaluationId == evaluationId);
 
                 var autoNotEvaluableQuestions = autoObjectivesSection?.NotEvaluableQuestions
                     .Where(question => question.EvaluationId == autoEvaluation.Id);
 
-                foreach (var notEvaluableQuestion in autoNotEvaluableQuestions)
+                foreach (var autoNotEvaluableQuestion in autoNotEvaluableQuestions)
                 {
-                    Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion = new Evaluations.EvaluationQuestions.NotEvaluableQuestion(
-                        evaObjectivesSection.Id,
-                        notEvaluableQuestion.Text,
-                        evaluationId,
-                        notEvaluableQuestion.TerminationDateTime,
-                        notEvaluableQuestion.Status
-                    );
+                    Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion =
+                        new Evaluations.EvaluationQuestions.NotEvaluableQuestion(
+                            evaObjectivesSection.Id,
+                            autoNotEvaluableQuestion.Text,
+                            evaluationId,
+                            autoNotEvaluableQuestion.NotEvaluableAnswer.CommitmentTime,
+                            autoNotEvaluableQuestion.Status
+                        ){
+                            SectionId = evaObjectivesSection.Id
+                        };
 
                     currentQuestion.SetAnswer(
-                        currentQuestion.Id,
-                        notEvaluableQuestion.NotEvaluableAnswer.Text,
-                        notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime
+                        evaluationId,
+                        autoNotEvaluableQuestion.NotEvaluableAnswer.Text,
+                        autoNotEvaluableQuestion.NotEvaluableAnswer.CommitmentTime
                     );
 
-                    // newMeasuredQuestion.SectionId = nextObjectivesChildSection.Id;
+                    await _evaluationQuestionRepository.InsertAsync(currentQuestion);
                 }
-
-                foreach (var notEvaluableQuestion in evaNotEvaluableQuestions)
+                // TODO: Remove current Objectives
+                foreach (var evaNotEvaluableQuestion in evaNotEvaluableQuestions)
                 {
-                    // _evaluationQuestionRepository.Delete(notEvaluableQuestion);
+                    NotEvaluableAnswer notEvaluableAnswer = _notEvaluableAnswerRepository
+                        .FirstOrDefault(answer => answer.EvaluationQuestionId == evaNotEvaluableQuestion.Id);
+                    await _notEvaluableAnswerRepository.DeleteAsync(notEvaluableAnswer);
+                    await _evaluationQuestionRepository.DeleteAsync(evaNotEvaluableQuestion);
                 }
 
-                // CurrentUnitOfWork.SaveChanges();
+                await CurrentUnitOfWork.SaveChangesAsync();
             }
 
             evaluation.ValidateEvaluation();
-
-            return Task.CompletedTask;
         }
 
         public async Task FinishEvaluation(long evaluationId)
