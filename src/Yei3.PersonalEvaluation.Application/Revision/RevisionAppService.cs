@@ -61,11 +61,6 @@ namespace Yei3.PersonalEvaluation.Revision
                 .ThenInclude(section => section.NotEvaluableQuestions)
                 .FirstOrDefault(evaluations => evaluations.Id == evaluationId);
 
-            if (evaluation.IsNullOrDeleted())
-            {
-                // return Task.CompletedTask;
-            }
-
             Evaluation autoEvaluation = EvaluationRepository
                 .GetAll()
                 .Include(evaluations => evaluations.User)
@@ -90,12 +85,8 @@ namespace Yei3.PersonalEvaluation.Revision
                 .OrderByDescending(evaluations => evaluations.CreationTime)
                 .FirstOrDefault(evaluations => evaluations.Id != evaluation.Id);
 
-            if (autoEvaluation.IsNullOrDeleted())
-            {
-                // return Task.CompletedTask;
-            }
 
-            if (evaluation.Template.IncludePastObjectives)
+            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted() && evaluation.Template.IncludePastObjectives)
             {
                 Evaluations.Sections.Section evaNextObjectivesSection = evaluation
                     .Template
@@ -115,13 +106,30 @@ namespace Yei3.PersonalEvaluation.Revision
                 {
                     // throw new UserFriendlyException($"No hay objetivos para clonar, revise la auto evalución {autoEvaluation.Id}.");
                 }
-                // ** Clone Objectives, here is da magic
+                
                 var evaNotEvaluableQuestions = evaObjectivesSection?.NotEvaluableQuestions
                     .Where(question => question.EvaluationId == evaluationId);
 
                 var autoNotEvaluableQuestions = autoObjectivesSection?.NotEvaluableQuestions
                     .Where(question => question.EvaluationId == autoEvaluation.Id);
+                
+                // ** Remove current Objectives
+                foreach (var evaNotEvaluableQuestion in evaNotEvaluableQuestions)
+                {
+                    NotEvaluableAnswer notEvaluableAnswer = _notEvaluableAnswerRepository
+                        .FirstOrDefault(answer => answer.EvaluationQuestionId == evaNotEvaluableQuestion.Id);
 
+                    if (!notEvaluableAnswer.IsNullOrDeleted())
+                    {
+                        await _notEvaluableAnswerRepository.DeleteAsync(notEvaluableAnswer);    
+                    }                    
+
+                    await _evaluationQuestionRepository.DeleteAsync(evaNotEvaluableQuestion);
+                }
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                // ** Clone Objectives, here is da magic
                 foreach (var autoNotEvaluableQuestion in autoNotEvaluableQuestions)
                 {
                     Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion =
@@ -142,19 +150,6 @@ namespace Yei3.PersonalEvaluation.Revision
                     );
 
                     await _evaluationQuestionRepository.InsertAsync(currentQuestion);
-                }
-                // ** Remove current Objectives
-                foreach (var evaNotEvaluableQuestion in evaNotEvaluableQuestions)
-                {
-                    NotEvaluableAnswer notEvaluableAnswer = _notEvaluableAnswerRepository
-                        .FirstOrDefault(answer => answer.EvaluationQuestionId == evaNotEvaluableQuestion.Id);
-
-                    if (!notEvaluableAnswer.IsNullOrDeleted())
-                    {
-                        await _notEvaluableAnswerRepository.DeleteAsync(notEvaluableAnswer);    
-                    }                    
-
-                    await _evaluationQuestionRepository.DeleteAsync(evaNotEvaluableQuestion);
                 }
 
                 await CurrentUnitOfWork.SaveChangesAsync();
