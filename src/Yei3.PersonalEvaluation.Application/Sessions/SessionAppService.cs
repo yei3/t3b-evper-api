@@ -31,8 +31,6 @@ namespace Yei3.PersonalEvaluation.Sessions
 
                 User user = await GetCurrentUserAsync();
 
-                ;
-
                 output.User = ObjectMapper.Map<UserLoginInfoDto>(user);
                 output.Roles = ObjectMapper.Map<List<string>>(await this.UserManager.GetRolesAsync(user));
             }
