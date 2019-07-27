@@ -115,7 +115,7 @@ namespace Yei3.PersonalEvaluation.Revision
                 {
                     // throw new UserFriendlyException($"No hay objetivos para clonar, revise la auto evalución {autoEvaluation.Id}.");
                 }
-                // TODO: Clone Objectives, here is da magic
+                // ** Clone Objectives, here is da magic
                 var evaNotEvaluableQuestions = evaObjectivesSection?.NotEvaluableQuestions
                     .Where(question => question.EvaluationId == evaluationId);
 
@@ -143,12 +143,17 @@ namespace Yei3.PersonalEvaluation.Revision
 
                     await _evaluationQuestionRepository.InsertAsync(currentQuestion);
                 }
-                // TODO: Remove current Objectives
+                // ** Remove current Objectives
                 foreach (var evaNotEvaluableQuestion in evaNotEvaluableQuestions)
                 {
                     NotEvaluableAnswer notEvaluableAnswer = _notEvaluableAnswerRepository
                         .FirstOrDefault(answer => answer.EvaluationQuestionId == evaNotEvaluableQuestion.Id);
-                    await _notEvaluableAnswerRepository.DeleteAsync(notEvaluableAnswer);
+
+                    if (!notEvaluableAnswer.IsNullOrDeleted())
+                    {
+                        await _notEvaluableAnswerRepository.DeleteAsync(notEvaluableAnswer);    
+                    }                    
+
                     await _evaluationQuestionRepository.DeleteAsync(evaNotEvaluableQuestion);
                 }
 
