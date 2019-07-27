@@ -7,10 +7,11 @@ using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Section;
 using Yei3.PersonalEvaluation.Evaluations;
-using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Revision.Dto;
 using Yei3.PersonalEvaluation.Evaluations.Sections;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 
 namespace Yei3.PersonalEvaluation.Revision
 {
@@ -32,11 +33,25 @@ namespace Yei3.PersonalEvaluation.Revision
         public Task ReviseEvaluation(long evaluationId)
         {
             Evaluation evaluation = EvaluationRepository
-               .GetAll()
-               .Include(evaluations => evaluations.Template)
-               .ThenInclude(template => template.Sections)
-               .ThenInclude(sections => sections.ChildSections)
-               .FirstOrDefault(evaluations => evaluations.Id == evaluationId);
+                .GetAll()
+                .Include(evaluations => evaluations.User)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluations => evaluations.Questions)
+                .ThenInclude(evaluationQuestion => ((Evaluations.EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
+                .Include(evaluations => evaluations.Template)
+                .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluations => evaluations.Template.Sections)
+                .ThenInclude(section => section.NotEvaluableQuestions)
+                .FirstOrDefault(evaluations => evaluations.Id == evaluationId);
 
             if (evaluation.IsNullOrDeleted())
             {
@@ -84,46 +99,46 @@ namespace Yei3.PersonalEvaluation.Revision
                     .Sections
                     .Single(section => section.Name == AppConsts.SectionNextObjectivesName);
 
-                Evaluations.Sections.Section evaNextObjectivesChildSection = evaNextObjectivesSection.ChildSections.Single();
+                Evaluations.Sections.Section evaObjectivesSection = evaNextObjectivesSection.ChildSections.Single();
                 
-                Evaluations.Sections.Section autoNextObjectivesChildSection = autoNextObjectivesSection.ChildSections.Single();
+                Evaluations.Sections.Section autoObjectivesSection = autoNextObjectivesSection.ChildSections.Single();
 
-                if (autoNextObjectivesChildSection.IsNullOrDeleted())
+                if (autoObjectivesSection.IsNullOrDeleted())
                 {
                     // throw new UserFriendlyException($"No hay objetivos para clonar, revise la auto evalución {autoEvaluation.Id}.");
                 }
-                // TODO: Clonar Objetivos, aqu[i] esta la magia
-                var evaNotEvaluableQuestions = evaNextObjectivesChildSection?.NotEvaluableQuestions
-                    .Where(question => question.EvaluationId == autoEvaluation.Id)
-                    .ToList();
+                // TODO: Clone Objectives, here is da magic
+                var evaNotEvaluableQuestions = evaObjectivesSection?.NotEvaluableQuestions
+                    .Where(question => question.EvaluationId == autoEvaluation.Id);
 
-                var autoNotEvaluableQuestions = autoNextObjectivesChildSection?.NotEvaluableQuestions
-                    .Where(question => question.EvaluationId == autoEvaluation.Id)
-                    .ToList();
+                var autoNotEvaluableQuestions = autoObjectivesSection?.NotEvaluableQuestions
+                    .Where(question => question.EvaluationId == autoEvaluation.Id);
 
                 foreach (var notEvaluableQuestion in autoNotEvaluableQuestions)
                 {
-                    // var newMeasuredQuestion = MeasuredQuestionRepository.Insert(
-                    //     new MeasuredQuestion(
-                    //         measuredQuestion.Text,
-                    //         measuredQuestion.QuestionType,
-                    //         measuredQuestion.IsQualifiable,
-                    //         measuredQuestion.Expected,
-                    //         measuredQuestion.ExpectedText,
-                    //         measuredQuestion.Relation,
-                    //         measuredQuestion.Deliverable
-                    //     )
-                    // );
+                    Evaluations.EvaluationQuestions.NotEvaluableQuestion currentQuestion = new Evaluations.EvaluationQuestions.NotEvaluableQuestion(
+                        evaObjectivesSection.Id,
+                        notEvaluableQuestion.Text,
+                        evaluationId,
+                        notEvaluableQuestion.TerminationDateTime,
+                        notEvaluableQuestion.Status
+                    );
+
+                    currentQuestion.SetAnswer(
+                        currentQuestion.Id,
+                        notEvaluableQuestion.NotEvaluableAnswer.Text,
+                        notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime
+                    );
 
                     // newMeasuredQuestion.SectionId = nextObjectivesChildSection.Id;
                 }
 
                 foreach (var notEvaluableQuestion in evaNotEvaluableQuestions)
                 {
-                    _evaluationQuestionRepository.Delete(notEvaluableQuestion);
+                    // _evaluationQuestionRepository.Delete(notEvaluableQuestion);
                 }
 
-                    // CurrentUnitOfWork.SaveChanges();
+                // CurrentUnitOfWork.SaveChanges();
             }
 
             evaluation.ValidateEvaluation();
