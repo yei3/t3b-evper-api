@@ -242,7 +242,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         SectionId = currentEvaluationObjectivesSectionId.Value
                     };
 
-                    currentQuestion.SetAnswer(currentEvaluation.Id, notEvaluableQuestion.NotEvaluableAnswer.Text, notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime);
+                    currentQuestion.SetAnswer(
+                        currentEvaluation.Id,
+                        notEvaluableQuestion.NotEvaluableAnswer.Text,
+                        notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime
+                    );
 
                     await NotEvaluableQuestionRepository.InsertAsync(currentQuestion);
                 }
