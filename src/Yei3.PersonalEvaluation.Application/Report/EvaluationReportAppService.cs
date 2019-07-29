@@ -639,7 +639,7 @@ namespace Yei3.PersonalEvaluation.Report
                             .Include(question => question.MeasuredQuestion)
                             .Include(question => question.MeasuredAnswer)
                             .Where(question => question.EvaluationId == currentEvaluationId)
-                            .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question))
+                            .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer))
                     });
             }
 
@@ -654,7 +654,7 @@ namespace Yei3.PersonalEvaluation.Report
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
                         .Where(question => question.EvaluationId == lastEvaluationId)
-                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question)),
+                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer)),
                     CurrentTotal = MeasuredQuestionRepository
                         .GetAll()
                         .Count(question => question.EvaluationId == currentEvaluationId),
@@ -663,7 +663,7 @@ namespace Yei3.PersonalEvaluation.Report
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
                         .Where(question => question.EvaluationId == currentEvaluationId)
-                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question))
+                        .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer))
                 }
             );
         }
@@ -682,18 +682,10 @@ namespace Yei3.PersonalEvaluation.Report
             }
         }
 
-        protected bool IsObjectiveAccomplished(MeasuredQuestion question, MeasuredAnswer answer, EvaluationMeasuredQuestion evaluationQuestion)
+        protected bool IsObjectiveAccomplished(MeasuredQuestion question, MeasuredAnswer answer)
         {
-            string expectedText = question.ExpectedText.IsNullOrEmpty()
-                ? evaluationQuestion.ExpectedText
-                : question.ExpectedText;
-
-            decimal expectedValue = evaluationQuestion.Expected.HasValue
-                ? evaluationQuestion.Expected.Value
-                : question.Expected;
-            
-            return expectedText.IsNullOrEmpty()
-                ? IsObjectiveNumericAccomplished(expectedValue, answer.Real, question.Relation)
+            return question.ExpectedText.IsNullOrEmpty()
+                ? IsObjectiveNumericAccomplished(question.Expected, answer.Real, question.Relation)
                 : question.ExpectedText == answer.Text;
         }
 
