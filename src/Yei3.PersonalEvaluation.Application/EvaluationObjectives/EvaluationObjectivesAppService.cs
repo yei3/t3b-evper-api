@@ -97,6 +97,11 @@ namespace Yei3.PersonalEvaluation.EvaluationObjectives
                 currentQuestion.MeasuredAnswer.Observations = expectedValues.Comment;
             }
 
+            if (expectedValues.Status.HasValue)
+            {
+                currentQuestion.Status = EvaluationQuestionStatus.Initiated;
+            }
+
             await _evaluationMeasuredQuestionRepository.UpdateAsync(currentQuestion);
         }
     }

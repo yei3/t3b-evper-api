@@ -9,5 +9,6 @@ namespace Yei3.PersonalEvaluation.Application.EvaluationObjectives.Dto
         public decimal? ExpectedQuestion { get; set; }
         public string ExpectedQuestionText { get; set; }
         public string Comment { get; set; }
+        public int? Status { get; set; }
     }
 }
