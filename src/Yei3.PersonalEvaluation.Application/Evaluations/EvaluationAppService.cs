@@ -76,6 +76,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             List<User> users = new List<User>();
 
+            if(input.OrganizationUnitIds.IsNullOrEmpty()){
+                input.OrganizationUnitIds = new List<long>() { OrganizationUnitRepository.Single(organizationUnit => organizationUnit.Code.Equals("00001")).Id };
+            }
+
             foreach (long inputOrganizationUnitId in input.OrganizationUnitIds)
             {
                 Abp.Organizations.OrganizationUnit currentOrganizationUnit = await
@@ -89,16 +93,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         )
                         .WhereIf(!input.JobDescriptions.IsNullOrEmpty(), user => input.JobDescriptions.Contains(user.JobDescription))
                     );
-            }
-            //Programar por puesto
-            if (!input.JobDescriptions.IsNullOrEmpty())
-            {
-                List<User> allUsers = UserManager.Users
-                .Where(user => input.JobDescriptions.Contains(user.JobDescription))
-                .ToList();
-
-                users.AddRange(allUsers);
-                
             }
 
             foreach (User user in users.Distinct())
