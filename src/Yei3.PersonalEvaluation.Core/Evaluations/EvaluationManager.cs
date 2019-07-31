@@ -388,12 +388,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             User user = await UserManager.GetUserByIdAsync(userId.Value);
 
-            return await EvaluationRepository
+            List<EvaluationSummaryValueObject> evaluationsResult = await EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.Template)
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
@@ -405,6 +406,26 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     CollaboratorName = user.FullName,
                     IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
+
+                evaluationsResult.AddRange(await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Validated)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Select(evaluation => new EvaluationSummaryValueObject
+                {
+                    Term = evaluation.Term,
+                    Id = evaluation.Id,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
+                    Status = evaluation.Status,
+                    EndDateTime = evaluation.EndDateTime,
+                    CollaboratorName = user.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                }).ToListAsync());
+
+                return evaluationsResult;
         }
 
         public async Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsEvaluationsHistoryAsync(long? userId = null)
@@ -604,6 +625,57 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return actionSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
                 .ToList();
+        }
+
+        public async Task<ICollection<EvaluationSummaryValueObject>> GetBossEvaluationsHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
+            
+            List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
+
+            List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
+                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                .Select(user => user.Id)
+                .ToList();
+
+
+            foreach (long idUser in userIds)
+            {
+                List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetBossUserEvaluationsHistoryAsync(idUser))
+                    .ToList();
+                evaluationsSummary.AddRange(currentUserEvaluations);
+            }
+
+            return evaluationsSummary;
+        }
+
+        private async Task<List<EvaluationSummaryValueObject>> GetBossUserEvaluationsHistoryAsync(long? userId = null)
+        {
+            userId = userId ?? AbpSession.GetUserId();
+
+            User user = await UserManager.GetUserByIdAsync(userId.Value);
+            //TODO Agregar filtro de auto evaluaciones cerradas
+            return await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
+                .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Select(evaluation => new EvaluationSummaryValueObject
+                {
+                    Term = evaluation.Term,
+                    Id = evaluation.Id,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
+                    Status = evaluation.Status,
+                    EndDateTime = evaluation.EndDateTime,
+                    CollaboratorName = user.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                }).ToListAsync();
+                
         }
     }
 }
