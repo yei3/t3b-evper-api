@@ -298,6 +298,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             foreach (User user in users)
             {
                 List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetUserPendingEvaluationsAsync(user.Id))
+                    .Where(evaluation => !evaluation.IsAutoEvaluation)
                     .ToList();
                 evaluationsSummary.AddRange(currentUserEvaluations);
             }

@@ -42,7 +42,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
                     CollaboratorsObjectivesValidationPending = await EvaluationManager.GetUserOrganizationUnitPendingEvaluationValidationsCountAsync(),
                     CollaboratorsPendingEvaluations = await EvaluationManager.GetUserOrganizationUnitPendingEvaluationsCountAsync()
                 },
-                CollaboratorsEvaluationSummary = (await EvaluationManager.GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync()).Where(evaluation => !evaluation.IsAutoEvaluation).MapTo<ICollection<EvaluationSummaryDto>>(),
+                CollaboratorsEvaluationSummary = (await EvaluationManager.GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync()).MapTo<ICollection<EvaluationSummaryDto>>(),
                 CollaboratorRevisionSummary = (await EvaluationManager.GetUserOrganizationUnitPendingEvaluationRevisionsAsync()).MapTo<ICollection<RevisionSummaryDto>>(),
                 CollaboratorsObjectivesSummary = (await EvaluationManager.GetUserOrganizationUnitObjectivesSummaryAsync()).MapTo<ICollection<CollaboratorsObjectivesSummaryDto>>(),
                 ActionSummary = (await EvaluationManager.GetUserOrganizationUnitCollaboratorsActionsAsync()).MapTo<ICollection<EvaluationActionDto>>()
