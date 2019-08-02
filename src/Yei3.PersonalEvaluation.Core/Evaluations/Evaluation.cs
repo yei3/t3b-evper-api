@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
@@ -10,7 +11,7 @@ using Yei3.PersonalEvaluation.Evaluations.Terms;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
-    public class Evaluation : FullAuditedEntity<long>
+    public class Evaluation : FullAuditedEntity<long>, IPassivable
     {
         public Evaluation(string name, long evaluationId, long userId, DateTime startDateTime, DateTime endDateTime)
         {
@@ -41,6 +42,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         public virtual DateTime StartDateTime { get; protected set; }
         public virtual DateTime EndDateTime { get; protected set; }
         public virtual ICollection<EvaluationQuestion> Questions { get; protected set; }
+        public bool IsActive { get; set; }
 
         public void SetRevision(long evaluationId, long reviewerUserId, DateTime revisionDateTime)
         {

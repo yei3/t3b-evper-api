@@ -76,7 +76,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             List<User> users = new List<User>();
 
-            if(input.OrganizationUnitIds.IsNullOrEmpty()){
+            if (input.OrganizationUnitIds.IsNullOrEmpty())
+            {
                 input.OrganizationUnitIds = new List<long>() { OrganizationUnitRepository.Single(organizationUnit => organizationUnit.Code.Equals("00001")).Id };
             }
 
@@ -190,7 +191,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 // No utilizada la variable currentEvaluation porque no tiene los valores de la propiedad de navegacion ParentSection por ser muy profunda
                 // en cambio utilizamos el repositorio para que vaya a la base de datos a buscar el id del Parent Section
-                
+
                 long? currentEvaluationObjectivesSectionId = EvaluationRepository
                     .GetAll()
                     .Include(evaluation => evaluation.Template)
@@ -204,18 +205,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .ThenInclude(section => section.ParentSection)
                     .Where(evaluation => evaluation.Id == currentEvaluation.Id)
                     .Select(evaluation => evaluation.Template)
-                    .Select(template => 
+                    .Select(template =>
                         template.Sections
-                                // Hasta aqui es exactamente el valor que esta en currentEvaluation, utilizamos el repo por lo explicado anteriormente
+                            // Hasta aqui es exactamente el valor que esta en currentEvaluation, utilizamos el repo por lo explicado anteriormente
                             .Where(section => section.ParentId.HasValue)
                             .Where(section => section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
                             .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)
                         ).FirstOrDefault()?.Id;
-                    
-                    
-                    
-                
-                if(!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
+
+
+
+
+                if (!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
                     .GetAll()
@@ -300,9 +301,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
 
-            if (!evaluation.IsNullOrDeleted())
+            Evaluation autoEvaluation = EvaluationRepository
+                .GetAll()
+                .Where(evaluations => evaluations.Term == evaluation.Term)
+                .Where(evaluations => evaluations.UserId == evaluation.UserId)
+                .OrderByDescending(evaluations => evaluations.CreationTime)
+                .FirstOrDefault(evaluations => evaluations.Id != evaluationClose.Id);
+
+            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted())
             {
-                evaluation.ClosingComment = evaluationClose.Comment;   
+                evaluation.ClosingComment = evaluationClose.Comment;
+                evaluation.IsActive = false;
+                autoEvaluation.IsActive = false;
             }
             return Task.CompletedTask;
         }
