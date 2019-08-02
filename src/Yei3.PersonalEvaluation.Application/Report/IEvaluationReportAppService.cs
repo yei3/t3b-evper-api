@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Yei3.PersonalEvaluation.Application.Report.Dto;
 using Yei3.PersonalEvaluation.Report.Dto;
 
 namespace Yei3.PersonalEvaluation.Report
@@ -13,6 +14,7 @@ namespace Yei3.PersonalEvaluation.Report
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input);
         Task<AdministratorObjectiveReportDto> GetEvaluatorObjectivesReport(AdministratorInputDto input);
+        Task<EvaluationEmployeeDataDto> GetEvaluationEmployeeData(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetEvaluatorCapabilitiesReport(AdministratorInputDto input);
         Task<ICollection<EvaluationResultsDto>> GetEvaluationCollaboratorResultsById(UserEvaluationResultDto input);
         Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReportById(UserEvaluationResultDto input);
