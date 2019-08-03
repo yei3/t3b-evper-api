@@ -15,6 +15,7 @@ using Abp.UI;
 using Yei3.PersonalEvaluation.Evaluations;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System;
 
 namespace Yei3.PersonalEvaluation.Notifications
 {
@@ -42,7 +43,17 @@ namespace Yei3.PersonalEvaluation.Notifications
         public async Task<List<UserNotification>> getAll()
         {
             User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
-            return await _userNotificationManager.GetUserNotificationsAsync(new Abp.UserIdentifier(administratorUser.TenantId, administratorUser.Id), 0, 0, 100);
+            List<UserNotification> lista =  await _userNotificationManager.GetUserNotificationsAsync(new Abp.UserIdentifier(administratorUser.TenantId, administratorUser.Id), 0, 0, 100);
+            List<UserNotification> resultados = new List<UserNotification>();
+            foreach (UserNotification userNotif in lista) 
+            {
+                if (userNotif.Notification.CreationTime > DateTime.Now.AddDays(-5))
+                {
+                    resultados.Add(userNotif);
+
+                }
+            }
+            return resultados;
         }
 
         public async Task<int> getNotifCount()
