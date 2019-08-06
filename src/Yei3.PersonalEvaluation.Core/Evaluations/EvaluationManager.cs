@@ -133,6 +133,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .OrderByDescending(evaluationQuestion => evaluationQuestion.Evaluation.Id)
                 .OfType<NotEvaluableQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
@@ -148,7 +149,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         CreationTime = objectiveBinnacle.CreationTime,
                         UserName = UserManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
                     }).ToList(),
-                    isNotEvaluable = true
+                    isNotEvaluable = true,
+                    isNextObjective = evaluationQuestion.Section.ParentSection.Name == "Próximos Objetivos" ? true : false
                 }).ToListAsync();
 
             evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
