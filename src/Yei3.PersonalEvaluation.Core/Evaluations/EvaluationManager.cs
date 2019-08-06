@@ -664,7 +664,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Where(evaluation => evaluation.UserId == userId)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
                 .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
-                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => !evaluation.IsActive)
                 .Select(evaluation => new EvaluationSummaryValueObject
                 {
                     Term = evaluation.Term,
