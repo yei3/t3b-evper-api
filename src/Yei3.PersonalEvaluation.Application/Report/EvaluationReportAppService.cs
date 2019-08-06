@@ -8,7 +8,9 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Castle.Core.Internal;
+using Castle.Core.Logging;
 using Microsoft.EntityFrameworkCore;
+using Yei3.PersonalEvaluation.Application.Report.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
@@ -28,22 +30,15 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly UserManager UserManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
 
-        public EvaluationReportAppService(
-            IRepository<Evaluation, long> evaluationRepository,
-            IUnitOfWorkManager unitOfWorkManager,
-            IRepository<Evaluations.Sections.Section, long> sectionRepository,
-            UserManager userManager,
-            IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository,
-            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository,
-            IRepository<Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion, long> measuredQuestionRepository)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
             SectionRepository = sectionRepository;
-            UserManager = userManager;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
-            OrganizationUnitsRepository = organizationUnitsRepository;
             MeasuredQuestionRepository = measuredQuestionRepository;
+            UserManager = userManager;
+            OrganizationUnitsRepository = organizationUnitsRepository;
         }
 
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null)
@@ -1071,6 +1066,86 @@ namespace Yei3.PersonalEvaluation.Report
             }
 
             return result;
+        }
+
+        public async Task<EvaluationEmployeeDataDto> GetEvaluationEmployeeData(AdministratorInputDto input)
+        {
+            User evaluatorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
+
+            List<long> evaluationIds = new List<long>();
+
+            if (input.UserId.HasValue)
+            {
+                evaluations = evaluations
+                    .Where(evaluation => evaluation.UserId == input.UserId.Value);
+            }
+            else
+            {
+                long? organizationUnitId = 0;
+                List<long> userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                    .Select(user => user.Id)
+                    .ToList();
+
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
+
+                if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
+                {
+                    Abp.Organizations.OrganizationUnit _organizationUnit =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .First();
+                }
+                else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
+                {
+                    Abp.Organizations.OrganizationUnit areaOrganizationUnit =
+                        await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
+                            organizationUnitId.Equals(organizationUnit.Id));
+
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+                else if (!organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
+                {
+                    userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+
+                evaluations = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId));
+            }
+
+            return new EvaluationEmployeeDataDto {
+                TotalEmployees = evaluations
+                    .Select(evaluation => evaluation.UserId)
+                    .Distinct()
+                    .Count(),
+                EvaluatedEmployees = evaluations
+                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
+                    .Select(evaluation => evaluation.UserId)
+                    .Distinct()
+                    .Count(),
+                SeniorityAverage = evaluations
+                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
+                    .Select(evaluation => evaluation.User)
+                    .Distinct()
+                    .Select(user => user.EntryDate)
+                    .ToList()
+                    .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
+                    .Average() / AppConsts.YearsLengthInDays
+            };
         }
     }
 }
