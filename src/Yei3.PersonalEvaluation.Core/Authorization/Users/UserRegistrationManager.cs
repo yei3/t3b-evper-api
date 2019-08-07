@@ -132,7 +132,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
                     _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress).GetAwaiter().GetResult();
                 }
-                catch (UserFriendlyException e)
+                catch (UserFriendlyException)
                 {
                     User existingUser = _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber).GetAwaiter().GetResult();
                     existingUser = user;

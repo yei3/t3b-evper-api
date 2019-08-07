@@ -641,42 +641,48 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Select(user => user.Id)
                 .ToList();
 
+            evaluationsSummary.AddRange(
+                await EvaluationRepository
+                    .GetAll()
+                    .Include(evaluation => evaluation.Template)
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
+                    .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
+                    .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
+                    .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                    .Select(evaluation => new EvaluationSummaryValueObject
+                    {
+                        Term = evaluation.Term,
+                        Id = evaluation.Id,
+                        Name = evaluation.Name,
+                        Description = evaluation.Template.Description,
+                        Status = evaluation.Status,
+                        EndDateTime = evaluation.EndDateTime,
+                        CollaboratorName = evaluation.User.FullName,
+                        IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                    }).ToListAsync()
+            );
 
-            foreach (long idUser in userIds)
-            {
-                List<EvaluationSummaryValueObject> currentUserEvaluations = (await GetBossUserEvaluationsHistoryAsync(idUser))
-                    .ToList();
-                evaluationsSummary.AddRange(currentUserEvaluations);
-            }
+            evaluationsSummary.AddRange(
+                await EvaluationRepository
+                    .GetAll()
+                    .Include(evaluation => evaluation.Template)
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
+                    .Where(evaluation => evaluation.Template.IsAutoEvaluation)
+                    .Where(evaluation => !evaluation.IsActive)
+                    .Select(evaluation => new EvaluationSummaryValueObject
+                    {
+                        Term = evaluation.Term,
+                        Id = evaluation.Id,
+                        Name = evaluation.Name,
+                        Description = evaluation.Template.Description,
+                        Status = evaluation.Status,
+                        EndDateTime = evaluation.EndDateTime,
+                        CollaboratorName = evaluation.User.FullName,
+                        IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                    }).ToListAsync()
+            );
 
             return evaluationsSummary;
-        }
-
-        private async Task<List<EvaluationSummaryValueObject>> GetBossUserEvaluationsHistoryAsync(long? userId = null)
-        {
-            userId = userId ?? AbpSession.GetUserId();
-
-            User user = await UserManager.GetUserByIdAsync(userId.Value);
-            //TODO Agregar filtro de auto evaluaciones cerradas
-            return await EvaluationRepository
-                .GetAll()
-                .Include(evaluation => evaluation.Template)
-                .Where(evaluation => evaluation.UserId == userId)
-                .Where(evaluation => evaluation.Status != EvaluationStatus.Pending)
-                .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
-                .Where(evaluation => !evaluation.IsActive)
-                .Select(evaluation => new EvaluationSummaryValueObject
-                {
-                    Term = evaluation.Term,
-                    Id = evaluation.Id,
-                    Name = evaluation.Name,
-                    Description = evaluation.Template.Description,
-                    Status = evaluation.Status,
-                    EndDateTime = evaluation.EndDateTime,
-                    CollaboratorName = user.FullName,
-                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
-                }).ToListAsync();
-                
         }
     }
 }
