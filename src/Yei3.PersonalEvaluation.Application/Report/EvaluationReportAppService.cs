@@ -310,8 +310,6 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
             }
-            // todo fix hardcoded SeniorityAverage
-            Random rd = new Random();
 
             return new AdministratorObjectiveReportDto
             {
@@ -324,7 +322,6 @@ namespace Yei3.PersonalEvaluation.Report
                     .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
                     .Count(question => question.Status == EvaluationQuestionStatus.Validated),
-                SeniorityAverage = rd.Next(0, 5),
             };
         }
 
@@ -865,21 +862,28 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
             }
-            // todo fix hardcoded SeniorityAverage
-            Random rd = new Random();
-
+            
             return new AdministratorObjectiveReportDto
             {
                 TotalObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name.Contains(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
-                    .Count(question => evaluationIds.Contains(question.EvaluationId)),
+                    .Include(question => question.Section)
+                    .ThenInclude(section => section.ParentSection)
+                    .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                    .Where(question => evaluationIds.Contains(question.EvaluationId))
+                    .Count(question => 
+                        question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                    ),
                 ValidatedObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name.Contains(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                    .Include(question => question.Section)
+                    .ThenInclude(section => section.ParentSection)
+                    .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
-                    .Count(question => question.Status == EvaluationQuestionStatus.Validated),
-                SeniorityAverage = rd.Next(0, 5),
+                    .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                    .Count(question => 
+                        question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                    ),
             };
         }
 
