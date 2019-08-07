@@ -634,12 +634,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
             
-            List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
+            List<long> userIds = UserManager.Users
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    .Select(user => user.Id)
+                    .ToList();
 
-            List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
-                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
-                .Select(user => user.Id)
-                .ToList();
+            List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
 
             evaluationsSummary.AddRange(
                 await EvaluationRepository
