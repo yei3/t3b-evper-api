@@ -8,7 +8,6 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Castle.Core.Internal;
-using Castle.Core.Logging;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Application.Report.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -683,7 +682,7 @@ namespace Yei3.PersonalEvaluation.Report
             decimal expectedValue = evaluationQuestion.Expected.HasValue
                 ? evaluationQuestion.Expected.Value
                 : question.Expected;
-            
+
             return expectedText.IsNullOrEmpty()
                 ? IsObjectiveNumericAccomplished(expectedValue, answer.Real, question.Relation)
                 : question.ExpectedText == answer.Text;
@@ -862,7 +861,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
             }
-            
+
             return new AdministratorObjectiveReportDto
             {
                 TotalObjectives = NotEvaluableQuestionRepository
@@ -871,7 +870,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .ThenInclude(section => section.ParentSection)
                     .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
-                    .Count(question => 
+                    .Count(question =>
                         question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
                     ),
                 ValidatedObjectives = NotEvaluableQuestionRepository
@@ -881,7 +880,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
                     .Where(question => question.Status == EvaluationQuestionStatus.Validated)
-                    .Count(question => 
+                    .Count(question =>
                         question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
                     ),
             };
@@ -1102,7 +1101,7 @@ namespace Yei3.PersonalEvaluation.Report
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit _organizationUnit =
+                    Abp.Organizations.OrganizationUnit currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
@@ -1110,11 +1109,13 @@ namespace Yei3.PersonalEvaluation.Report
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit areaOrganizationUnit =
-                        await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
-                            organizationUnitId.Equals(organizationUnit.Id));
+                    Abp.Organizations.OrganizationUnit currentOrganizationUnit =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .First();
 
-                    userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
@@ -1131,7 +1132,26 @@ namespace Yei3.PersonalEvaluation.Report
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId));
             }
 
-            return new EvaluationEmployeeDataDto {
+            double seniorityAverage = 0;
+
+            try
+            {
+                seniorityAverage = evaluations
+                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
+                    .Select(evaluation => evaluation.User)
+                    .Distinct()
+                    .Select(user => user.EntryDate)
+                    .ToList()
+                    .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
+                    .Average() / AppConsts.YearsLengthInDays;
+            }
+            catch (InvalidOperationException)
+            {
+                // do nothing
+            }
+
+            return new EvaluationEmployeeDataDto
+            {
                 TotalEmployees = evaluations
                     .Select(evaluation => evaluation.UserId)
                     .Distinct()
@@ -1141,14 +1161,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.UserId)
                     .Distinct()
                     .Count(),
-                SeniorityAverage = evaluations
-                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
-                    .Select(evaluation => evaluation.User)
-                    .Distinct()
-                    .Select(user => user.EntryDate)
-                    .ToList()
-                    .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
-                    .Average() / AppConsts.YearsLengthInDays
+                SeniorityAverage = seniorityAverage
             };
         }
     }
