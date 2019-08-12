@@ -29,6 +29,7 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly UserManager UserManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
 
+
         public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository)
         {
             EvaluationRepository = evaluationRepository;
@@ -1083,6 +1084,9 @@ namespace Yei3.PersonalEvaluation.Report
                 .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
                 .AsQueryable();
 
+            List<User> users = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                    .ToList();
+
             List<long> evaluationIds = new List<long>();
 
             if (input.UserId.HasValue)
@@ -1093,9 +1097,7 @@ namespace Yei3.PersonalEvaluation.Report
             else
             {
                 long? organizationUnitId = 0;
-                List<long> userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                    .Select(user => user.Id)
-                    .ToList();
+                List<long> userIds = users.Select(user => user.Id).ToList();
 
                 organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
 
@@ -1136,10 +1138,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             try
             {
-                seniorityAverage = evaluations
-                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
-                    .Select(evaluation => evaluation.User)
-                    .Distinct()
+                seniorityAverage = users
                     .Select(user => user.EntryDate)
                     .ToList()
                     .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
@@ -1152,10 +1151,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             return new EvaluationEmployeeDataDto
             {
-                TotalEmployees = evaluations
-                    .Select(evaluation => evaluation.UserId)
-                    .Distinct()
-                    .Count(),
+                TotalEmployees = users.Distinct().ToList().Count + 1, // add the current user itself
                 EvaluatedEmployees = evaluations
                     .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
                     .Select(evaluation => evaluation.UserId)
