@@ -1142,6 +1142,7 @@ namespace Yei3.PersonalEvaluation.Report
                 users.Add(evaluatorUser);
 
                 seniorityAverage = users
+                    .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
                     .Select(user => user.EntryDate)
                     .ToList()
                     .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
@@ -1154,7 +1155,9 @@ namespace Yei3.PersonalEvaluation.Report
 
             return new EvaluationEmployeeDataDto
             {
-                TotalEmployees = users.Distinct().ToList().Count,
+                TotalEmployees = users
+                    .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
+                    .ToList().Count,
                 EvaluatedEmployees = evaluations
                     .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
                     .Select(evaluation => evaluation.UserId)
