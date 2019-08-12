@@ -1138,6 +1138,9 @@ namespace Yei3.PersonalEvaluation.Report
 
             try
             {
+
+                users.Add(evaluatorUser);
+
                 seniorityAverage = users
                     .Select(user => user.EntryDate)
                     .ToList()
@@ -1151,7 +1154,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             return new EvaluationEmployeeDataDto
             {
-                TotalEmployees = users.Distinct().ToList().Count + 1, // add the current user itself
+                TotalEmployees = users.Distinct().ToList().Count,
                 EvaluatedEmployees = evaluations
                     .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
                     .Select(evaluation => evaluation.UserId)
