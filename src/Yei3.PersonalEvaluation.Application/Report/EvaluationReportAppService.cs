@@ -1084,10 +1084,11 @@ namespace Yei3.PersonalEvaluation.Report
                 .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
                 .AsQueryable();
 
+            List<long> evaluationIds = new List<long>();
             List<User> users = (await UserManager.GetSubordinatesTree(evaluatorUser))
                     .ToList();
 
-            List<long> evaluationIds = new List<long>();
+            users.Add(evaluatorUser);            
 
             if (input.UserId.HasValue)
             {
@@ -1138,9 +1139,6 @@ namespace Yei3.PersonalEvaluation.Report
 
             try
             {
-
-                users.Add(evaluatorUser);
-
                 seniorityAverage = users
                     .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
                     .Select(user => user.EntryDate)
