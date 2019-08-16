@@ -102,7 +102,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
                     .OfType<AreaOrganizationUnit>()
                     .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
 
-                areas.Concat(subordinateAreas);
+                areas = areas.Concat(subordinateAreas);
             }
 
             return areas.Distinct().ToList();
