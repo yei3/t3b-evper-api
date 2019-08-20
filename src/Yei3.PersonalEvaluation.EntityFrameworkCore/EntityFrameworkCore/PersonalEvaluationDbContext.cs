@@ -13,6 +13,7 @@ using Yei3.PersonalEvaluation.Evaluations.Questions;
 using Yei3.PersonalEvaluation.Evaluations.Sections;
 using Yei3.PersonalEvaluation.MultiTenancy;
 using Yei3.PersonalEvaluation.OrganizationUnit;
+using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 
 namespace Yei3.PersonalEvaluation.EntityFrameworkCore
 {
@@ -29,8 +30,8 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<MeasuredQuestion> MeasuredQuestions { get; set; }
         public virtual DbSet<EvaluationQuestion> EvaluationQuestions { get; set; }
         public virtual DbSet<EvaluableQuestion> EvaluableQuestions { get; set; }
-        public virtual DbSet<EvaluationMeasuredQuestion> EvaluationMeasuredQuestions{ get; set; }
-        public virtual DbSet<EvaluationUnmeasuredQuestion> EvaluationUnmeasuredQuestions{ get; set; }
+        public virtual DbSet<EvaluationMeasuredQuestion> EvaluationMeasuredQuestions { get; set; }
+        public virtual DbSet<EvaluationUnmeasuredQuestion> EvaluationUnmeasuredQuestions { get; set; }
         public virtual DbSet<NotEvaluableQuestion> NotEvaluableQuestions { get; set; }
         public virtual DbSet<AreaOrganizationUnit> AreaOrganizationUnits { get; set; }
         public virtual DbSet<RegionOrganizationUnit> RegionOrganizationUnits { get; set; }
@@ -39,8 +40,9 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore
         public virtual DbSet<MeasuredAnswer> MeasuredAnswers { get; set; }
         public virtual DbSet<UnmeasuredAnswer> UnmeasuredAnswers { get; set; }
         public virtual DbSet<NotEvaluableAnswer> NotEvaluableAnswers { get; set; }
-        public virtual DbSet<ObjectiveBinnacle> Binnacles{ get; set; }
-        
+        public virtual DbSet<ObjectiveBinnacle> Binnacles { get; set; }
+        public virtual DbSet<SalesAreaOrganizationUnit> SalesAreaOrganizationUnits { get; set; }
+
         public PersonalEvaluationDbContext(DbContextOptions<PersonalEvaluationDbContext> options)
             : base(options)
         {

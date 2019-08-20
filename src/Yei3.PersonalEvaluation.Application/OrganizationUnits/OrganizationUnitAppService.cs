@@ -15,6 +15,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using Yei3.PersonalEvaluation.Authorization.Roles;
     using Abp.UI;
     using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
+    using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 
     public class OrganizationUnitAppService : PersonalEvaluationAppServiceBase, IOrganizationUnitAppService
     {
@@ -90,9 +91,15 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         {
             User currentUser = await GetCurrentUserIfSupervisor();
 
-            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+            IEnumerable<OrganizationUnitDto> areas =  (await UserManager.GetOrganizationUnitsAsync(currentUser))
+                .OfType<SalesAreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
+
+            areas = areas.Concat(
+               (await UserManager.GetOrganizationUnitsAsync(currentUser))
                 .OfType<AreaOrganizationUnit>()
-                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>())
+            );
 
             List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
 
@@ -102,7 +109,11 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
                     .OfType<AreaOrganizationUnit>()
                     .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>());
 
-                areas = areas.Concat(subordinateAreas);
+                var subordinateSalesAreas = (await UserManager.GetOrganizationUnitsAsync(subordinate))
+                    .OfType<SalesAreaOrganizationUnit>()
+                    .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
+
+                areas = areas.Concat(subordinateSalesAreas).Concat(subordinateAreas);
             }
 
             return areas.Distinct().ToList();
@@ -114,7 +125,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
             List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser)).ToList();
             List<UserJobDescriptionDto> usersJobDescription = new List<UserJobDescriptionDto>();
-            
+
             foreach (User user in subordinates)
             {
                 UserJobDescriptionDto currentUserJobDescription = user.MapTo<UserJobDescriptionDto>();
@@ -122,7 +133,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
                     .OfType<AreaOrganizationUnit>()
                     .Select(organizationUnit => organizationUnit.Id)
                     .ToList();
-                    
+
                 usersJobDescription.Add(currentUserJobDescription);
             }
 
@@ -154,7 +165,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             User currentUser = await GetCurrentUserIfSupervisor();
             List<User> subordinates = (await UserManager.GetSubordinatesTree(currentUser));
             List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
-            
+
             foreach (User subordinate in subordinates)
             {
                 IEnumerable<string> regionCodes = (await UserManager.GetOrganizationUnitsAsync(subordinate))
