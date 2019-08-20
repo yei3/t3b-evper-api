@@ -8,6 +8,7 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Castle.Core.Internal;
+using Castle.Core.Logging;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Application.Report.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -28,9 +29,9 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly IRepository<Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion, long> MeasuredQuestionRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
+        private readonly ILogger _logger;
 
-
-        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository, ILogger logger)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
@@ -39,6 +40,7 @@ namespace Yei3.PersonalEvaluation.Report
             MeasuredQuestionRepository = measuredQuestionRepository;
             UserManager = userManager;
             OrganizationUnitsRepository = organizationUnitsRepository;
+            _logger = logger;
         }
 
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null)
@@ -812,6 +814,8 @@ namespace Yei3.PersonalEvaluation.Report
                 .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
                 .AsQueryable();
 
+            _logger.Info($"{evaluations.Count()} evaluations found for user {evaluatorUser.EmployeeNumber} between {input.StartTime:dd/mm/yyyy} {input.EndDateTime:dd/mm/yyyy}");
+
             List<long> evaluationIds = new List<long>();
 
             if (input.UserId.HasValue)
@@ -894,8 +898,9 @@ namespace Yei3.PersonalEvaluation.Report
             IQueryable<Evaluation> evaluations = EvaluationRepository
                 .GetAll()
                 .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-                .Where(evaluation => evaluation.CreationTime >= input.StartTime)
-                .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
 
             List<long> evaluationIds = new List<long>();
             List<long> evaluationTemplatesIds = new List<long>();
