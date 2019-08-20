@@ -93,12 +93,8 @@ namespace Yei3.PersonalEvaluation.Users
 
         public override async Task Delete(EntityDto<long> input)
         {
-            try{
-                var user = await _userManager.GetUserByIdAsync(input.Id);
-                await _userManager.DeleteAsync(user);
-            } catch (Exception e) {
-                throw new UserFriendlyException(e.Message);
-            }
+            var user = await _userManager.GetUserByIdAsync(input.Id);
+            await _userManager.DeleteAsync(user);
         }
 
         public async Task<ListResultDto<RoleDto>> GetRoles()
