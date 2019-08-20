@@ -6,8 +6,10 @@ using Abp.Application.Services;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
+using Abp.Organizations;
 using Abp.Runtime.Session;
 using Castle.Core.Internal;
+using Castle.Core.Logging;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Application.Report.Dto;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -15,6 +17,7 @@ using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Yei3.PersonalEvaluation.Evaluations.Sections;
 using Yei3.PersonalEvaluation.Report.Dto;
 
 namespace Yei3.PersonalEvaluation.Report
@@ -29,8 +32,9 @@ namespace Yei3.PersonalEvaluation.Report
         private readonly UserManager UserManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
 
+        private readonly ILogger _logger;
 
-        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository)
+        public EvaluationReportAppService(IRepository<Evaluation, long> evaluationRepository, IUnitOfWorkManager unitOfWorkManager, IRepository<Evaluations.Sections.Section, long> sectionRepository, IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<EvaluationMeasuredQuestion, long> measuredQuestionRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitsRepository, ILogger logger)
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
@@ -39,6 +43,7 @@ namespace Yei3.PersonalEvaluation.Report
             MeasuredQuestionRepository = measuredQuestionRepository;
             UserManager = userManager;
             OrganizationUnitsRepository = organizationUnitsRepository;
+            _logger = logger;
         }
 
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesReport(long? period = null)
@@ -247,7 +252,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             return Task.FromResult(result);
         }
-       
+
         public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null)
         {
             long userId = AbpSession.GetUserId();
@@ -433,6 +438,8 @@ namespace Yei3.PersonalEvaluation.Report
 
             List<long> evaluationIds = new List<long>();
 
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
+
             if (input.UserId.HasValue)
             {
                 evaluationIds = evaluations
@@ -451,19 +458,19 @@ namespace Yei3.PersonalEvaluation.Report
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit _organizationUnit =
+                    currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit areaOrganizationUnit =
-                        await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
-                            organizationUnitId.Equals(organizationUnit.Id));
+                    currentOrganizationUnit =
+                        await OrganizationUnitsRepository
+                            .SingleAsync(organizationUnit => organizationUnitId == organizationUnit.Id);
 
-                    userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
@@ -473,6 +480,13 @@ namespace Yei3.PersonalEvaluation.Report
                     userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
+                        .ToList();
+                }
+
+                if (currentOrganizationUnit != null)
+                {
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
                 }
 
@@ -519,6 +533,8 @@ namespace Yei3.PersonalEvaluation.Report
             List<long> evaluationIds = new List<long>();
             List<long> evaluationTemplatesIds = new List<long>();
 
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
+
             if (input.UserId.HasValue)
             {
                 evaluations = evaluations
@@ -543,7 +559,7 @@ namespace Yei3.PersonalEvaluation.Report
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit _organizationUnit =
+                    currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
@@ -551,11 +567,11 @@ namespace Yei3.PersonalEvaluation.Report
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit areaOrganizationUnit =
+                    currentOrganizationUnit =
                         await OrganizationUnitsRepository.SingleAsync(organizationUnit =>
                             organizationUnitId.Equals(organizationUnit.Id));
 
-                    userIds = (await UserManager.GetUsersInOrganizationUnit(areaOrganizationUnit, true))
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
@@ -565,6 +581,13 @@ namespace Yei3.PersonalEvaluation.Report
                     userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
+                        .ToList();
+                }
+
+                if (currentOrganizationUnit != null)
+                {
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
                 }
 
@@ -828,14 +851,14 @@ namespace Yei3.PersonalEvaluation.Report
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit _organizationUnit =
+                    Abp.Organizations.OrganizationUnit currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
 
                     userIds.AddRange(
-                        (await UserManager.GetUsersInOrganizationUnit(_organizationUnit, true))
+                        (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Select(user => user.Id)
                         .ToList());
                 }
@@ -994,7 +1017,8 @@ namespace Yei3.PersonalEvaluation.Report
 
             List<long> evaluationIds = new List<long>();
             List<User> users = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                    .ToList();
+                .ToList();
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
 
             users.Add(evaluatorUser);
 
@@ -1012,18 +1036,18 @@ namespace Yei3.PersonalEvaluation.Report
 
                 if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit currentOrganizationUnit =
+                    currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
-                    Abp.Organizations.OrganizationUnit currentOrganizationUnit =
+                    currentOrganizationUnit =
                         OrganizationUnitsRepository
                             .GetAll()
-                            .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
 
                     userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
@@ -1037,6 +1061,14 @@ namespace Yei3.PersonalEvaluation.Report
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
                         .ToList();
+                }
+
+                if (currentOrganizationUnit != null)
+                {
+                    users = users
+                        .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+                    userIds = users.Select(user => user.Id).ToList();
                 }
 
                 evaluations = evaluations
