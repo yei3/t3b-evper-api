@@ -26,9 +26,9 @@ namespace Yei3.PersonalEvaluation.Report
     {
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
-        private readonly IRepository<Evaluations.Sections.Section, long> SectionRepository;
+        private readonly IRepository<Evaluations.Sections.Section, long> _sectionRepository;
         private readonly IRepository<Evaluations.EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
-        private readonly IRepository<Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion, long> MeasuredQuestionRepository;
+        private readonly IRepository<Evaluations.EvaluationQuestions.EvaluationMeasuredQuestion, long> _measuredQuestionRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitsRepository;
 
@@ -38,9 +38,9 @@ namespace Yei3.PersonalEvaluation.Report
         {
             EvaluationRepository = evaluationRepository;
             _unitOfWorkManager = unitOfWorkManager;
-            SectionRepository = sectionRepository;
+            _sectionRepository = sectionRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
-            MeasuredQuestionRepository = measuredQuestionRepository;
+            _measuredQuestionRepository = measuredQuestionRepository;
             UserManager = userManager;
             OrganizationUnitsRepository = organizationUnitsRepository;
             _logger = logger;
@@ -193,7 +193,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationTemplateId = firstEvaluation.EvaluationId;
             }
 
-            Evaluations.Sections.Section sections = SectionRepository
+            Evaluations.Sections.Section sections = _sectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
@@ -253,7 +253,7 @@ namespace Yei3.PersonalEvaluation.Report
             return Task.FromResult(result);
         }
 
-        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesAccomplishmentReport(long? period = null)
+        public Task<CollaboratorObjectivesReportDto> GetCollaboratorObjectivesSalesReport(long? period = null)
         {
             long userId = AbpSession.GetUserId();
             List<long> evaluationIds = new List<long>();
@@ -277,10 +277,10 @@ namespace Yei3.PersonalEvaluation.Report
                     {
                         PreviousTotal = 0,
                         PreviousValidated = 0,
-                        CurrentTotal = MeasuredQuestionRepository
+                        CurrentTotal = _measuredQuestionRepository
                             .GetAll()
                             .Count(question => question.EvaluationId == currentEvaluationId),
-                        CurrentValidated = MeasuredQuestionRepository
+                        CurrentValidated = _measuredQuestionRepository
                             .GetAll()
                             .Include(question => question.MeasuredQuestion)
                             .Include(question => question.MeasuredAnswer)
@@ -292,19 +292,19 @@ namespace Yei3.PersonalEvaluation.Report
             return Task.FromResult(
                 new CollaboratorObjectivesReportDto
                 {
-                    PreviousTotal = MeasuredQuestionRepository
+                    PreviousTotal = _measuredQuestionRepository
                         .GetAll()
                         .Count(question => question.EvaluationId == lastEvaluationId),
-                    PreviousValidated = MeasuredQuestionRepository
+                    PreviousValidated = _measuredQuestionRepository
                         .GetAll()
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
                         .Where(question => question.EvaluationId == lastEvaluationId)
                         .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question)),
-                    CurrentTotal = MeasuredQuestionRepository
+                    CurrentTotal = _measuredQuestionRepository
                         .GetAll()
                         .Count(question => question.EvaluationId == currentEvaluationId),
-                    CurrentValidated = MeasuredQuestionRepository
+                    CurrentValidated = _measuredQuestionRepository
                         .GetAll()
                         .Include(question => question.MeasuredQuestion)
                         .Include(question => question.MeasuredAnswer)
@@ -314,7 +314,7 @@ namespace Yei3.PersonalEvaluation.Report
             );
         }
 
-        public Task<IList<SalesCapabilitiesReportDto>> GetCollaboratorAccomplishmentReport(long? period = null)
+        public Task<IList<SalesCapabilitiesReportDto>> GetCollaboratorCapabilitiesSalesReport(long? period = null)
         {
             long evaluationId = 0;
             long evaluationTemplateId = 0;
@@ -367,7 +367,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationTemplateId = firstEvaluation.EvaluationId;
             }
 
-            IList<Evaluations.Sections.Section> sections = SectionRepository
+            IList<Evaluations.Sections.Section> sections = _sectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
@@ -531,7 +531,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
             List<long> evaluationIds = new List<long>();
-            List<long> evaluationTemplatesIds = new List<long>();
+            List<long> templateIds = new List<long>();
 
             Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
 
@@ -544,7 +544,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
 
-                evaluationTemplatesIds = evaluations
+                templateIds = evaluations
                     .Select(evaluation => evaluation.EvaluationId)
                     .ToList();
             }
@@ -596,21 +596,21 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
 
-                evaluationTemplatesIds = evaluations
+                templateIds = evaluations
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
                     .Select(evaluation => evaluation.EvaluationId)
                     .Distinct()
                     .ToList();
             }
 
-            List<Evaluations.Sections.Section> sections = SectionRepository
+            List<Evaluations.Sections.Section> sections = _sectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
-                .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
+                .Where(section => templateIds.Contains(section.EvaluationTemplateId))
                 .ToList();
 
             // I'm sorry for this
@@ -716,28 +716,225 @@ namespace Yei3.PersonalEvaluation.Report
 
         public async Task<AdministratorObjectiveReportDto> GetEvaluatorObjectivesSalesReport(AdministratorInputDto input)
         {
+            User evaluatorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
+
+            List<long> evaluationIds = new List<long>();
+
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
+
+            if (input.UserId.HasValue)
+            {
+                evaluationIds = evaluations
+                    .Where(evaluation => evaluation.UserId == input.UserId.Value)
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
+            }
+            else
+            {
+                long? organizationUnitId = 0;
+                List<long> userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                    .Select(user => user.Id)
+                    .ToList();
+
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
+
+                if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
+                {
+                    currentOrganizationUnit =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
+                            .First();                    
+
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+
+                    //* Only add the evaluator if it belongs to the same area
+                    if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
+                    {
+                        userIds.Add(evaluatorUser.Id);
+                    }
+                }
+                else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
+                {
+                    currentOrganizationUnit =
+                        await OrganizationUnitsRepository
+                            .SingleAsync(organizationUnit => organizationUnitId == organizationUnit.Id);
+
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+
+                evaluationIds = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
+            }
+
             return new AdministratorObjectiveReportDto
             {
-                TotalObjectives = 80,
-                ValidatedObjectives = 67,
+                TotalObjectives = _measuredQuestionRepository
+                    .GetAll()
+                    .Count(question => evaluationIds.Contains(question.EvaluationId)),
+                ValidatedObjectives = _measuredQuestionRepository
+                    .GetAll()
+                    .Include(question => question.MeasuredQuestion)
+                    .Include(question => question.MeasuredAnswer)
+                    .Where(question => evaluationIds.Contains(question.EvaluationId))
+                    .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question)),
             };
         }
-        public Task<IList<SalesCapabilitiesReportDto>> GetEvaluatorCapabilitiesSalesReport(AdministratorInputDto input)
+        public async Task<IList<SalesCapabilitiesReportDto>> GetEvaluatorCapabilitiesSalesReport(AdministratorInputDto input)
         {
-            IList<SalesCapabilitiesReportDto> result = new List<SalesCapabilitiesReportDto>()
+            User evaluatorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
+
+            List<long> templateIds = new List<long>();
+            List<long> evaluationIds = new List<long>();
+            
+
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
+
+            if (input.UserId.HasValue)
             {
-                new SalesCapabilitiesReportDto {
-                    Name = "Competencias del puesto",
-                    Total = 100,
-                    Satisfactory = 85,
-                },
-                new SalesCapabilitiesReportDto {
-                    Name = "Cultura 3B",
-                    Total = 100,
-                    Satisfactory = 92,
+                evaluationIds = evaluations
+                    .Where(evaluation => evaluation.UserId == input.UserId.Value)
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();
+            }
+            else
+            {
+                long? organizationUnitId = 0;
+                List<long> userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                    .Select(user => user.Id)
+                    .ToList();
+
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
+
+                if (organizationUnitId.HasValue && input.JobDescription.IsNullOrEmpty())
+                {
+                    currentOrganizationUnit =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
+                            .First();                    
+
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+
+                    //* Only add the evaluator if it belongs to the same area
+                    if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
+                    {
+                        userIds.Add(evaluatorUser.Id);
+                    }
                 }
-            };
-            return Task.FromResult(result);
+                else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
+                {
+                    currentOrganizationUnit =
+                        await OrganizationUnitsRepository
+                            .SingleAsync(organizationUnit => organizationUnitId == organizationUnit.Id);
+
+                    userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .Select(user => user.Id)
+                        .ToList();
+                }
+
+                evaluationIds = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
+                    .Select(evaluation => evaluation.Id)
+                    .ToList();                
+            }
+
+            templateIds = evaluations
+                .Where(evaluation => evaluationIds.Contains(evaluation.Id))
+                .Select(evaluation => evaluation.EvaluationId)
+                .Distinct()
+                .ToList();
+
+            IQueryable<Evaluations.Sections.Section> sections = _sectionRepository
+                .GetAll()
+                .Include(section => section.ChildSections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
+                .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
+                .Where(section => templateIds.Contains(section.EvaluationTemplateId))
+                .Where(
+                    section =>
+                        section.Name.StartsWith(AppConsts.Section3bCulture, StringComparison.CurrentCultureIgnoreCase)
+                            || section.Name.StartsWith(AppConsts.SectionJobCapability, StringComparison.CurrentCultureIgnoreCase)
+                    );
+
+            List<SalesCapabilitiesReportDto> result = new List<SalesCapabilitiesReportDto>()
+                {
+                    new SalesCapabilitiesReportDto {
+                        Name = "Competencias del puesto",
+                        Total = 0,
+                        Satisfactory = 0,
+                    },
+                    new SalesCapabilitiesReportDto {
+                        Name = "Cultura 3B",
+                        Total = 0,
+                        Satisfactory = 0,
+                    }
+                };
+
+            foreach (var section in sections)
+            {
+                foreach (Evaluations.Sections.Section subSection in section.ChildSections)
+                {
+                    var Total = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId)).Count()
+                            }.Value
+                        ).ToList();
+
+                    var Satisfactory = subSection?.UnmeasuredQuestions
+                        .Select(uq =>
+                            new
+                            {
+                                Value = uq.EvaluationUnmeasuredQuestions
+                                    .Where(euq => evaluationIds.Contains(euq.EvaluationId))
+                                    .Where(euq => euq?.UnmeasuredAnswer?.Action == "true").Count()
+                            }.Value
+                        ).ToList();
+
+                    foreach (var capabilities in result)
+                    {
+                        if (section.Name.StartsWith(capabilities.Name, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            capabilities.Total += Total.Count * Total[0];
+                            for (int j = 0; j < Satisfactory.Count; j++)
+                            {
+                                capabilities.Satisfactory += Satisfactory[j];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
         public async Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input)
         {
@@ -827,7 +1024,7 @@ namespace Yei3.PersonalEvaluation.Report
                 .Where(evaluation => evaluation.CreationTime <= input.EndDateTime);
 
             List<long> evaluationIds = new List<long>();
-            List<long> evaluationTemplatesIds = new List<long>();
+            List<long> templateIds = new List<long>();
 
             if (input.UserId.HasValue)
             {
@@ -838,7 +1035,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
 
-                evaluationTemplatesIds = evaluations
+                templateIds = evaluations
                     .Select(evaluation => evaluation.EvaluationId)
                     .ToList();
             }
@@ -885,21 +1082,21 @@ namespace Yei3.PersonalEvaluation.Report
                     .Select(evaluation => evaluation.Id)
                     .ToList();
 
-                evaluationTemplatesIds = evaluations
+                templateIds = evaluations
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
                     .Select(evaluation => evaluation.EvaluationId)
                     .Distinct()
                     .ToList();
             }
 
-            List<Evaluations.Sections.Section> sections = SectionRepository
+            List<Evaluations.Sections.Section> sections = _sectionRepository
                 .GetAll()
                 .Include(section => section.ChildSections)
                 .ThenInclude(section => section.UnmeasuredQuestions)
                 .ThenInclude(question => question.EvaluationUnmeasuredQuestions)
                 .ThenInclude(evaluationQuestion => evaluationQuestion.UnmeasuredAnswer)
                 .Where(section => section.Name.StartsWith(AppConsts.SectionCapability, StringComparison.CurrentCultureIgnoreCase))
-                .Where(section => evaluationTemplatesIds.Contains(section.EvaluationTemplateId))
+                .Where(section => templateIds.Contains(section.EvaluationTemplateId))
                 .ToList();
 
             // I'm sorry for this
