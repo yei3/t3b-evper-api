@@ -18,6 +18,7 @@
     using System.Threading.Tasks;
     using System.Linq;
     using Yei3.PersonalEvaluation.Core;
+    using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 
     public class UserManager : AbpUserManager<Role, User>
     {
@@ -67,20 +68,10 @@
 
         public async Task<bool> IsUserASalesMan(User user)
         {
-            bool isInsideOperationArea = (await GetOrganizationUnitsAsync(user))
-                .Any(organizationUnit => organizationUnit.DisplayName.Contains(BizConst.OperationsArea, StringComparison.InvariantCultureIgnoreCase));
+            bool isSalesMan = (await GetOrganizationUnitsAsync(user))
+                .Any(organizationUnit => organizationUnit is SalesAreaOrganizationUnit);
 
-            bool hasSalesManJobDescription = false;
-
-            foreach (string salesManJobDescription in BizConst.SalesManJobDescriptions)
-            {
-                if (user.JobDescription.Contains(salesManJobDescription, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    hasSalesManJobDescription = true;
-                    break;
-                }
-            }
-            return isInsideOperationArea && hasSalesManJobDescription;
+            return isSalesMan;
         }
 
         public async Task<List<User>> GetSubordinatesTree(User rootUser)
