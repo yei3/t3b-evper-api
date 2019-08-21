@@ -462,7 +462,17 @@ namespace Yei3.PersonalEvaluation.Report
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
-                            .First();
+                            .First();                    
+
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+
+                    //* Only add the evaluator if it belongs to the same area
+                    if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
+                    {
+                        userIds.Add(evaluatorUser.Id);
+                    }
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
@@ -473,20 +483,6 @@ namespace Yei3.PersonalEvaluation.Report
                     userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
-                        .ToList();
-                }
-                else if (!organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
-                {
-                    userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                        .Where(user => user.JobDescription == input.JobDescription)
-                        .Select(user => user.Id)
-                        .ToList();
-                }
-
-                if (currentOrganizationUnit != null)
-                {
-                    userIds = userIds
-                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
                 }
 
@@ -564,6 +560,16 @@ namespace Yei3.PersonalEvaluation.Report
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId.Equals(organizationUnit.Id))
                             .First();
+
+                    userIds = userIds
+                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+                    
+                    //* Only add the evaluator if it belongs to the same area
+                    if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
+                    {
+                        userIds.Add(evaluatorUser.Id);
+                    }
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
@@ -574,20 +580,6 @@ namespace Yei3.PersonalEvaluation.Report
                     userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
                         .Select(user => user.Id)
-                        .ToList();
-                }
-                else if (!organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
-                {
-                    userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                        .Where(user => user.JobDescription == input.JobDescription)
-                        .Select(user => user.Id)
-                        .ToList();
-                }
-
-                if (currentOrganizationUnit != null)
-                {
-                    userIds = userIds
-                        .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
                 }
 
@@ -1202,6 +1194,7 @@ namespace Yei3.PersonalEvaluation.Report
 
         public async Task<EvaluationEmployeeDataDto> GetEvaluationEmployeeData(AdministratorInputDto input)
         {
+            double seniorityAverage = 0;
             User evaluatorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
 
             IQueryable<Evaluation> evaluations = EvaluationRepository
@@ -1212,12 +1205,9 @@ namespace Yei3.PersonalEvaluation.Report
                 .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
                 .AsQueryable();
 
-            List<long> evaluationIds = new List<long>();
-            List<User> users = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                .ToList();
-            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
-
-            users.Add(evaluatorUser);
+            List<User> users = null;
+            List<long> evaluationIds = new List<long>();            
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;            
 
             if (input.UserId.HasValue)
             {
@@ -1227,7 +1217,9 @@ namespace Yei3.PersonalEvaluation.Report
             else
             {
                 long? organizationUnitId = 0;
-                List<long> userIds = users.Select(user => user.Id).ToList();
+                List<long> userIds = null;
+
+                users = (await UserManager.GetSubordinatesTree(evaluatorUser)).ToList();
 
                 organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
 
@@ -1238,6 +1230,18 @@ namespace Yei3.PersonalEvaluation.Report
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
+
+                    users = users
+                        .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .ToList();
+                    
+                    //* Only add the evaluator if it belongs to the same area
+                    if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
+                    {
+                        users.Add(evaluatorUser);
+                    }
+
+                    userIds = users.Select(user => user.Id).ToList();
                 }
                 else if (organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
                 {
@@ -1252,27 +1256,10 @@ namespace Yei3.PersonalEvaluation.Report
                         .Select(user => user.Id)
                         .ToList();
                 }
-                else if (!organizationUnitId.HasValue && !input.JobDescription.IsNullOrEmpty())
-                {
-                    userIds = (await UserManager.GetSubordinatesTree(evaluatorUser))
-                        .Where(user => user.JobDescription == input.JobDescription)
-                        .Select(user => user.Id)
-                        .ToList();
-                }
-
-                if (currentOrganizationUnit != null)
-                {
-                    users = users
-                        .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, currentOrganizationUnit.Id).GetAwaiter().GetResult())
-                        .ToList();
-                    userIds = users.Select(user => user.Id).ToList();
-                }
 
                 evaluations = evaluations
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId));
             }
-
-            double seniorityAverage = 0;
 
             try
             {
@@ -1294,7 +1281,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
                     .ToList().Count,
                 EvaluatedEmployees = evaluations
-                    .Where(evaluation => evaluation.Status == EvaluationStatus.Finished || evaluation.Status == EvaluationStatus.Validated)
+                    .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
                     .Select(evaluation => evaluation.UserId)
                     .Distinct()
                     .Count(),
