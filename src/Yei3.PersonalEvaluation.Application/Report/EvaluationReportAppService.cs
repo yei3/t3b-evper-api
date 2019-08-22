@@ -72,13 +72,23 @@ namespace Yei3.PersonalEvaluation.Report
                         PreviousValidated = 0,
                         CurrentTotal = NotEvaluableQuestionRepository
                             .GetAll()
-                            .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                            .Count(question => question.EvaluationId == currentEvaluationId),
+                            .Include(question => question.Section)
+                            .ThenInclude(section => section.ParentSection)
+                            .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                            .Where(question => evaluationIds.Contains(question.EvaluationId))
+                            .Count(question =>
+                                question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                            ),
                         CurrentValidated = NotEvaluableQuestionRepository
                             .GetAll()
-                            .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                            .Where(question => question.EvaluationId == currentEvaluationId)
-                            .Count(question => question.Status == EvaluationQuestionStatus.Validated)
+                            .Include(question => question.Section)
+                            .ThenInclude(section => section.ParentSection)
+                            .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                            .Where(question => evaluationIds.Contains(question.EvaluationId))
+                            .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                            .Count(question =>
+                                question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                            )
                     }
                 );
             }
@@ -88,22 +98,42 @@ namespace Yei3.PersonalEvaluation.Report
                 {
                     PreviousTotal = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                        .Count(question => question.EvaluationId == lastEvaluationId),
+                        .Include(question => question.Section)
+                        .ThenInclude(section => section.ParentSection)
+                        .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(question => evaluationIds.Contains(question.EvaluationId))
+                        .Count(question =>
+                            question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                        ),
                     PreviousValidated = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.EvaluationId == lastEvaluationId)
-                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                        .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                        .Include(question => question.Section)
+                        .ThenInclude(section => section.ParentSection)
+                        .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(question => evaluationIds.Contains(question.EvaluationId))
+                        .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                        .Count(question =>
+                            question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                        ),
                     CurrentTotal = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                        .Count(question => question.EvaluationId == currentEvaluationId),
+                        .Include(question => question.Section)
+                        .ThenInclude(section => section.ParentSection)
+                        .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(question => evaluationIds.Contains(question.EvaluationId))
+                        .Count(question =>
+                            question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                        ),
                     CurrentValidated = NotEvaluableQuestionRepository
                         .GetAll()
-                        .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                        .Where(question => question.EvaluationId == currentEvaluationId)
-                        .Count(question => question.Status == EvaluationQuestionStatus.Validated)
+                        .Include(question => question.Section)
+                        .ThenInclude(section => section.ParentSection)
+                        .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(question => evaluationIds.Contains(question.EvaluationId))
+                        .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                        .Count(question =>
+                            question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                        ),
                 }
             );
         }
