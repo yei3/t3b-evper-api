@@ -1235,14 +1235,17 @@ namespace Yei3.PersonalEvaluation.Report
                 .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
                 .AsQueryable();
 
-            List<User> users = null;
+            List<User> users = new List<User>();
             List<long> evaluationIds = new List<long>();            
             Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;            
 
             if (input.UserId.HasValue)
             {
-                evaluations = evaluations
-                    .Where(evaluation => evaluation.UserId == input.UserId.Value);
+                evaluations = evaluations.Where(evaluation => evaluation.UserId == input.UserId.Value);
+
+                User user = await UserManager.GetUserByIdAsync(input.UserId.Value);
+                
+                users.Add(user);
             }
             else
             {
