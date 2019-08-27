@@ -73,25 +73,34 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetMyRegionOrganizationUnit()
         {
-            User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(administratorUser);
-            List<Abp.Organizations.OrganizationUnit> regions = new List<OrganizationUnit>();
-            foreach (Abp.Organizations.OrganizationUnit area in organizationUnits)
+            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
+
+            IEnumerable<string> regionCodes = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+                .Select(organizationUnit => organizationUnit.Code.Substring(0, 5))
+                .Distinct();
+
+            foreach (string code in regionCodes)
             {
-                if (area.ParentId != null)
-                {
-                    regions.Add(_regionOrganizationUnitRepository.Get(area.ParentId.Value));
-                }
+                OrganizationUnitDto currentRegion = (await _regionOrganizationUnitRepository
+                    .SingleAsync(region => region.Code == code))
+                    .MapTo<OrganizationUnitDto>();
+
+                if (regions.Contains(currentRegion))
+                    continue;
+
+                regions.Add(currentRegion);
             }
-            List<OrganizationUnitDto> organizationUnitDtos = regions.MapTo<List<OrganizationUnitDto>>();
-            return organizationUnitDtos;
+
+            return regions;
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree()
         {
             User currentUser = await GetCurrentUserIfSupervisor();
 
-            IEnumerable<OrganizationUnitDto> areas =  (await UserManager.GetOrganizationUnitsAsync(currentUser))
+            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
                 .OfType<SalesAreaOrganizationUnit>()
                 .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
 
