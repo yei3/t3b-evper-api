@@ -6,7 +6,6 @@ using Abp.Application.Services;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
-using Abp.Organizations;
 using Abp.Runtime.Session;
 using Castle.Core.Internal;
 using Castle.Core.Logging;
@@ -17,7 +16,6 @@ using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationAnswers;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
-using Yei3.PersonalEvaluation.Evaluations.Sections;
 using Yei3.PersonalEvaluation.Report.Dto;
 
 namespace Yei3.PersonalEvaluation.Report
@@ -492,7 +490,7 @@ namespace Yei3.PersonalEvaluation.Report
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
-                            .First();                    
+                            .First();
 
                     userIds = userIds
                         .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
@@ -594,7 +592,7 @@ namespace Yei3.PersonalEvaluation.Report
                     userIds = userIds
                         .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
-                    
+
                     //* Only add the evaluator if it belongs to the same area
                     if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
                     {
@@ -773,7 +771,7 @@ namespace Yei3.PersonalEvaluation.Report
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
-                            .First();                    
+                            .First();
 
                     userIds = userIds
                         .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
@@ -829,7 +827,7 @@ namespace Yei3.PersonalEvaluation.Report
 
             List<long> templateIds = new List<long>();
             List<long> evaluationIds = new List<long>();
-            
+
 
             Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
 
@@ -855,7 +853,7 @@ namespace Yei3.PersonalEvaluation.Report
                         OrganizationUnitsRepository
                             .GetAll()
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
-                            .First();                    
+                            .First();
 
                     userIds = userIds
                         .Where(userId => UserManager.IsInOrganizationUnitAsync(userId, currentOrganizationUnit.Id).GetAwaiter().GetResult())
@@ -882,7 +880,7 @@ namespace Yei3.PersonalEvaluation.Report
                 evaluationIds = evaluations
                     .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId))
                     .Select(evaluation => evaluation.Id)
-                    .ToList();                
+                    .ToList();
             }
 
             templateIds = evaluations
@@ -1236,15 +1234,15 @@ namespace Yei3.PersonalEvaluation.Report
                 .AsQueryable();
 
             List<User> users = new List<User>();
-            List<long> evaluationIds = new List<long>();            
-            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;            
+            List<long> evaluationIds = new List<long>();
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
 
             if (input.UserId.HasValue)
             {
                 evaluations = evaluations.Where(evaluation => evaluation.UserId == input.UserId.Value);
 
                 User user = await UserManager.GetUserByIdAsync(input.UserId.Value);
-                
+
                 users.Add(user);
             }
             else
@@ -1267,7 +1265,7 @@ namespace Yei3.PersonalEvaluation.Report
                     users = users
                         .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, currentOrganizationUnit.Id).GetAwaiter().GetResult())
                         .ToList();
-                    
+
                     //* Only add the evaluator if it belongs to the same area
                     if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
                     {
@@ -1351,5 +1349,98 @@ namespace Yei3.PersonalEvaluation.Report
                 : question.ExpectedText == answer.Text;
         }
 
+        public async Task<EvaluationEmployeeDataDto> GetAdministratorEvaluationEmployeeData(AdministratorInputDto input)
+        {
+            double seniorityAverage = 0;
+
+            IQueryable<Evaluation> evaluations = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .WhereIf(input.StartTime != null, evaluation => evaluation.CreationTime >= input.StartTime)
+                .WhereIf(input.EndDateTime != null, evaluation => evaluation.CreationTime <= input.EndDateTime)
+                .AsQueryable();
+
+            List<User> users = new List<User>();
+            List<long> evaluationIds = new List<long>();
+            Abp.Organizations.OrganizationUnit currentOrganizationUnit = null;
+
+            if (input.UserId.HasValue)
+            {
+                evaluations = evaluations.Where(evaluation => evaluation.UserId == input.UserId.Value);
+
+                CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
+
+                User currentUser = UserManager
+                    .Users
+                    .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                    .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
+                    .Single(user => user.Id == input.UserId.Value);
+
+                users.Add(currentUser);
+
+                CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);
+            }
+            else
+            {
+                long? organizationUnitId = 0;
+                List<long> userIds = null;
+
+                organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
+
+                currentOrganizationUnit =
+                        OrganizationUnitsRepository
+                            .GetAll()
+                            .Single(organizationUnit => organizationUnitId == organizationUnit.Id);
+
+                CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
+
+                users = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit))
+                    .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                    .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
+                    .ToList();
+
+                CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);
+
+                if (!input.JobDescription.IsNullOrEmpty())
+                {
+                    users = users
+                        .Where(user => user.JobDescription == input.JobDescription)
+                        .ToList();
+                }
+
+                userIds = users.Select(user => user.Id).ToList();
+
+                evaluations = evaluations
+                    .Where(evaluation => userIds.Distinct().Contains(evaluation.UserId));
+            }
+
+            try
+            {
+                seniorityAverage = users
+                    .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
+                    .Select(user => user.EntryDate)
+                    .ToList()
+                    .Select(entryDate => (DateTime.Now - entryDate).TotalDays)
+                    .Average() / AppConsts.YearsLengthInDays;
+            }
+            catch (InvalidOperationException)
+            {
+                // do nothing
+            }
+
+            return new EvaluationEmployeeDataDto
+            {
+                TotalEmployees = users
+                    .ToList()
+                    .Count,
+                EvaluatedEmployees = evaluations
+                    .Where(evaluation => evaluation.Status != EvaluationStatus.NonInitiated)
+                    .Select(evaluation => evaluation.UserId)
+                    .Distinct()
+                    .Count(),
+                SeniorityAverage = seniorityAverage
+            };
+        }
     }
 }

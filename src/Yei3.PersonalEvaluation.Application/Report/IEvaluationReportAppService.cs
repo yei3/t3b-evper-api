@@ -19,5 +19,6 @@ namespace Yei3.PersonalEvaluation.Report
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input);
         Task<EvaluationEmployeeDataDto> GetEvaluationEmployeeData(AdministratorInputDto input);
+        Task<EvaluationEmployeeDataDto> GetAdministratorEvaluationEmployeeData(AdministratorInputDto input);
     }
 }
