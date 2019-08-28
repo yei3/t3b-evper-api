@@ -1241,16 +1241,31 @@ namespace Yei3.PersonalEvaluation.Report
             {
                 evaluations = evaluations.Where(evaluation => evaluation.UserId == input.UserId.Value);
 
-                User user = await UserManager.GetUserByIdAsync(input.UserId.Value);
+                CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
 
-                users.Add(user);
+                User currentUser = UserManager
+                    .Users
+                    .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                    .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
+                    .Single(user => user.Id == input.UserId.Value);
+
+                CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);
+
+                users.Add(currentUser);
             }
             else
             {
                 long? organizationUnitId = 0;
                 List<long> userIds = null;
 
-                users = (await UserManager.GetSubordinatesTree(evaluatorUser)).ToList();
+                CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
+
+                users = (await UserManager.GetSubordinatesTree(evaluatorUser))
+                    .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                    .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
+                    .ToList();
+
+                CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);
 
                 organizationUnitId = (input.AreaId.HasValue && input.AreaId != AppConsts.Zero) ? input.AreaId : input.RegionId;
 
@@ -1262,9 +1277,15 @@ namespace Yei3.PersonalEvaluation.Report
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
 
+                    CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
+
                     users = users
                         .Where(user => UserManager.IsInOrganizationUnitAsync(user.Id, currentOrganizationUnit.Id).GetAwaiter().GetResult())
+                        .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                        .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
                         .ToList();
+    
+                    CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);                    
 
                     //* Only add the evaluator if it belongs to the same area
                     if (currentOrganizationUnit.DisplayName.Contains(evaluatorUser.Area))
@@ -1282,10 +1303,16 @@ namespace Yei3.PersonalEvaluation.Report
                             .Where(organizationUnit => organizationUnitId == organizationUnit.Id)
                             .First();
 
+                    CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete);
+
                     userIds = (await UserManager.GetUsersInOrganizationUnit(currentOrganizationUnit, true))
                         .Where(user => user.JobDescription == input.JobDescription)
+                        .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                        .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
                         .Select(user => user.Id)
                         .ToList();
+                    
+                    CurrentUnitOfWork.EnableFilter(AbpDataFilters.SoftDelete);                    
                 }
 
                 evaluations = evaluations
@@ -1309,6 +1336,7 @@ namespace Yei3.PersonalEvaluation.Report
             return new EvaluationEmployeeDataDto
             {
                 TotalEmployees = users
+                    .Where(user => user.Id != evaluatorUser.Id)
                     .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
                     .ToList().Count,
                 EvaluatedEmployees = evaluations
@@ -1373,8 +1401,8 @@ namespace Yei3.PersonalEvaluation.Report
 
                 User currentUser = UserManager
                     .Users
-                    .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
-                    .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
+                .WhereIf(input.StartTime != null, user => user.CreationTime > input.StartTime)
+                .WhereIf(input.EndDateTime != null, user => user.DeletionTime.HasValue ? user.DeletionTime > input.EndDateTime : true)
                     .Single(user => user.Id == input.UserId.Value);
 
                 users.Add(currentUser);
