@@ -16,18 +16,21 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using Abp.UI;
     using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
     using Yei3.PersonalEvaluation.Core.OrganizationUnit;
+    using Abp.Collections.Extensions;
 
     public class OrganizationUnitAppService : PersonalEvaluationAppServiceBase, IOrganizationUnitAppService
     {
         private readonly IRepository<OrganizationUnit, long> _repository;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
         private readonly IRepository<RegionOrganizationUnit, long> _regionOrganizationUnitRepository;
+        private readonly UserManager _userManager;
 
-        public OrganizationUnitAppService(IRepository<OrganizationUnit, long> repository, IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository, IRepository<RegionOrganizationUnit, long> regionOrganizationUnitRepository)
+        public OrganizationUnitAppService(IRepository<OrganizationUnit, long> repository, IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository, IRepository<RegionOrganizationUnit, long> regionOrganizationUnitRepository, UserManager userManager)
         {
             _repository = repository;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
             _regionOrganizationUnitRepository = regionOrganizationUnitRepository;
+            _userManager = userManager;
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllOrganizationUnits()
@@ -195,6 +198,34 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             }
 
             return regions;
+        }
+
+        public async Task<ICollection<AreaJobDescriptionDto>> GetAreasJobDescription(long? areaId)
+        {
+            List<AreaJobDescriptionDto> areasJobDescription = new List<AreaJobDescriptionDto>();
+
+            IEnumerable<AreaOrganizationUnit> areas = _areaOrganizationUnitRepository
+                .GetAll()
+                .WhereIf(areaId.HasValue, area => area.Id == areaId);
+
+            foreach (AreaOrganizationUnit area in areas)
+            {
+                AreaJobDescriptionDto areaJobDescription = new AreaJobDescriptionDto {
+                        AreaId = area.Id,
+                        JobDescriptions = new List<string>()
+                };
+                
+                List<User> users = await _userManager.GetUsersInOrganizationUnit(area);
+                
+                foreach (User user in users)
+                {
+                    areaJobDescription.JobDescriptions.AddIfNotContains(user.JobDescription);
+                }
+
+                areasJobDescription.Add(areaJobDescription);
+            }
+
+            return areasJobDescription;
         }
     }
 }
