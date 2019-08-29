@@ -276,5 +276,19 @@ namespace Yei3.PersonalEvaluation.Users
                 .SingleAsync(user => user.Id == AbpSession.GetUserId());
             return await _userManager.IsUserASalesMan(currentUser);
         }
+
+        public async Task<ICollection<UserFullNameDto>> GetSubordinatesByUser(long userId)
+        {
+            User currentUser;
+            try {
+                currentUser = await _userManager.GetUserByIdAsync(userId);
+            } catch (Exception) {
+                throw new EntityNotFoundException(typeof(User), userId);
+            }
+
+            return (await _userManager.GetSubordinates(currentUser))
+                .Where(user => !user.JobDescription.IsNullOrEmpty())
+                .MapTo<ICollection<UserFullNameDto>>();                
+        }
     }
 }
