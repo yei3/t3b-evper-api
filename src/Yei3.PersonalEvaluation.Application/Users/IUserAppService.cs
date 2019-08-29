@@ -17,5 +17,6 @@ namespace Yei3.PersonalEvaluation.Users
         Task<bool> IsUserSalesMan();
         Task<ICollection<string>> GetAllJobDescriptions();
         Task<ICollection<UserFullNameDto>> GetSubordinatesByUser(long userId);
+        Task<ICollection<UserAreaDto>> GetUsersByArea(long? areaId);
     }
 }

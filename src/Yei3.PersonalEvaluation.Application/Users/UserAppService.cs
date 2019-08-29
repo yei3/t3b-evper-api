@@ -22,6 +22,8 @@ using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
+using Yei3.PersonalEvaluation.OrganizationUnit;
+using Abp.Collections.Extensions;
 
 namespace Yei3.PersonalEvaluation.Users
 {
@@ -33,13 +35,16 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
 
+        private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
+
         public UserAppService(
             IRepository<User, long> repository,
             UserManager userManager,
             RoleManager roleManager,
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
-            IEmailSender emailSender
+            IEmailSender emailSender,
+            IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository
         )
             : base(repository)
         {
@@ -48,6 +53,7 @@ namespace Yei3.PersonalEvaluation.Users
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
             _emailSender = emailSender;
+            _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -288,7 +294,31 @@ namespace Yei3.PersonalEvaluation.Users
 
             return (await _userManager.GetSubordinates(currentUser))
                 .Where(user => !user.JobDescription.IsNullOrEmpty())
-                .MapTo<ICollection<UserFullNameDto>>();                
+                .MapTo<ICollection<UserFullNameDto>>();
+        }       
+        public async Task<ICollection<UserAreaDto>> GetUsersByArea(long? areaId)
+        {
+            List<UserAreaDto> usersArea = new List<UserAreaDto>();
+
+            IEnumerable<AreaOrganizationUnit> areas = _areaOrganizationUnitRepository
+                .GetAll()
+                .WhereIf(areaId.HasValue, area => area.Id == areaId.Value);
+
+            foreach (AreaOrganizationUnit area in areas)
+            {
+                IEnumerable<UserAreaDto> users = (await _userManager
+                    .GetUsersInOrganizationUnit(area))
+                    .Select(user => new UserAreaDto
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        JobDescription = user.JobDescription,
+                        AreaId = area.Id
+                    });
+
+                usersArea.AddRange(users);
+            }
+            return usersArea;
         }
     }
 }
