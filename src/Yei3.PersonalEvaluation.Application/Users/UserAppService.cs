@@ -283,19 +283,6 @@ namespace Yei3.PersonalEvaluation.Users
             return await _userManager.IsUserASalesMan(currentUser);
         }
 
-        public async Task<ICollection<UserFullNameDto>> GetSubordinatesByUser(long userId)
-        {
-            User currentUser;
-            try {
-                currentUser = await _userManager.GetUserByIdAsync(userId);
-            } catch (Exception) {
-                throw new EntityNotFoundException(typeof(User), userId);
-            }
-
-            return (await _userManager.GetSubordinates(currentUser))
-                .Where(user => !user.JobDescription.IsNullOrEmpty())
-                .MapTo<ICollection<UserFullNameDto>>();
-        }       
         public async Task<ICollection<UserAreaDto>> GetUsersByArea(long? areaId)
         {
             List<UserAreaDto> usersArea = new List<UserAreaDto>();
@@ -318,6 +305,7 @@ namespace Yei3.PersonalEvaluation.Users
 
                 usersArea.AddRange(users);
             }
+
             return usersArea;
         }
     }
