@@ -14,7 +14,6 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using Abp.AutoMapper;
     using Yei3.PersonalEvaluation.Authorization.Roles;
     using Abp.UI;
-    using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
     using Yei3.PersonalEvaluation.Core.OrganizationUnit;
     using Abp.Collections.Extensions;
 
@@ -164,12 +163,12 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return currentUser;
         }
 
-        public async Task<ICollection<UserFullNameDto>> GetUserTree()
+        public async Task<ICollection<UserFullNameAndJobDescriptionDto>> GetUserTree()
         {
             User currentUser = await GetCurrentUserIfSupervisor();
             List<User> subordinates = await UserManager.GetSubordinatesTree(currentUser);
 
-            return subordinates.MapTo<List<UserFullNameDto>>();
+            return subordinates.MapTo<List<UserFullNameAndJobDescriptionDto>>();
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree()
