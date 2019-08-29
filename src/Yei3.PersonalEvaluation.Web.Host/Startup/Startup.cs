@@ -16,6 +16,7 @@ using Abp.Extensions;
 using Yei3.PersonalEvaluation.Authentication.JwtBearer;
 using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.Identity;
+using Yei3.PersonalEvaluation.OperationFilters;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Startup
 {
@@ -64,6 +65,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Startup
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new Info { Title = "PersonalEvaluation API", Version = "v1" });
+                options.OperationFilter<FormFileSwaggerFilter>();
                 options.DocInclusionPredicate((docName, description) => true);
 
                 // Define the BearerAuth scheme that's in use
