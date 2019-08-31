@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Controllers;
+using Yei3.PersonalEvaluation.Core.Authorization.Users;
+using Abp.BackgroundJobs;
+using Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 {
@@ -14,17 +17,21 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
     {
 
         private readonly UserRegistrationManager _userRegistrationManager;
+        private readonly IBackgroundJobManager _backgroundJobManager;
 
-        public ImportUserController(UserRegistrationManager userRegistrationManager)
+        public ImportUserController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
         {
-            this._userRegistrationManager = userRegistrationManager;
+            _userRegistrationManager = userRegistrationManager;
+            _backgroundJobManager = backgroundJobManager;
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportUserAction([FromForm]IFormFile file)
+        public async Task<IActionResult> ImportUserAction(string emailAddress, [FromForm]IFormFile file)
         {
             string filePath = Path.GetTempFileName();
             
+            ImportUserSummaryModel importUserSummaryModel = new ImportUserSummaryModel(filePath, emailAddress);
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -64,13 +71,19 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                             email: worksheet.Cells[row, 17].Value.ToString(),
                             isMale: worksheet.Cells[row, 18].Value.ToString() == "MASCULINO"
                         );
+
+                        importUserSummaryModel.ImportedUserDictionary.Add(currentUser.EmployeeNumber, currentUser.FullName);
+                        importUserSummaryModel.IncrementImportedUser();
                     }
                     catch (Exception e)
                     {
+                        importUserSummaryModel.IncrementNotImportedUser();
                         Logger.Info(e.Message);
                         Logger.Info($"Usuario {worksheet.Cells[row, 3].Value} fue agregado anteriormente.");
                     }
                 }
+
+                await _backgroundJobManager.EnqueueAsync<SendImportUserReportBackgroundJob, ImportUserSummaryModel>(importUserSummaryModel);
 
                 return Ok();
             }
