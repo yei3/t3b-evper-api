@@ -15,8 +15,6 @@ using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Runtime.Session;
 using Abp.UI;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
@@ -24,6 +22,7 @@ using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
 using Yei3.PersonalEvaluation.OrganizationUnit;
 using Abp.Collections.Extensions;
+using System.Net.Mail;
 
 namespace Yei3.PersonalEvaluation.Users
 {
@@ -159,19 +158,17 @@ namespace Yei3.PersonalEvaluation.Users
             if ((await _userManager.ChangePasswordAsync(user, newPassword)).Succeeded)
             {
                 user.IsEmailConfirmed = false;
-                // Temporary solution the key must be in the appsettings
-                var sendGridClient = new SendGridClient("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");
-                var from = new EmailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B");
-                var subject = "Soporte Tiendas 3B - Recuperación de contraseña";
-                var to = new EmailAddress(user.EmailAddress, user.FullName);
-                var plainTextContent = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
-                // We need create a email template
-                var htmlContent = $"Su nueva contraseña es: <strong>{newPassword}</strong> Al iniciar sesión debe volver a cambiarla.";
-                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+
+                MailMessage mail = new MailMessage(
+                new MailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B"),
+                new MailAddress(user.EmailAddress, user.FullName)
+            );
+                mail.Subject = "Soporte Tiendas 3B - Recuperación de contraseña";
+                mail.Body = $"Su nueva contraseña es {newPassword}. Al iniciar debe cambiarla.";
 
                 try
                 {
-                    await sendGridClient.SendEmailAsync(msg);
+                    await _emailSender.SendAsync(mail);
                 }
                 catch (Exception)
                 {
@@ -311,14 +308,17 @@ namespace Yei3.PersonalEvaluation.Users
         public async Task<ICollection<UserFullNameDto>> GetSubordinatesByUser(long userId)
         {
             User currentUser;
-            try {
+            try
+            {
                 currentUser = await _userManager.GetUserByIdAsync(userId);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 throw new EntityNotFoundException(typeof(User), userId);
             }
             return (await _userManager.GetSubordinates(currentUser))
                 .Where(user => !user.JobDescription.IsNullOrEmpty())
                 .MapTo<ICollection<UserFullNameDto>>();
-        } 
+        }
     }
 }

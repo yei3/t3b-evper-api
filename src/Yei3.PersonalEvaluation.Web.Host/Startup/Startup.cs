@@ -13,7 +13,6 @@ using Abp.AspNetCore;
 using Abp.AspNetCore.SignalR.Hubs;
 using Abp.Castle.Logging.Log4Net;
 using Abp.Extensions;
-using Yei3.PersonalEvaluation.Authentication.JwtBearer;
 using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.Identity;
 
