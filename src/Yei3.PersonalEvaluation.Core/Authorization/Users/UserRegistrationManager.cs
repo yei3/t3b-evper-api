@@ -15,6 +15,7 @@ using Abp.UI;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.MultiTenancy;
 using Abp.Extensions;
+using Yei3.PersonalEvaluation.OrganizationUnit;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
@@ -161,8 +162,19 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 if (!organizationUnit.IsNullOrDeleted())
                 {
-                    _userManager.AddToOrganizationUnitAsync(user, organizationUnit).GetAwaiter().GetResult();
+                    var regionOrganizationUnit = _organizationUnitRepository
+                        .GetAll()
+                        .FirstOrDefault(ou => ou.DisplayName == user.Region);
+
+                    if (regionOrganizationUnit.IsNullOrDeleted())
+                    {
+                        _organizationUnitRepository.Insert(new RegionOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Region));
+                    }
+
+                    organizationUnit = _organizationUnitRepository.Insert(new AreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, regionOrganizationUnit.Id));
                 }
+
+                _userManager.AddToOrganizationUnitAsync(user, organizationUnit).GetAwaiter().GetResult();
 
                 unitOfWork.Complete();
 
