@@ -35,12 +35,13 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob
             _logger.Info("User import report parsed");
 
             MailMessage mail = new MailMessage(
-                new MailAddress("noreply@t3b.mx", "Tiendas 3B"),
+                new MailAddress("comunicadosrh@t3b.com.mx", "Soporte Tiendas 3B"),
                 new MailAddress(args.EmailAddress)
             );
 
             mail.Body = template;
             mail.Subject = $"Reporte de importacion de usuarios";
+            mail.IsBodyHtml = true;
 
             _emailSender.Send(mail);
             _logger.Info("User import report email sent");
