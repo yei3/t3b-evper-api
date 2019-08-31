@@ -1,0 +1,36 @@
+@model Yei3.PersonalEvaluation.Core.Authorization.Users.ImportUserSummaryModel;
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+</head>
+<body class="container">
+    <label>
+        <b style="color: darkgreen">Usuarios Importados: @Model.ImportedUsers</b>
+    </label>
+    <br/>
+    <label>
+        <b style="color: darkred">Usuarios No Importados: @Model.NotImportedUsers</b>
+    </label>
+    <hr/>
+    <table class="table">
+        <thead>
+            <th>
+                # de Empleado
+            </th>
+            <th>
+                Nombre Completo
+            </th>
+        </thead>
+        <tbody>
+            @foreach (KeyValuePair<string, string> item in Model.ImportedUserDictionary)
+            {
+                <tr>
+                    <td>item.Key</td>
+                    <td>item.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
