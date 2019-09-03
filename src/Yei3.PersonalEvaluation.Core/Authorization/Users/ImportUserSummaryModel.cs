@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace Yei3.PersonalEvaluation.Core.Authorization.Users
 {
+    [Serializable]
     public class ImportUserSummaryModel
     {
         public ImportUserSummaryModel(string templatePath, string emailAddress)
@@ -15,16 +17,18 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users
 
         public int ImportedUsers { get; protected set; }
         public int NotImportedUsers { get; protected set; }
-        public Dictionary<string, string> ImportedUserDictionary { get; protected set; }
         public string TemplatePath { get; protected set; }
         public string EmailAddress { get; protected set; }
+        public Dictionary<string, string> ImportedUserDictionary { get; protected set; }
 
-        public void IncrementImportedUser() {
-            ImportedUsers ++;
+        public void IncrementImportedUser()
+        {
+            ImportedUsers++;
         }
 
-        public void IncrementNotImportedUser() {
-            NotImportedUsers ++;
+        public void IncrementNotImportedUser()
+        {
+            NotImportedUsers++;
         }
     }
 }

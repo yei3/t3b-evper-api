@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Events.Bus.Entities;
 using Abp.Events.Bus.Handlers;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -27,11 +28,13 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
             _evaluationRevisionRepository = evaluationRevisionRepository;
         }
 
+        [UnitOfWork]
         public void HandleEvent(EntityDeletingEventData<User> eventData)
         {
             UpdateSupervisorSubordinateRelation(eventData.Entity);
         }
-
+        
+        [UnitOfWork]
         public void HandleEvent(EntityChangedEventData<User> eventData)
         {
             if (eventData.Entity.IsActive)

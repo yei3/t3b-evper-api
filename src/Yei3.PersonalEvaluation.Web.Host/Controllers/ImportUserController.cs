@@ -30,7 +30,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         {
             string filePath = Path.GetTempFileName();
             
-            ImportUserSummaryModel importUserSummaryModel = new ImportUserSummaryModel(filePath, emailAddress);
+            ImportUserSummaryModel importUserSummaryModel = new ImportUserSummaryModel("./View/ImportedUserSummaryView.cshtml", emailAddress);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
