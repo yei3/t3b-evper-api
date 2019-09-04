@@ -126,13 +126,20 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
+            Evaluation lastEvaluation = await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .OrderByDescending(evaluation => evaluation.Id)
+                .FirstOrDefaultAsync();
+
+
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == lastEvaluation.Id)
                 .OrderByDescending(evaluationQuestion => evaluationQuestion.Evaluation.Id)
                 .OfType<NotEvaluableQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
@@ -158,7 +165,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
-                .Where(evaluationQuestion => evaluationQuestion.Evaluation.EndDateTime.AddMonths(1) > DateTime.Now)
+                .Where(evaluationQuestion => evaluationQuestion.Evaluation.Id == lastEvaluation.Id)
                 .OfType<EvaluationMeasuredQuestion>()
                 .Select(evaluationQuestion => new EvaluationObjectivesSummaryValueObject
                 {
