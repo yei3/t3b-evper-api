@@ -811,7 +811,7 @@ namespace Yei3.PersonalEvaluation.Report
                     .Include(question => question.MeasuredQuestion)
                     .Include(question => question.MeasuredAnswer)
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
-                    .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question)),
+                    .Count(question => IsObjectiveAccomplished(question.MeasuredQuestion, question.MeasuredAnswer, question))
             };
         }
         public async Task<IList<SalesCapabilitiesReportDto>> GetEvaluatorCapabilitiesSalesReport(AdministratorInputDto input)
@@ -1023,13 +1023,23 @@ namespace Yei3.PersonalEvaluation.Report
             {
                 TotalObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
-                    .Count(question => evaluationIds.Contains(question.EvaluationId)),
+                    .Include(question => question.Section)
+                    .ThenInclude(section => section.ParentSection)
+                    .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
+                    .Where(question => evaluationIds.Contains(question.EvaluationId))
+                    .Count(question =>
+                        question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                    ),
                 ValidatedObjectives = NotEvaluableQuestionRepository
                     .GetAll()
-                    .Where(question => question.Section.Name == AppConsts.SectionObjectivesName)
+                    .Include(question => question.Section)
+                    .ThenInclude(section => section.ParentSection)
+                    .Where(question => question.Section.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase))
                     .Where(question => evaluationIds.Contains(question.EvaluationId))
-                    .Count(question => question.Status == EvaluationQuestionStatus.Validated),
+                    .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                    .Count(question =>
+                        question.Section.ParentSection.Name.Equals(AppConsts.SectionObjectivesName, StringComparison.InvariantCultureIgnoreCase)
+                    )
             };
         }
 
