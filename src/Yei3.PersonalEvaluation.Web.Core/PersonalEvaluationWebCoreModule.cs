@@ -12,6 +12,11 @@ using Abp.Zero.Configuration;
 using Yei3.PersonalEvaluation.Authentication.JwtBearer;
 using Yei3.PersonalEvaluation.Configuration;
 using Yei3.PersonalEvaluation.EntityFrameworkCore;
+using Abp.Net.Mail;
+using Yei3.PersonalEvaluation.Core.Email;
+using Abp.Dependency;
+using Abp.Configuration.Startup;
+using Yei3.PersonalEvaluation.Core.Debugging;
 
 namespace Yei3.PersonalEvaluation
 {
@@ -45,7 +50,15 @@ namespace Yei3.PersonalEvaluation
                  .CreateControllersForAppServices(
                      typeof(PersonalEvaluationApplicationModule).GetAssembly()
                  );
+            
+            Configuration.ReplaceService<IEmailSender, SendGridEmailSender>(DependencyLifeStyle.Transient);
 
+            if (DebugHelper.IsDebug)
+            {
+                //Disabling email sending in debug mode
+                Configuration.ReplaceService<IEmailSender, NullEmailSender>(DependencyLifeStyle.Transient);
+            }
+            
             ConfigureTokenAuth();
         }
 
