@@ -1565,7 +1565,6 @@ namespace Yei3.PersonalEvaluation.Report
             return new EvaluationEmployeeDataDto
             {
                 TotalEmployees = users
-                    .Where(user => user.Id != evaluatorUser.Id)
                     .WhereIf(!input.JobDescription.IsNullOrEmpty(), user => user.JobDescription == input.JobDescription)
                     .ToList().Count,
                 EvaluatedEmployees = evaluations
