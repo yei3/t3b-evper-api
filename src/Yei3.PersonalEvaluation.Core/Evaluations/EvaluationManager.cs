@@ -129,6 +129,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             Evaluation lastEvaluation = await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Template.IsAutoEvaluation)
                 .OrderByDescending(evaluation => evaluation.Id)
                 .FirstOrDefaultAsync();
 
