@@ -58,16 +58,24 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllAreaOrganizationUnits()
         {
-            List<AreaOrganizationUnit> organizationUnits = await _areaOrganizationUnitRepository.GetAllListAsync();
-            List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
-            return organizationUnitDtos;
+            IEnumerable<OrganizationUnitDto> areas = (await _areaOrganizationUnitRepository.GetAllListAsync())
+                .OfType<SalesAreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
+
+            areas = areas.Concat(
+               (await _areaOrganizationUnitRepository.GetAllListAsync())
+                .OfType<AreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>())
+            );
+
+            return areas.Distinct().ToList();
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllAreasOrganizationUnitsByRegionCode(string regionCode)
         {
             List<AreaOrganizationUnit> organizationUnits = (await _areaOrganizationUnitRepository
                 .GetAllListAsync())
-                .Where(organizationUnit => organizationUnit.Code.StartsWith(regionCode))
+                .WhereIf(regionCode != null, organizationUnit => organizationUnit.Code.StartsWith(regionCode))
                 .ToList();
             List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
             return organizationUnitDtos;
