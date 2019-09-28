@@ -17,6 +17,7 @@ using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Yei3.PersonalEvaluation.Binnacle;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -132,7 +133,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EvaluationId,
                         unmeasuredQuestion.Id,
                         currentEvaluation.EndDateTime,
-                        currentEvaluation.EvaluationStatus);
+                        EvaluationQuestionStatus.Unanswered);
 
                     evaluationUnmeasuredQuestion.SetAnswer(unmeasuredQuestion.Id);
 
@@ -145,7 +146,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EvaluationId,
                         measuredQuestion.Id,
                         currentEvaluation.EndDateTime,
-                        currentEvaluation.EvaluationStatus,
+                        EvaluationQuestionStatus.Unanswered,
                         measuredQuestion.Expected,
                         measuredQuestion.ExpectedText);
 
@@ -218,13 +219,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 if (!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
-                IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
+                IQueryable<EvaluationQuestions.NotEvaluableQuestion> notEvaluableQuestions = NotEvaluableQuestionRepository
                     .GetAll()
                     .Include(question => question.NotEvaluableAnswer)
                     .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId.Value)
                     .Where(question => question.EvaluationId == lastEvaluation.Id);
 
-                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in questions)
+                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in notEvaluableQuestions)
                 {
 
                     EvaluationQuestions.NotEvaluableQuestion currentQuestion = new EvaluationQuestions.NotEvaluableQuestion(
@@ -232,7 +233,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         notEvaluableQuestion.Text,
                         currentEvaluation.Id,
                         notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime,
-                        EvaluationQuestionStatus.Unanswered)
+                        notEvaluableQuestion.Status)
                     {
                         SectionId = currentEvaluationObjectivesSectionId.Value
                     };
@@ -244,6 +245,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     );
 
                     await NotEvaluableQuestionRepository.InsertAsync(currentQuestion);
+
+                    foreach(ObjectiveBinnacle objectiveBinnacle in notEvaluableQuestion.Binnacle)
+                    {
+                        ObjectiveBinnacle currentObjectiveBinnacle = new ObjectiveBinnacle(
+                            objectiveBinnacle.Text,
+                            currentQuestion.Id
+                        );
+
+                        notEvaluableQuestion.Binnacle.Add(currentObjectiveBinnacle);
+                    }
                 }
             }
         }
