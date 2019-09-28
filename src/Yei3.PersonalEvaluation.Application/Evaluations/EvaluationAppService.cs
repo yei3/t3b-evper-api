@@ -132,7 +132,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EvaluationId,
                         unmeasuredQuestion.Id,
                         currentEvaluation.EndDateTime,
-                        EvaluationQuestionStatus.Unanswered);
+                        currentEvaluation.EvaluationStatus);
 
                     evaluationUnmeasuredQuestion.SetAnswer(unmeasuredQuestion.Id);
 
@@ -145,7 +145,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         currentEvaluation.EvaluationId,
                         measuredQuestion.Id,
                         currentEvaluation.EndDateTime,
-                        EvaluationQuestionStatus.Unanswered,
+                        currentEvaluation.EvaluationStatus,
                         measuredQuestion.Expected,
                         measuredQuestion.ExpectedText);
 
