@@ -322,6 +322,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             Evaluation resultEvaluation = await EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Revision)
+                .ThenInclude(revision => revision.ReviewerUser)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .ThenInclude(answer => answer.EvaluationMeasuredQuestion)
@@ -345,7 +347,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             evaluationDto.Template.PurgeSubSections();
 
-            User evaluatorUser = await UserManager.GetUserByIdAsync(resultEvaluation.CreatorUserId.Value);
+            User evaluatorUser = resultEvaluation.Revision.ReviewerUser;
 
             evaluationDto.EvaluatorFullName = evaluatorUser.FullName;
 
