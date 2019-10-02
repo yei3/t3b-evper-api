@@ -17,6 +17,7 @@ using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Castle.Core.Logging;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -29,8 +30,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
+        private readonly ILogger _logger;
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Sections.Section, long> sectionRepository)
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Sections.Section, long> sectionRepository, ILogger logger)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
@@ -38,6 +40,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
             SectionRepository = sectionRepository;
+            _logger = logger;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -344,6 +347,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
             var evaluationDto = resultEvaluation.MapTo<EvaluationDto>();
 
             evaluationDto.Template.PurgeSubSections();
+
+            _logger.Info($"Evaluator user {resultEvaluation.CreatorUserId.Value}");
+
+            User evaluatorUser = await UserManager.GetUserByIdAsync(resultEvaluation.CreatorUserId.Value);
+
+            _logger.Info($"evaluator user name {evaluatorUser.FullName}");
+
+            evaluationDto.EvaluatorFullName = evaluatorUser.FullName;
 
             return evaluationDto;
         }

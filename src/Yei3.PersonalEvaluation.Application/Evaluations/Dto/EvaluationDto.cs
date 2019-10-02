@@ -22,5 +22,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.Dto
         public EvaluationStatus Status { get; set; }        
         public EvaluationTemplateDto Template { get; set; }
         public ICollection<EvaluationQuestionDto> Questions { get; set; }
+        public string EvaluatorFullName { get; set; }
     }
 }
