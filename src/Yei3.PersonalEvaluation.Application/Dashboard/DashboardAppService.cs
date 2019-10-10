@@ -74,7 +74,7 @@ namespace Yei3.PersonalEvaluation.Dashboard
         {
             return new CollaboratorUserDashboardDto
             {
-                ObjectiveSummary = (await EvaluationManager.GetUserObjectivesHistory()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
+                ObjectiveSummary = (await EvaluationManager.GetCollaboratorObjectivesHistoryAsync()).MapTo<ICollection<PendingObjectivesSummaryDto>>()
             };
         }
     }
