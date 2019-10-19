@@ -11,6 +11,7 @@ namespace Yei3.PersonalEvaluation.Binnacle
             Text = text;
             EvaluationQuestionId = evaluationQuestionId;
         }
+
         public virtual string Text { get; protected set; }
         public virtual long EvaluationQuestionId { get; protected set; }
         [ForeignKey("EvaluationQuestionId")]

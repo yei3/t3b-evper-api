@@ -18,6 +18,8 @@ using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Yei3.PersonalEvaluation.Binnacle;
+using Castle.Core.Logging;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -222,6 +224,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> notEvaluableQuestions = NotEvaluableQuestionRepository
                     .GetAll()
                     .Include(question => question.NotEvaluableAnswer)
+                    .Include(question => question.Binnacle)
                     .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId.Value)
                     .Where(question => question.EvaluationId == lastEvaluation.Id);
 
@@ -251,7 +254,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                             objectiveBinnacle.Text,
                             currentQuestion.Id
                         );
-                        notEvaluableQuestion.Binnacle.Add(currentObjectiveBinnacle);
+
                         currentQuestion.Binnacle.Add(currentObjectiveBinnacle);
                         CurrentUnitOfWork.SaveChanges();
                     }
