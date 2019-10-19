@@ -16,6 +16,7 @@ using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.MultiTenancy;
 using Abp.Extensions;
 using Yei3.PersonalEvaluation.OrganizationUnit;
+using Abp.Domain.Uow;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
@@ -98,10 +99,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             string email,
             bool isMale)
         {
-            using (Abp.Domain.Uow.IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
+            using (IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
             {
 
-                _tenantManager.UnitOfWorkManager.Current.SetTenantId(1);
+                UnitOfWorkManager.Current.SetTenantId(1);
+                UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
 
                 User user = new User
                 {
