@@ -17,6 +17,7 @@ namespace Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions
             EvaluationId = evaluationId;
             TerminationDateTime = terminationDateTime;
             Status = status;
+            Binnacle = new List<ObjectiveBinnacle>();
         }
 
         public virtual long EvaluationId { get; set; }
