@@ -252,7 +252,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         );
 
                         currentQuestion.Binnacle.Add(currentObjectiveBinnacle);
-                        CurrentUnitOfWork.SaveChanges();
                     }
                 }
             }
