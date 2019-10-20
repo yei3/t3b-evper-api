@@ -18,8 +18,6 @@ using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
-using Yei3.PersonalEvaluation.Binnacle;
-using Castle.Core.Logging;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -28,19 +26,17 @@ namespace Yei3.PersonalEvaluation.Evaluations
     {
         private readonly IRepository<EvaluationTemplates.EvaluationTemplate, long> EvaluationTemplateRepository;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
-        private readonly IRepository<Sections.Section, long> SectionRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Sections.Section, long> sectionRepository)
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
             UserManager = userManager;
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
-            SectionRepository = sectionRepository;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
