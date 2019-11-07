@@ -49,7 +49,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 {
                     try
                     {
-                        User currentUser = _userRegistrationManager.ImportUser(
+                        User currentUser = await _userRegistrationManager.ImportUserAsync(
                             employeeNumber: worksheet.Cells[row, 1].Value.ToString(),
                             status: worksheet.Cells[row, 2].Value.ToString() == "ACTIVO",
                             firstLastName: worksheet.Cells[row, 3].Value.ToString(),
