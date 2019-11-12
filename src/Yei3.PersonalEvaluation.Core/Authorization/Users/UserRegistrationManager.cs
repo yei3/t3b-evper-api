@@ -136,7 +136,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 }
                 catch (UserFriendlyException)
                 {
-                    //! Improve logic 
+                    //! This must be implement on a better way or is the only one?
                     User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);                    
                     
                     existingUser.IsActive = user.IsActive;
