@@ -128,7 +128,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     IsMale = isMale
                 };
 
-
                 try
                 {
                     // mostly cause email is not set or repeated
@@ -137,9 +136,32 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 }
                 catch (UserFriendlyException)
                 {
-                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
-                    existingUser = user;
+                    //! Improve logic 
+                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);                    
+                    
+                    existingUser.IsActive = user.IsActive;
+                    existingUser.IsDeleted = user.IsActive;
+                    existingUser.JobDescription = user.JobDescription;
+                    existingUser.Area = user.Area;
+                    existingUser.Region = user.Region;
+                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
+                    existingUser.SocialReason = user.SocialReason;
+                    existingUser.ReassignDate = user.ReassignDate;
+                    existingUser.Scholarship = user.Scholarship;
+
+                    if (isManager)
+                    {
+                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Administrator);
+                    }
+
+                    if (isSupervisor)
+                    {
+                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Supervisor);
+                    }
+
+                    await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Collaborator);
                     await _userManager.UpdateAsync(existingUser);
+
                     return existingUser;
                 }
 
