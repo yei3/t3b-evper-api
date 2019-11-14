@@ -133,6 +133,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .OrderByDescending(evaluation => evaluation.Id)
                 .FirstOrDefaultAsync();
 
+            if (lastEvaluation == null)
+            {
+                return new List<EvaluationObjectivesSummaryValueObject>();
+            }
 
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
                 .GetAll()
@@ -605,7 +609,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             
             List<EvaluationActionValueObject> actionSummaryValueObjects = new List<EvaluationActionValueObject>();
 
-           List<User> users = UserManager.Users
+            List<User> users = UserManager.Users
                     .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .ToList();
 
