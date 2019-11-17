@@ -52,7 +52,8 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
 
             if (immediateSupervisor == null)
             {
-                throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido.");
+                return;
+                // throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido.");
             }
 
             // find subordinates
