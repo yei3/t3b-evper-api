@@ -121,49 +121,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     ReassignDate = NormalizeDateTime(reassignDate),
                     BirthDate = NormalizeDateTime(birthDate),
                     Scholarship = scholarship,
-                    EmailAddress = email,
                     IsEmailConfirmed = false,
                     TenantId = 1,
                     Roles = new List<UserRole>(),
                     IsMale = isMale
                 };
-
-                try
-                {
-                    // mostly cause email is not set or repeated
-                    user.EmailAddress = $"{user.UserName}@dummyemail.com";
-                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
-                }
-                catch (UserFriendlyException)
-                {
-                    //! This must be implement on a better way or is the only one?
-                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);                    
-                    
-                    existingUser.IsActive = user.IsActive;
-                    existingUser.IsDeleted = user.IsActive;
-                    existingUser.JobDescription = user.JobDescription;
-                    existingUser.Area = user.Area;
-                    existingUser.Region = user.Region;
-                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
-                    existingUser.SocialReason = user.SocialReason;
-                    existingUser.ReassignDate = user.ReassignDate;
-                    existingUser.Scholarship = user.Scholarship;
-
-                    if (isManager)
-                    {
-                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Administrator);
-                    }
-
-                    if (isSupervisor)
-                    {
-                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Supervisor);
-                    }
-
-                    await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Collaborator);
-                    await _userManager.UpdateAsync(existingUser);
-
-                    return existingUser;
-                }
 
                 var organizationUnit = _organizationUnitRepository
                     .GetAll()
@@ -196,6 +158,57 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         .LastOrDefault();
                     
                     organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode(lastArea.Code);
+                }
+
+                try
+                {
+                    // mostly cause email is not set or repeated
+                    user.EmailAddress = $"{user.UserName}@dummyemail.com";
+                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
+                }
+                catch (UserFriendlyException)
+                {
+                    //! This must be implement on a better way or is the only one?
+                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
+
+                    if (!status)
+                    {
+                        await _userManager.DeleteAsync(existingUser);
+                        return user;
+                    }
+
+                    //! This validition is just for deleted users
+                    if(existingUser.IsDeleted) return user;
+                    
+                    existingUser.EmailAddress = $"{user.UserName}@tiendas3b.com";
+                    existingUser.JobDescription = user.JobDescription;
+                    existingUser.Area = user.Area;
+                    existingUser.Region = user.Region;
+                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
+                    existingUser.SocialReason = user.SocialReason;
+                    existingUser.ReassignDate = user.ReassignDate;
+                    existingUser.Scholarship = user.Scholarship;
+                    existingUser.DeletionTime = null;
+
+                    await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
+
+                    if (isManager)
+                    {
+                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Administrator);
+                    }
+
+                    if (isSupervisor)
+                    {
+                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Supervisor);
+                    }
+                    
+                    await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Collaborator);
+                    
+                    await _userManager.UpdateAsync(existingUser);
+                    
+                    await unitOfWork.CompleteAsync();
+
+                    return existingUser;
                 }
 
                 CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));

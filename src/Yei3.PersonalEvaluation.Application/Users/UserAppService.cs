@@ -134,7 +134,6 @@ namespace Yei3.PersonalEvaluation.Users
 
         public async Task RecoverPassword(RecoverPasswordDto recoverPassword)
         {
-            // for what?
             CurrentUnitOfWork.SetTenantId(1);
 
             User user;
