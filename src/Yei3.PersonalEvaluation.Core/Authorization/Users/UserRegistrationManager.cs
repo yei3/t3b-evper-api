@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Abp.Authorization.Users;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Abp.Domain.Uow;
+using Abp.Extensions;
 using Abp.IdentityFramework;
 using Abp.Runtime.Session;
 using Abp.UI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.MultiTenancy;
-using Abp.Extensions;
 using Yei3.PersonalEvaluation.OrganizationUnit;
-using Abp.Domain.Uow;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
@@ -32,28 +32,28 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         private readonly string PasswordSalt = "_t3B";
 
-        public UserRegistrationManager(
+        public UserRegistrationManager (
             TenantManager tenantManager,
             UserManager userManager,
-            RoleManager roleManager, IPermissionManager permissionManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
+            RoleManager roleManager,
+            IPermissionManager permissionManager,
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _permissionManager = permissionManager;
             _organizationUnitRepository = organizationUnitRepository;
-
             AbpSession = NullAbpSession.Instance;
         }
 
-        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed)
+        public async Task<User> RegisterAsync (string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed)
         {
             CheckForTenant();
 
             var tenant = await GetActiveTenantAsync();
 
-            var user = new User
-            {
+            var user = new User {
                 TenantId = tenant.Id,
                 Name = name,
                 Surname = surname,
@@ -61,10 +61,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 IsActive = true,
                 UserName = userName,
                 IsEmailConfirmed = isEmailConfirmed,
-                Roles = new List<UserRole>()
+                Roles = new List<UserRole> ()
             };
 
-            user.SetNormalizedNames();
+            user.SetNormalizedNames ();
 
             foreach (var defaultRole in await _roleManager.Roles.Where(r => r.IsDefault).ToListAsync())
             {
@@ -79,7 +79,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return user;
         }
 
-        public async Task<User> ImportUserAsync(
+        public async Task<User> ImportUserAsync (
             string employeeNumber,
             bool status,
             string firstLastName,
@@ -105,8 +105,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 UnitOfWorkManager.Current.SetTenantId(1);
                 UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
 
-                User user = new User
-                {
+                User user = new User {
                     EmployeeNumber = employeeNumber,
                     UserName = employeeNumber,
                     IsActive = status,
@@ -117,69 +116,69 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     Region = region,
                     ImmediateSupervisor = immediateSupervisor,
                     SocialReason = socialReason,
-                    EntryDate = NormalizeDateTime(entryDate),
-                    ReassignDate = NormalizeDateTime(reassignDate),
-                    BirthDate = NormalizeDateTime(birthDate),
+                    EntryDate = NormalizeDateTime (entryDate),
+                    ReassignDate = NormalizeDateTime (reassignDate),
+                    BirthDate = NormalizeDateTime (birthDate),
                     Scholarship = scholarship,
                     IsEmailConfirmed = false,
                     TenantId = 1,
-                    Roles = new List<UserRole>(),
+                    Roles = new List<UserRole> (),
                     IsMale = isMale
                 };
 
                 var organizationUnit = _organizationUnitRepository
-                    .GetAll()
-                    .Where(ou => ou.Parent.DisplayName == user.Region)
-                    .FirstOrDefault(ou => ou.DisplayName == user.Area);
+                    .GetAll ()
+                    .Where (ou => ou.Parent.DisplayName == user.Region)
+                    .FirstOrDefault (ou => ou.DisplayName == user.Area);
 
-                if (organizationUnit.IsNullOrDeleted())
+                //* Create Organization Unit if not exists
+                if (organizationUnit.IsNullOrDeleted ())
                 {
                     var regionOrganizationUnit = _organizationUnitRepository
-                        .GetAll()
-                        .FirstOrDefault(ou => ou.DisplayName == user.Region);
+                        .GetAll ()
+                        .FirstOrDefault (ou => ou.DisplayName == user.Region);
 
-                    if (regionOrganizationUnit.IsNullOrDeleted())
+                    if (regionOrganizationUnit.IsNullOrDeleted ())
                     {
-                        organizationUnit = await _organizationUnitRepository.InsertAsync(new RegionOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Region));
+                        organizationUnit = await _organizationUnitRepository.InsertAsync (new RegionOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Region));
 
                         var lastRegion = _organizationUnitRepository
-                            .GetAll()
-                            .Where(ou => ou.Parent.DisplayName == user.Region)
-                            .LastOrDefault();
+                            .GetAll ()
+                            .Where (ou => ou.Parent.DisplayName == user.Region)
+                            .LastOrDefault ();
 
-                        organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode(lastRegion.Code);
+                        organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastRegion.Code);
                     }
 
-                    organizationUnit = await _organizationUnitRepository.InsertAsync(new AreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, regionOrganizationUnit.Id));
+                    organizationUnit = await _organizationUnitRepository.InsertAsync (new AreaOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Area, regionOrganizationUnit.Id));
 
                     var lastArea = _organizationUnitRepository
-                        .GetAll()
-                        .Where(ou => ou.Parent.DisplayName == user.Region)
-                        .LastOrDefault();
-                    
-                    organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode(lastArea.Code);
+                        .GetAll ()
+                        .Where (ou => ou.Parent.DisplayName == user.Region)
+                        .LastOrDefault ();
+
+                    organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastArea.Code);
                 }
 
                 try
                 {
-                    // mostly cause email is not set or repeated
+                    //* mostly cause email is not set or repeated
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
-                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
+                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync (user.Id, user.UserName, user.EmailAddress);
                 }
                 catch (UserFriendlyException)
                 {
                     //! This must be implement on a better way or is the only one?
-                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
+                    User existingUser = await _userManager.FindByEmployeeNumberAsync (user.EmployeeNumber);
 
-                    if (!status)
-                    {
-                        await _userManager.DeleteAsync(existingUser);
+                    if (!status) {
+                        await _userManager.DeleteAsync (existingUser);
                         return user;
                     }
 
                     //! This validition is just for deleted users
-                    if(existingUser.IsDeleted) return user;
-                    
+                    if (existingUser.IsDeleted) return user;
+
                     existingUser.EmailAddress = $"{user.UserName}@tiendas3b.com";
                     existingUser.JobDescription = user.JobDescription;
                     existingUser.Area = user.Area;
@@ -190,27 +189,28 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.Scholarship = user.Scholarship;
                     existingUser.DeletionTime = null;
 
-                    await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
-
                     if (isManager)
                     {
-                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Administrator);
+                        await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Administrator);
                     }
 
                     if (isSupervisor)
                     {
-                        await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Supervisor);
+                        await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Supervisor);
                     }
-                    
-                    await _userManager.AddToRoleAsync(existingUser, StaticRoleNames.Tenants.Collaborator);
-                    
-                    await _userManager.UpdateAsync(existingUser);
-                    
-                    await unitOfWork.CompleteAsync();
+
+                    await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Collaborator);
+
+                    await _userManager.AddToOrganizationUnitAsync (existingUser, organizationUnit);
+
+                    await _userManager.UpdateAsync (existingUser);
+
+                    await unitOfWork.CompleteAsync ();
 
                     return existingUser;
                 }
 
+                //* Create User if not exists
                 CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));
 
                 if (isManager)
@@ -259,12 +259,15 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         private string ParseRole(string role)
         {
-            switch (role)
-            {
-                case "COLABORADOR": return StaticRoleNames.Tenants.Collaborator;
-                case "JEFE": return StaticRoleNames.Tenants.Supervisor;
-                case "ADMINISTRADOR": return StaticRoleNames.Tenants.Administrator;
-                default: return string.Empty;
+            switch (role) {
+                case "COLABORADOR":
+                    return StaticRoleNames.Tenants.Collaborator;
+                case "JEFE":
+                    return StaticRoleNames.Tenants.Supervisor;
+                case "ADMINISTRADOR":
+                    return StaticRoleNames.Tenants.Administrator;
+                default:
+                    return string.Empty;
             }
         }
 
@@ -276,7 +279,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
         }
 
-        private async Task<Tenant> GetActiveTenantAsync()
+        private async Task<Tenant> GetActiveTenantAsync ()
         {
             if (!AbpSession.TenantId.HasValue)
             {
@@ -291,12 +294,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             var tenant = await _tenantManager.FindByIdAsync(tenantId);
             if (tenant == null)
             {
-                throw new UserFriendlyException(L("UnknownTenantId{0}", tenantId));
+                throw new UserFriendlyException(L ("UnknownTenantId{0}", tenantId));
             }
 
             if (!tenant.IsActive)
             {
-                throw new UserFriendlyException(L("TenantIdIsNotActive{0}", tenantId));
+                throw new UserFriendlyException(L ("TenantIdIsNotActive{0}", tenantId));
             }
 
             return tenant;
