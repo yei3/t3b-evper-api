@@ -132,32 +132,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     .FirstOrDefault (ou => ou.DisplayName == user.Area);
 
                 //* Create Organization Unit if not exists
-                if (organizationUnit.IsNullOrDeleted ())
+                if (organizationUnit.IsNullOrDeleted())
                 {
-                    var regionOrganizationUnit = _organizationUnitRepository
-                        .GetAll ()
-                        .FirstOrDefault (ou => ou.DisplayName == user.Region);
-
-                    if (regionOrganizationUnit.IsNullOrDeleted ())
-                    {
-                        organizationUnit = await _organizationUnitRepository.InsertAsync (new RegionOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Region));
-
-                        var lastRegion = _organizationUnitRepository
-                            .GetAll ()
-                            .Where (ou => ou.Parent.DisplayName == user.Region)
-                            .LastOrDefault ();
-
-                        organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastRegion.Code);
-                    }
-
-                    organizationUnit = await _organizationUnitRepository.InsertAsync (new AreaOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Area, regionOrganizationUnit.Id));
-
-                    var lastArea = _organizationUnitRepository
-                        .GetAll ()
-                        .Where (ou => ou.Parent.DisplayName == user.Region)
-                        .LastOrDefault ();
-
-                    organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastArea.Code);
+                    organizationUnit = await CreateOrganizationUnit(organizationUnit, user);
                 }
 
                 try
@@ -177,7 +154,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     }
 
                     //! This validition is just for deleted users
-                    if (existingUser.IsDeleted) return user;
+                    if (existingUser.IsDeleted)
+                    {
+                        return user;
+                    }
 
                     existingUser.EmailAddress = $"{user.UserName}@tiendas3b.com";
                     existingUser.JobDescription = user.JobDescription;
@@ -231,6 +211,36 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 return user;
             }
+        }
+
+        public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnit(Abp.Organizations.OrganizationUnit organizationUnit, User user)
+        {
+            var regionOrganizationUnit = _organizationUnitRepository
+                    .GetAll ()
+                    .FirstOrDefault (ou => ou.DisplayName == user.Region);
+
+                if (regionOrganizationUnit.IsNullOrDeleted ())
+                {
+                    organizationUnit = await _organizationUnitRepository.InsertAsync (new RegionOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Region));
+
+                    var lastRegion = _organizationUnitRepository
+                        .GetAll ()
+                        .Where (ou => ou.Parent.DisplayName == user.Region)
+                        .LastOrDefault ();
+
+                    organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastRegion.Code);
+                }
+
+                organizationUnit = await _organizationUnitRepository.InsertAsync (new AreaOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Area, regionOrganizationUnit.Id));
+
+                var lastArea = _organizationUnitRepository
+                    .GetAll ()
+                    .Where (ou => ou.Parent.DisplayName == user.Region)
+                    .LastOrDefault ();
+
+                organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastArea.Code);
+
+                return organizationUnit;
         }
 
         public async Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
