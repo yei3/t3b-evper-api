@@ -92,13 +92,5 @@
                 .Where(user => user.ImmediateSupervisor == rootUser.JobDescription)
                 .ToListAsync();
         }
-
-        public async Task<bool> ActivateDeletedUser(string employeeNumber)
-        {
-            
-            var user = await this.FindByEmployeeNumberAsync(employeeNumber);
-
-            return true;
-        }
     }
 }

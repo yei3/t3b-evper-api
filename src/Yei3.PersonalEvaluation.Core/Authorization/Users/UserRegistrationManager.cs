@@ -153,12 +153,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         return user;
                     }
 
-                    //! This validition is just for deleted users
-                    if (existingUser.IsDeleted)
-                    {
-                        return user;
-                    }
-
                     existingUser.EmailAddress = $"{user.UserName}@tiendas3b.com";
                     existingUser.JobDescription = user.JobDescription;
                     existingUser.Area = user.Area;
@@ -169,23 +163,24 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.Scholarship = user.Scholarship;
                     existingUser.DeletionTime = null;
 
-                    if (isManager)
+                    //! This validition is just for deleted users
+                    if (existingUser.IsDeleted)
                     {
-                        await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Administrator);
+                        if (await ActivateDeletedUser(existingUser, isSupervisor, isManager))
+                        {
+                            await unitOfWork.CompleteAsync();
+
+                            return existingUser;
+                        }
                     }
 
-                    if (isSupervisor)
-                    {
-                        await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Supervisor);
-                    }
+                    await AddUserRole(existingUser, isSupervisor, isManager);
 
-                    await _userManager.AddToRoleAsync (existingUser, StaticRoleNames.Tenants.Collaborator);
+                    await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
 
-                    await _userManager.AddToOrganizationUnitAsync (existingUser, organizationUnit);
+                    await _userManager.UpdateAsync(existingUser);
 
-                    await _userManager.UpdateAsync (existingUser);
-
-                    await unitOfWork.CompleteAsync ();
+                    await unitOfWork.CompleteAsync();
 
                     return existingUser;
                 }
@@ -193,17 +188,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 //* Create User if not exists
                 CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));
 
-                if (isManager)
-                {
-                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator);
-                }
-
-                if (isSupervisor)
-                {
-                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
-                }
-
-                await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator);
+                await AddUserRole(user, isSupervisor, isManager);
 
                 await _userManager.AddToOrganizationUnitAsync(user, organizationUnit);
 
@@ -211,6 +196,33 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                 return user;
             }
+        }
+
+        public async Task<bool> ActivateDeletedUser(User user, bool isSupervisor, bool isManager)
+        {
+            if (await AddUserRole(user, isSupervisor, isManager))
+            {
+                await _userManager.UpdateAsync(user);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> AddUserRole(User user, bool isSupervisor, bool isManager)
+        {
+            if (isManager)
+            {
+                await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Administrator);
+            }
+
+            if (isSupervisor)
+            {
+                await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Supervisor);
+            }
+
+            await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Collaborator);
+
+            return true;
         }
 
         public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnit(Abp.Organizations.OrganizationUnit organizationUnit, User user)
