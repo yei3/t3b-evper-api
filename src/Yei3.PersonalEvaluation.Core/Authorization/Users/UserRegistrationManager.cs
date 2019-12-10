@@ -167,8 +167,18 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     //! This validition is just for deleted users
                     if (existingUser.IsDeleted)
                     {
+                        existingUser.IsDeleted = false;
+                        existingUser.DeleterUser = null;
+                        existingUser.DeletionTime = null;
+                        existingUser.LastModificationTime = DateTime.Now;
+                        existingUser.LastModifierUserId = AbpSession.UserId;
+
                         if (await ActivateDeletedUser(existingUser, isSupervisor, isManager))
                         {
+                            await _userManager.ChangePasswordAsync(user, $"{existingUser.EmployeeNumber}_t3B");
+
+                            await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
+
                             await unitOfWork.CompleteAsync();
 
                             return existingUser;
@@ -201,12 +211,19 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         public async Task<bool> ActivateDeletedUser(User user, bool isSupervisor, bool isManager)
         {
-            if (await AddUserRole(user, isSupervisor, isManager))
+            try
             {
-                await _userManager.UpdateAsync(user);
-            }
+                if (await AddUserRole(user, isSupervisor, isManager))
+                {
+                    await _userManager.UpdateAsync(user);
+                }
 
-            return true;
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
         }
 
         public async Task<bool> AddUserRole(User user, bool isSupervisor, bool isManager)
