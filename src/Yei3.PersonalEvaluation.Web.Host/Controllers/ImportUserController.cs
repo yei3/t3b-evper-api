@@ -89,11 +89,5 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 return Ok();
             }
         }
-
-        [HttpPost]
-        public async Task<IActionResult> ImportObjectivesAction(string emailAddress, [FromForm]IFormFile file)
-        {
-            return Ok();
-        }
     }
 }
