@@ -13,13 +13,13 @@ using Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob;
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 {
     [Route("api/[controller]")]
-    public class ImportController : PersonalEvaluationControllerBase
+    public class ImportUserController : PersonalEvaluationControllerBase
     {
 
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IBackgroundJobManager _backgroundJobManager;
 
-        public ImportController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
+        public ImportUserController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
         {
             _userRegistrationManager = userRegistrationManager;
             _backgroundJobManager = backgroundJobManager;
