@@ -166,7 +166,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.SocialReason = user.SocialReason;
                     existingUser.ReassignDate = user.ReassignDate;
                     existingUser.Scholarship = user.Scholarship;
-                    existingUser.DeletionTime = null;
 
                     // Punto 4 PBI 1019
                     var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
