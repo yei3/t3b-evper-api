@@ -30,6 +30,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         private readonly IPermissionManager _permissionManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
 
+        private readonly IRepository<UserOrganizationUnit, long> _userOrganizationUnitRepository;
+
         private readonly string PasswordSalt = "_t3B";
 
         public UserRegistrationManager (
@@ -37,13 +39,15 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             UserManager userManager,
             RoleManager roleManager,
             IPermissionManager permissionManager,
-            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository,
+            IRepository<UserOrganizationUnit, long> userOrganizationUnitRepository)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _permissionManager = permissionManager;
             _organizationUnitRepository = organizationUnitRepository;
+            _userOrganizationUnitRepository = userOrganizationUnitRepository;
             AbpSession = NullAbpSession.Instance;
         }
 
@@ -141,15 +145,15 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 {
                     //* mostly cause email is not set or repeated
                     user.EmailAddress = $"{user.UserName}@dummyemail.com";
-                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync (user.Id, user.UserName, user.EmailAddress);
+                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
                 }
                 catch (UserFriendlyException)
                 {
                     //! This must be implement on a better way or is the only one?
-                    User existingUser = await _userManager.FindByEmployeeNumberAsync (user.EmployeeNumber);
+                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
 
                     if (!status) {
-                        await _userManager.DeleteAsync (existingUser);
+                        await _userManager.DeleteAsync(existingUser);
                         return user;
                     }
 
@@ -164,6 +168,19 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.Scholarship = user.Scholarship;
                     existingUser.DeletionTime = null;
 
+                    // Punto 4 PBI 1019
+                    var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
+                        uou => uou.UserId == existingUser.Id
+                    );
+
+                    if (existingUser.Area != user.Area)
+                    {
+                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                    }
+
+                    userOrganizationUnit.UnDelete();
+                    userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+
                     //! This validition is just for deleted users
                     if (existingUser.IsDeleted)
                     {
@@ -177,8 +194,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         {
                             await _userManager.ChangePasswordAsync(user, $"{existingUser.EmployeeNumber}_t3B");
 
-                            await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
-
                             await unitOfWork.CompleteAsync();
 
                             return existingUser;
@@ -186,8 +201,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     }
 
                     await AddUserRole(existingUser, isSupervisor, isManager);
-
-                    await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
 
                     await _userManager.UpdateAsync(existingUser);
 
