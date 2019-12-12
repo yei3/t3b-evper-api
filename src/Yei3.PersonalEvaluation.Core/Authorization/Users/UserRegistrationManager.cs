@@ -127,13 +127,14 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     IsEmailConfirmed = false,
                     TenantId = 1,
                     Roles = new List<UserRole> (),
+                    EmailAddress = email,
                     IsMale = isMale
                 };
 
                 var organizationUnit = _organizationUnitRepository
-                    .GetAll ()
-                    .Where (ou => ou.Parent.DisplayName == user.Region)
-                    .FirstOrDefault (ou => ou.DisplayName == user.Area);
+                    .GetAll()
+                    .Where(ou => ou.Parent.DisplayName == user.Region)
+                    .FirstOrDefault(ou => ou.DisplayName == user.Area);
 
                 //* Create Organization Unit if not exists
                 if (organizationUnit.IsNullOrDeleted())
@@ -144,7 +145,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 try
                 {
                     //* mostly cause email is not set or repeated
-                    user.EmailAddress = $"{user.UserName}@dummyemail.com";
+                    user.EmailAddress = $"{user.UserName}@tiendas3b.com";
                     await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
                 }
                 catch (UserFriendlyException)
@@ -157,8 +158,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         return user;
                     }
 
-                    //* Adding excel data to existing user
-                    existingUser.EmailAddress = $"{user.UserName}@tiendas3b.com";
+                    //* Adding excel data to existing user                    
                     existingUser.JobDescription = user.JobDescription;
                     existingUser.Area = user.Area;
                     existingUser.Region = user.Region;
@@ -166,6 +166,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.SocialReason = user.SocialReason;
                     existingUser.ReassignDate = user.ReassignDate;
                     existingUser.Scholarship = user.Scholarship;
+                    existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
 
                     // Punto 4 PBI 1019
                     var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
@@ -180,7 +181,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     userOrganizationUnit.UnDelete();
                     userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
 
-                    //! This validition is just for deleted users
+                    //! Just for deleted users
                     if (existingUser.IsDeleted)
                     {
                         existingUser.IsDeleted = false;
@@ -209,6 +210,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 }
 
                 //* Create User if not exists
+                user.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
                 CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));
 
                 await AddUserRole(user, isSupervisor, isManager);
