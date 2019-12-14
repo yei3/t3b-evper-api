@@ -289,43 +289,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return Task.FromResult(evaluationsDto);
         }
 
-        public async Task Delete(long id)
-        {
-            Evaluation evaluation = EvaluationRepository.FirstOrDefault(id);
-
-            if (evaluation.IsNullOrDeleted())
-            {
-                return;
-            }
-
-            if (DateTime.Now.IsBetween(evaluation.StartDateTime, evaluation.EndDateTime))
-            {
-                throw new UserFriendlyException("La evaluación está activa, por el momento no se puede eliminar.");
-            }
-
-            await EvaluationRepository.DeleteAsync(evaluation);
-        }
-
-        public Task ClosingComment(EvaluationCloseDto evaluationClose)
-        {
-            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
-
-            Evaluation autoEvaluation = EvaluationRepository
-                .GetAll()
-                .Where(evaluations => evaluations.Term == evaluation.Term)
-                .Where(evaluations => evaluations.UserId == evaluation.UserId)
-                .OrderByDescending(evaluations => evaluations.CreationTime)
-                .FirstOrDefault(evaluations => evaluations.Id != evaluationClose.Id);
-
-            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted())
-            {
-                evaluation.ClosingComment = evaluationClose.Comment;
-                evaluation.IsActive = false;
-                autoEvaluation.IsActive = false;
-            }
-            return Task.CompletedTask;
-        }
-
         public async Task<EvaluationDto> Get(long id)
         {
             Evaluation resultEvaluation = await EvaluationRepository
@@ -363,6 +326,27 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return evaluationDto;
         }
 
+        //TODO: Enpoint to return the period of a user by his last evaluations
+        public async Task<string> GetUserPeriod()
+        {
+            var userId = AbpSession.GetUserId();
+
+            var lastEvaluation = await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Select(evaluation => evaluation.CreationTime)
+                .FirstOrDefaultAsync();
+
+            if (lastEvaluation != null)
+            {
+                
+            }
+
+            return "";
+        }
+
         public async Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary()
         {
             var evaluations = EvaluationRepository
@@ -398,6 +382,43 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
 
             return await Task.FromResult(result);
+        }
+
+        public async Task Delete(long id)
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                return;
+            }
+
+            if (DateTime.Now.IsBetween(evaluation.StartDateTime, evaluation.EndDateTime))
+            {
+                throw new UserFriendlyException("La evaluación está activa, por el momento no se puede eliminar.");
+            }
+
+            await EvaluationRepository.DeleteAsync(evaluation);
+        }
+
+        public Task ClosingComment(EvaluationCloseDto evaluationClose)
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
+
+            Evaluation autoEvaluation = EvaluationRepository
+                .GetAll()
+                .Where(evaluations => evaluations.Term == evaluation.Term)
+                .Where(evaluations => evaluations.UserId == evaluation.UserId)
+                .OrderByDescending(evaluations => evaluations.CreationTime)
+                .FirstOrDefault(evaluations => evaluations.Id != evaluationClose.Id);
+
+            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted())
+            {
+                evaluation.ClosingComment = evaluationClose.Comment;
+                evaluation.IsActive = false;
+                autoEvaluation.IsActive = false;
+            }
+            return Task.CompletedTask;
         }
     }
 }
