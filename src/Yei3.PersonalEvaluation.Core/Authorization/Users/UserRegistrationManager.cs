@@ -15,6 +15,7 @@ using Abp.UI;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
+using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 using Yei3.PersonalEvaluation.MultiTenancy;
 using Yei3.PersonalEvaluation.OrganizationUnit;
 
@@ -139,7 +140,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 //* Create Organization Unit if not exists
                 if (organizationUnit.IsNullOrDeleted())
                 {
-                    organizationUnit = await CreateOrganizationUnit(organizationUnit, user);
+                    organizationUnit = await CreateOrganizationUnits(organizationUnit, user, true);
                 }
 
                 try
@@ -257,34 +258,52 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return true;
         }
 
-        public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnit(Abp.Organizations.OrganizationUnit organizationUnit, User user)
+        public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnits(Abp.Organizations.OrganizationUnit area, User user, bool isSalesUser)
         {
-            var regionOrganizationUnit = _organizationUnitRepository
-                    .GetAll ()
-                    .FirstOrDefault (ou => ou.DisplayName == user.Region);
+            var region = _organizationUnitRepository
+                    .GetAll()
+                    .FirstOrDefault(ou => ou.DisplayName == user.Region);
 
-                if (regionOrganizationUnit.IsNullOrDeleted ())
-                {
-                    organizationUnit = await _organizationUnitRepository.InsertAsync (new RegionOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Region));
+            // Create region if not exists
+            if (region.IsNullOrDeleted())
+            {
+                region = await _organizationUnitRepository.InsertAsync( 
+                    new RegionOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Region));
 
-                    var lastRegion = _organizationUnitRepository
-                        .GetAll ()
-                        .Where (ou => ou.Parent.DisplayName == user.Region)
-                        .LastOrDefault ();
+                var lastRegion = await _organizationUnitRepository
+                    .GetAll()
+                    .Where(ou => ou.ParentId == null)
+                    .LastOrDefaultAsync();
 
-                    organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastRegion.Code);
-                }
+                region.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode(lastRegion.Code);
 
-                organizationUnit = await _organizationUnitRepository.InsertAsync (new AreaOrganizationUnit (CurrentUnitOfWork.GetTenantId ().Value, user.Area, regionOrganizationUnit.Id));
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
 
-                var lastArea = _organizationUnitRepository
-                    .GetAll ()
-                    .Where (ou => ou.Parent.DisplayName == user.Region)
-                    .LastOrDefault ();
+            // Validate if a Sales Area Organization Unit
+            if (!isSalesUser)
+            {
+                area = await _organizationUnitRepository.InsertAsync(
+                    new AreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, region.Id)
+                );
+            }
+            else
+            {
+                area = await _organizationUnitRepository.InsertAsync(
+                    new SalesAreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, region.Id)
+                );
+            }
 
-                organizationUnit.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode (lastArea.Code);
+            var lastArea = await _organizationUnitRepository
+                .GetAll()
+                .Where(ou => ou.Parent.DisplayName == region.DisplayName)
+                .LastOrDefaultAsync();
 
-                return organizationUnit;
+            area.Code = lastArea.IsNullOrDeleted() ? "00001" : Abp.Organizations.OrganizationUnit.CalculateNextCode(lastArea.Code);
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return area;
         }
 
         public async Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
