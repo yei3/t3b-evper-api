@@ -259,7 +259,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return true;
         }
 
+<<<<<<< HEAD
         public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnits(Abp.Organizations.OrganizationUnit area, User user, bool isSalesArea)
+=======
+        public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnits(Abp.Organizations.OrganizationUnit area, User user, bool isSalesUser)
+>>>>>>> development
         {
             var region = _organizationUnitRepository
                     .GetAll()
