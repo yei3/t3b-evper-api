@@ -180,8 +180,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
                     }
 
-                    userOrganizationUnit.UnDelete();
-                    userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                    if (!userOrganizationUnit.IsNullOrDeleted())
+                    {
+                        userOrganizationUnit.UnDelete();
+                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                    }
 
                     //! Just for deleted users
                     if (existingUser.IsDeleted)
