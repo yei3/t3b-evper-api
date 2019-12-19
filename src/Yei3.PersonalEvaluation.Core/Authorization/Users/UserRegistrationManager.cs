@@ -175,15 +175,19 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         uou => uou.UserId == existingUser.Id
                     );
 
+                    if(userOrganizationUnit.IsDeleted)
+                    {
+                        userOrganizationUnit.UnDelete();
+                    }
+
                     if (existingUser.Area != user.Area)
                     {
                         userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
                     }
 
-                    if (!userOrganizationUnit.IsNullOrDeleted())
+                    if (userOrganizationUnit.IsNullOrDeleted())
                     {
-                        userOrganizationUnit.UnDelete();
-                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                        await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
                     }
 
                     //! Just for deleted users
@@ -230,19 +234,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         public async Task<bool> ActivateDeletedUser(User user, bool isSupervisor, bool isManager)
         {
-            try
+            if (await AddUserRole(user, isSupervisor, isManager))
             {
-                if (await AddUserRole(user, isSupervisor, isManager))
-                {
-                    await _userManager.UpdateAsync(user);
-                }
+                await _userManager.UpdateAsync(user);
+            }
 
-                return true;
-            }
-            catch (System.Exception)
-            {
-                return false;
-            }
+            return true;
         }
 
         public async Task<bool> AddUserRole(User user, bool isSupervisor, bool isManager)

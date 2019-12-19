@@ -45,7 +45,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
                 int rowCount = worksheet.Dimension.Rows;
 
-                //* start in row 3 cause data starts there, any template change can break this, is better if we provide the template
+                //* start in row 2 cause data starts there, any template change can break this, is better if we provide the template
                 for (int row = 2; row <= rowCount; row++)
                 {
                     try
