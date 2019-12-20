@@ -175,19 +175,16 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         uou => uou.UserId == existingUser.Id
                     );
 
-                    if(userOrganizationUnit.IsDeleted)
-                    {
-                        userOrganizationUnit.UnDelete();
-                    }
-
-                    if (existingUser.Area != user.Area)
-                    {
-                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
-                    }
-
                     if (userOrganizationUnit.IsNullOrDeleted())
                     {
-                        await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
+                        if (userOrganizationUnit == null) 
+                            await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
+                        else 
+                            userOrganizationUnit.UnDelete();
+                    }
+                    else if (existingUser.Area != user.Area)
+                    {
+                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
                     }
 
                     //! Just for deleted users
