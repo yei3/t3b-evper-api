@@ -61,8 +61,10 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                             region: worksheet.Cells[row, 9].Value.ToString(),
                             immediateSupervisor: worksheet.Cells[row, 10].Value.ToString(),
                             socialReason: worksheet.Cells[row, 11].Value.ToString(),
-                            isSupervisor: worksheet.Cells[row, 12].Value != null && worksheet.Cells[row, 12].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase),
-                            isManager: worksheet.Cells[row, 13].Value != null && worksheet.Cells[row, 13].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase),
+                            isSupervisor: worksheet.Cells[row, 12].Value != null 
+                                && worksheet.Cells[row, 12].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase),
+                            isManager: worksheet.Cells[row, 13].Value != null
+                                && worksheet.Cells[row, 13].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase),
                             entryDate: worksheet.Cells[row, 14].Value.ToString(),
                             reassignDate: worksheet.Cells[row, 15].Value == null
                                 ? null

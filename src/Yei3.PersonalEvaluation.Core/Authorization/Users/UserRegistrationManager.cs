@@ -160,16 +160,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         return user;
                     }
 
-                    //* Adding excel data to existing user                    
-                    existingUser.JobDescription = user.JobDescription;
-                    existingUser.Area = user.Area;
-                    existingUser.Region = user.Region;
-                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
-                    existingUser.SocialReason = user.SocialReason;
-                    existingUser.ReassignDate = user.ReassignDate;
-                    existingUser.Scholarship = user.Scholarship;
-                    existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
-
                     // Punto 4 PBI 1019
                     var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
                         uou => uou.UserId == existingUser.Id
@@ -185,7 +175,18 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     else if (existingUser.Area != user.Area)
                     {
                         userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                        await _userManager.SetOrganizationUnitsAsync(existingUser.Id, organizationUnit.Id);
                     }
+
+                    //* Adding excel data to existing user                    
+                    existingUser.JobDescription = user.JobDescription;
+                    existingUser.Area = user.Area;
+                    existingUser.Region = user.Region;
+                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
+                    existingUser.SocialReason = user.SocialReason;
+                    existingUser.ReassignDate = user.ReassignDate;
+                    existingUser.Scholarship = user.Scholarship;
+                    existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
 
                     //! Just for deleted users
                     if (existingUser.IsDeleted)
@@ -206,7 +207,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         }
                     }
 
-                    await AddUserRole(existingUser, isSupervisor, isManager);
+                    await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
 
                     await _userManager.UpdateAsync(existingUser);
 
@@ -219,7 +220,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 user.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
                 CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));
 
-                await AddUserRole(user, isSupervisor, isManager);
+                await AddOrRemoveUserRole(user, isSupervisor, isManager);
 
                 await _userManager.AddToOrganizationUnitAsync(user, organizationUnit);
 
@@ -231,7 +232,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         public async Task<bool> ActivateDeletedUser(User user, bool isSupervisor, bool isManager)
         {
-            if (await AddUserRole(user, isSupervisor, isManager))
+            if (await AddOrRemoveUserRole(user, isSupervisor, isManager))
             {
                 await _userManager.UpdateAsync(user);
             }
@@ -239,19 +240,34 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return true;
         }
 
-        public async Task<bool> AddUserRole(User user, bool isSupervisor, bool isManager)
+        public async Task<bool> AddOrRemoveUserRole(User user, bool isSupervisor, bool isManager)
         {
-            if (isManager)
+            try
             {
-                await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Administrator);
+                if (isManager)
+                {
+                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Administrator);
+                }
+
+                if (isSupervisor)
+                {
+                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
+                }
+            }
+            catch (UserFriendlyException ufe)
+            {
+                Logger.Info("Fuck! {0}", ufe);
             }
 
-            if (isSupervisor)
-            {
-                await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Supervisor);
-            }
-
-            await _userManager.AddToRoleAsync (user, StaticRoleNames.Tenants.Collaborator);
+            await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator);
 
             return true;
         }
