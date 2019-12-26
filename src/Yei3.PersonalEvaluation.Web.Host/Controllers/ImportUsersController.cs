@@ -13,20 +13,20 @@ using Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob;
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 {
     [Route("api/[controller]")]
-    public class ImportUserController : PersonalEvaluationControllerBase
+    public class ImportUsersController : PersonalEvaluationControllerBase
     {
 
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IBackgroundJobManager _backgroundJobManager;
 
-        public ImportUserController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
+        public ImportUsersController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
         {
             _userRegistrationManager = userRegistrationManager;
             _backgroundJobManager = backgroundJobManager;
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportUserAction(string emailAddress, [FromForm]IFormFile file)
+        public async Task<IActionResult> ImportUsersAction(string emailAddress, [FromForm]IFormFile file)
         {
             string filePath = Path.GetTempFileName();
             
