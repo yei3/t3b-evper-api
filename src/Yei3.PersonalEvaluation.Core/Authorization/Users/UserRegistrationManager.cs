@@ -197,14 +197,15 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         existingUser.LastModificationTime = DateTime.Now;
                         existingUser.LastModifierUserId = AbpSession.UserId;
 
-                        if (await ActivateDeletedUser(existingUser, isSupervisor, isManager))
-                        {
-                            await _userManager.ChangePasswordAsync(user, $"{existingUser.EmployeeNumber}_t3B");
+                        await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
+            
+                        await _userManager.UpdateAsync(existingUser);
 
-                            await unitOfWork.CompleteAsync();
+                        await _userManager.ChangePasswordAsync(existingUser, $"{existingUser.EmployeeNumber}_t3B");
 
-                            return existingUser;
-                        }
+                        await unitOfWork.CompleteAsync();
+
+                        return existingUser;
                     }
 
                     await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
@@ -230,46 +231,27 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
         }
 
-        public async Task<bool> ActivateDeletedUser(User user, bool isSupervisor, bool isManager)
+        public async Task AddOrRemoveUserRole(User user, bool isSupervisor, bool isManager)
         {
-            if (await AddOrRemoveUserRole(user, isSupervisor, isManager))
+            if (isManager)
             {
-                await _userManager.UpdateAsync(user);
+                await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator);
+            }
+            else
+            {
+                await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Administrator);
             }
 
-            return true;
-        }
-
-        public async Task<bool> AddOrRemoveUserRole(User user, bool isSupervisor, bool isManager)
-        {
-            try
+            if (isSupervisor)
             {
-                if (isManager)
-                {
-                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator);
-                }
-                else
-                {
-                    await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Administrator);
-                }
-
-                if (isSupervisor)
-                {
-                    await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
-                }
-                else
-                {
-                    await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
-                }
+                await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
             }
-            catch (UserFriendlyException ufe)
+            else
             {
-                Logger.Info("Fuck! {0}", ufe);
+                await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
             }
 
             await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator);
-
-            return true;
         }
 
         public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnits(Abp.Organizations.OrganizationUnit area, User user, bool isSalesArea)

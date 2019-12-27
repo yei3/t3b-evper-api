@@ -75,7 +75,8 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                                 ? null
                                 : worksheet.Cells[row, 18].Value.ToString(),
                             isMale: worksheet.Cells[row, 19].Value.ToString() == "MASCULINO",
-                            isSalesArea: worksheet.Cells[row, 8].Value != null && worksheet.Cells[row, 8].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase)
+                            isSalesArea: worksheet.Cells[row, 8].Value != null
+                                && worksheet.Cells[row, 8].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase)
                         );
 
                         importUserSummaryModel.ImportedUserDictionary.Add(currentUser.EmployeeNumber, currentUser.FullName);
