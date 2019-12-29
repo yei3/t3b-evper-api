@@ -42,7 +42,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
                 ExcelWorksheet worksheetGD = package.Workbook.Worksheets["Indicadores GD"];
 
-                ExcelWorksheet worksheetGZ = package.Workbook.Worksheets["Indicadores GD"];
+                ExcelWorksheet worksheetGZ = package.Workbook.Worksheets["Indicadores GZ"];
 
                 return Ok();
             }
@@ -81,6 +81,46 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                         parseToDecimal(worksheet.Cells[row, 25].Value.ToString())
                     );
 
+                }
+                catch (Exception e)
+                {
+                    // importUserSummaryModel.IncrementNotImportedUser();
+                    Logger.Info(e.Message);
+                }
+            }
+            return true;
+        }
+
+        internal async Task<bool> importGDObjectives(ExcelWorksheet worksheet)
+        {
+            int rowCount = worksheet.Dimension.Rows;
+                
+            //! start in row 3 cause data starts there, any template change can break this.
+            for (int row = 3; row <= rowCount; row++)
+            {
+                try
+                {
+                    await Task.Delay(100);
+                }
+                catch (Exception e)
+                {
+                    // importUserSummaryModel.IncrementNotImportedUser();
+                    Logger.Info(e.Message);
+                }
+            }
+            return true;
+        }
+
+        internal async Task<bool> importGZObjectives(ExcelWorksheet worksheet)
+        {
+            int rowCount = worksheet.Dimension.Rows;
+                
+            //! start in row 3 cause data starts there, any template change can break this.
+            for (int row = 3; row <= rowCount; row++)
+            {
+                try
+                {
+                    await Task.Delay(100);
                 }
                 catch (Exception e)
                 {
