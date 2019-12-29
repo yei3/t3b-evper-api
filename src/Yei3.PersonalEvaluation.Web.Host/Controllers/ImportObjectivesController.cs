@@ -36,52 +36,62 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets["Indicadores GT"];
+                ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
 
-                int rowCount = worksheet.Dimension.Rows;
-                
-                //! start in row 3 cause data starts there, any template change can break this.
-                for (int row = 3; row <= rowCount; row++)
-                {
-                    try
-                    {
-                        await _salesObjectivesManager.ImportGTSalesObjectivesAsync(
-                            worksheet.Cells[row, 1].Value.ToString(),
-                            parseToLong(worksheet.Cells[row, 6].Value.ToString()),
-                            parseToLong(worksheet.Cells[row, 7].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 8].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 9].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 10].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 11].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 12].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 13].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 14].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 15].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 16].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 17].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 18].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 19].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 20].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 21].Value.ToString()),
-                            worksheet.Cells[row, 22].Value.ToString(),
-                            worksheet.Cells[row, 23].Value.ToString(),
-                            parseToDecimal(worksheet.Cells[row, 24].Value.ToString()),
-                            parseToDecimal(worksheet.Cells[row, 25].Value.ToString())
-                        );
+                var result = await importGTObjectives(worksheetGT);
 
-                    }
-                    catch (Exception e)
-                    {
-                        // importUserSummaryModel.IncrementNotImportedUser();
-                        Logger.Info(e.Message);
-                    }
-                }
+                ExcelWorksheet worksheetGD = package.Workbook.Worksheets["Indicadores GD"];
+
+                ExcelWorksheet worksheetGZ = package.Workbook.Worksheets["Indicadores GD"];
 
                 return Ok();
             }
         }
 
-        private static long parseToLong(string number)
+        internal async Task<bool> importGTObjectives(ExcelWorksheet worksheet)
+        {
+            int rowCount = worksheet.Dimension.Rows;
+                
+            //! start in row 3 cause data starts there, any template change can break this.
+            for (int row = 3; row <= rowCount; row++)
+            {
+                try
+                {
+                    await _salesObjectivesManager.ImportGTSalesObjectivesAsync(
+                        worksheet.Cells[row, 1].Value.ToString(),
+                        parseToLong(worksheet.Cells[row, 6].Value.ToString()),
+                        parseToLong(worksheet.Cells[row, 7].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 8].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 9].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 10].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 11].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 12].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 13].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 14].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 15].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 16].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 17].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 18].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 19].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 20].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 21].Value.ToString()),
+                        worksheet.Cells[row, 22].Value.ToString(),
+                        worksheet.Cells[row, 23].Value.ToString(),
+                        parseToDecimal(worksheet.Cells[row, 24].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 25].Value.ToString())
+                    );
+
+                }
+                catch (Exception e)
+                {
+                    // importUserSummaryModel.IncrementNotImportedUser();
+                    Logger.Info(e.Message);
+                }
+            }
+            return true;
+        }
+
+        internal static long parseToLong(string number)
         {
             if (long.TryParse(number, out long x))
                 return x;
@@ -89,7 +99,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 return 0;
         }
 
-        private static decimal parseToDecimal(string number)
+        internal static decimal parseToDecimal(string number)
         {
             if (decimal.TryParse(number, out decimal x))
                 return x;
