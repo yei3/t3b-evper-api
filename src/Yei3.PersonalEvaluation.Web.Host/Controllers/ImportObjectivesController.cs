@@ -36,11 +36,13 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
+                // ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
 
-                var result = await importGTObjectives(worksheetGT);
+                // await importGTObjectives(worksheetGT);
 
                 ExcelWorksheet worksheetGD = package.Workbook.Worksheets["Indicadores GD"];
+
+                await importGDObjectives(worksheetGD);
 
                 ExcelWorksheet worksheetGZ = package.Workbook.Worksheets["Indicadores GZ"];
 
@@ -100,7 +102,29 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
             {
                 try
                 {
-                    await Task.Delay(100);
+                    await _salesObjectivesManager.ImportGDSalesObjectivesAsync(
+                        worksheet.Cells[row, 1].Value.ToString(),
+                        parseToLong(worksheet.Cells[row, 6].Value.ToString()),
+                        parseToLong(worksheet.Cells[row, 7].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 8].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 9].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 10].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 11].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 12].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 13].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 14].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 15].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 16].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 17].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 18].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 19].Value.ToString()),
+                        worksheet.Cells[row, 20].Value.ToString(),
+                        worksheet.Cells[row, 21].Value.ToString(),
+                        parseToDecimal(worksheet.Cells[row, 22].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 23].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 24].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 25].Value.ToString())
+                    );
                 }
                 catch (Exception e)
                 {
