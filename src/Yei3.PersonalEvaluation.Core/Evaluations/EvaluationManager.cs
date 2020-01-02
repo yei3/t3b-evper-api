@@ -198,7 +198,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserPendingObjectiveAsync(userId);
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
-                .Where(dashboard => dashboard.DeliveryDate.Year == DateTime.Now.Year)
                 .ToList();
         }
 
