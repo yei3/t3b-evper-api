@@ -36,9 +36,9 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                // ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
+                ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
 
-                // await importGTObjectives(worksheetGT);
+                await importGTObjectives(worksheetGT);
 
                 ExcelWorksheet worksheetGD = package.Workbook.Worksheets["Indicadores GD"];
 
