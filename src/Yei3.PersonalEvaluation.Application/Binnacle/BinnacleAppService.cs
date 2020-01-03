@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
-using Abp.EntityFrameworkCore.Extensions;
+using Abp.Domain.Uow;
 using Abp.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Users;
@@ -66,8 +66,8 @@ namespace Yei3.PersonalEvaluation.Binnacle
                     .OrderByDescending(answer => answer.CreationTime);
 
                 pairAnswer = x
-                    .FirstOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
-                                               currentEvaluableQuestion.Evaluation.UserId);
+                    .FirstOrDefault(answer => 
+                        answer.NotEvaluableQuestion.Evaluation.UserId == currentEvaluableQuestion.Evaluation.UserId);
             }
 
             if (pairAnswer.IsNullOrDeleted())
@@ -83,6 +83,10 @@ namespace Yei3.PersonalEvaluation.Binnacle
 
         protected override ObjectiveBinnacleDto MapToEntityDto(ObjectiveBinnacle entity)
         {
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
+
             ObjectiveBinnacleDto entityDto = base.MapToEntityDto(entity);
             entityDto.UserName = _userManager.Users.Single(user => user.Id == entity.CreatorUserId).FullName;
 
