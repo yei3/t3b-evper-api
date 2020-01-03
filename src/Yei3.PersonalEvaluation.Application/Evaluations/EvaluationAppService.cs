@@ -7,6 +7,7 @@ using Abp.AutoMapper;
 using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.Runtime.Session;
 using Abp.UI;
@@ -212,9 +213,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                             .FirstOrDefault(section => section.Name == AppConsts.SectionObjectivesName)
                         ).FirstOrDefault()?.Id;
 
-
-
-
                 if (!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
                 IQueryable<EvaluationQuestions.NotEvaluableQuestion> notEvaluableQuestions = NotEvaluableQuestionRepository
@@ -291,6 +289,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<EvaluationDto> Get(long id)
         {
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
+
             Evaluation resultEvaluation = await EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.User)

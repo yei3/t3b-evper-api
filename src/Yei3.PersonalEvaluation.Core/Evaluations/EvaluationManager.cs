@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Abp;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +25,15 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IRepository<EvaluationQuestion, long> EvaluationQuestionRepository;
         private readonly UserManager UserManager;
 
-        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationQuestion, long> evaluationQuestionRepository, UserManager userManager)
+        private readonly UserRegistrationManager _userRegistrationManager;
+
+        public EvaluationManager(IAbpSession abpSession, IRepository<Evaluation, long> evaluationRepository, IRepository<EvaluationQuestion, long> evaluationQuestionRepository, UserManager userManager, UserRegistrationManager userRegistrationManager)
         {
             AbpSession = abpSession;
             EvaluationRepository = evaluationRepository;
             EvaluationQuestionRepository = evaluationQuestionRepository;
             UserManager = userManager;
+            _userRegistrationManager = userRegistrationManager;
         }
 
         public async Task<EvaluationTerm> GetUserNextEvaluationTermAsync(long? userId = null)
@@ -126,6 +129,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
+
             Evaluation lastEvaluation = await EvaluationRepository
                 .GetAll()
                 .Where(evaluation => evaluation.UserId == userId)
@@ -138,7 +145,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 return new List<EvaluationObjectivesSummaryValueObject>();
             }
 
-            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = new List<EvaluationObjectivesSummaryValueObject>();
+
+            evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
@@ -163,7 +172,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     }).ToList(),
                     isNotEvaluable = true,
                     isNextObjective = evaluationQuestion.Section.ParentSection.Name == "Próximos Objetivos" ? true : false
-                }).ToListAsync();
+                })
+                .ToListAsync();
 
             evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
@@ -198,7 +208,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserPendingObjectiveAsync(userId);
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
-                .Where(dashboard => dashboard.DeliveryDate.Year == DateTime.Now.Year)
                 .ToList();
         }
 
@@ -562,7 +571,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
-                .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
                 .ToList();
         }
 
@@ -570,7 +578,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserObjectivesHistoryAsync(userId);
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
-                .Where(dashboard => dashboard.DeliveryDate.Year < DateTime.Now.Year)
                 .ToList();
         }
 
@@ -703,6 +710,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
             List<long> evaluationIds = new List<long>();
+
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
 
             evaluationIds = await EvaluationRepository
                 .GetAll()
