@@ -330,5 +330,168 @@ namespace Yei3.PersonalEvaluation.Core.Evaluations.SalesObjectives
 
             return true;
         }
+
+        public async Task<bool> ImportGZSalesObjectivesAsync(
+            string employeeNumber,
+            long autoEvaluationId,
+            long evaluationId,
+            decimal expectedSales,
+            decimal realSales,
+            decimal expectedMerma,
+            decimal realMerma,
+            decimal expectedMOCost,
+            decimal realMOCost,
+            decimal expectedGTRotation,
+            decimal realGTRotation,
+            decimal expectedMysteryShopper,
+            decimal realMysteryShopper,
+            decimal expectedSO,
+            decimal realSO,
+            string expectedAudits,
+            string realAudits,
+            decimal expectedTRtoGTDev,
+            decimal realTRtoGTDev,
+            decimal expectedGTtoGDDev,
+            decimal realGTtoGDDev,
+            decimal expectedTEAudits,
+            decimal realTEAudits
+        )
+        {
+            using (IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
+            {
+                User user = await _userManager.FindByEmployeeNumberAsync(employeeNumber);
+
+                if (user.IsNullOrDeleted())
+                {
+                    
+                }
+
+                var evaSalesObjectives = await _evaluationMeasuredQuestionRepository
+                    .GetAll()
+                    .Include(question => question.MeasuredAnswer)
+                    .Include(question => question.MeasuredQuestion)
+                    .Where(question => question.EvaluationId == evaluationId)
+                    .ToListAsync();
+
+                foreach (var objective in evaSalesObjectives)
+                {
+                    if (objective.MeasuredQuestion.Text.Contains("Ventas"))
+                    {
+                        objective.Expected = expectedSales;
+                        objective.MeasuredAnswer.Real = realSales;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Merma"))
+                    {
+                        objective.Expected = expectedMerma;
+                        objective.MeasuredAnswer.Real = realMerma;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Costo mano de obra"))
+                    {
+                        objective.Expected = expectedMOCost;
+                        objective.MeasuredAnswer.Real = realMOCost;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Rotación de GT"))
+                    {
+                        objective.Expected = expectedGTRotation;
+                        objective.MeasuredAnswer.Real = realGTRotation;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Mystery Shopper"))
+                    {
+                        objective.Expected = expectedMysteryShopper;
+                        objective.MeasuredAnswer.Real = realMysteryShopper;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("SO promedio por Tienda"))
+                    {
+                        objective.Expected = expectedSO;
+                        objective.MeasuredAnswer.Real = realSO;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Auditorias"))
+                    {
+                        objective.ExpectedText = expectedAudits;
+                        objective.MeasuredAnswer.Text = realAudits;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Desarrollo de TR a GT"))
+                    {
+                        objective.Expected = expectedTRtoGTDev;
+                        objective.MeasuredAnswer.Real = realTRtoGTDev;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Desarrollo de GT a GD"))
+                    {
+                        objective.Expected = expectedGTtoGDDev;
+                        objective.MeasuredAnswer.Real = realGTtoGDDev;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Auditoria Tienda Escuela"))
+                    {
+                        objective.Expected = expectedTEAudits;
+                        objective.MeasuredAnswer.Real = realTEAudits;
+                    }
+                }
+
+                var autoSalesObjectives = await _evaluationMeasuredQuestionRepository
+                    .GetAll()
+                    .Include(question => question.MeasuredAnswer)
+                    .Include(question => question.MeasuredQuestion)
+                    .Where(question => question.EvaluationId == autoEvaluationId)
+                    .ToListAsync();
+
+                foreach (var objective in autoSalesObjectives)
+                {
+                    if (objective.MeasuredQuestion.Text.Contains("Ventas"))
+                    {
+                        objective.Expected = expectedSales;
+                        objective.MeasuredAnswer.Real = realSales;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Merma"))
+                    {
+                        objective.Expected = expectedMerma;
+                        objective.MeasuredAnswer.Real = realMerma;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Costo mano de obra"))
+                    {
+                        objective.Expected = expectedMOCost;
+                        objective.MeasuredAnswer.Real = realMOCost;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Rotación de GT"))
+                    {
+                        objective.Expected = expectedGTRotation;
+                        objective.MeasuredAnswer.Real = realGTRotation;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Mystery Shopper"))
+                    {
+                        objective.Expected = expectedMysteryShopper;
+                        objective.MeasuredAnswer.Real = realMysteryShopper;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("SO promedio por Tienda"))
+                    {
+                        objective.Expected = expectedSO;
+                        objective.MeasuredAnswer.Real = realSO;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Auditorias"))
+                    {
+                        objective.ExpectedText = expectedAudits;
+                        objective.MeasuredAnswer.Text = realAudits;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Desarrollo de TR a GT"))
+                    {
+                        objective.Expected = expectedTRtoGTDev;
+                        objective.MeasuredAnswer.Real = realTRtoGTDev;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Desarrollo de GT a GD"))
+                    {
+                        objective.Expected = expectedGTtoGDDev;
+                        objective.MeasuredAnswer.Real = realGTtoGDDev;
+                    }
+                    if (objective.MeasuredQuestion.Text.Contains("Auditoria Tienda Escuela"))
+                    {
+                        objective.Expected = expectedTEAudits;
+                        objective.MeasuredAnswer.Real = realTEAudits;
+                    }
+                }
+
+                await unitOfWork.CompleteAsync();
+            }
+
+            return true;
+        }
     }
 }

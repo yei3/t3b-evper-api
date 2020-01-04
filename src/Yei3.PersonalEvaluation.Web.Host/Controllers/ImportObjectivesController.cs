@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Abp.BackgroundJobs;
+using Abp.UI;
 using OfficeOpenXml;
 using Yei3.PersonalEvaluation.Controllers;
 using Yei3.PersonalEvaluation.Core.Evaluations.SalesObjectives;
@@ -36,15 +37,12 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                ExcelWorksheet worksheetGT = package.Workbook.Worksheets["Indicadores GT"];
 
-                await importGTObjectives(worksheetGT);
+                await importGTObjectives(package.Workbook.Worksheets["Indicadores GT"]);
 
-                ExcelWorksheet worksheetGD = package.Workbook.Worksheets["Indicadores GD"];
+                await importGDObjectives(package.Workbook.Worksheets["Indicadores GD"]);
 
-                await importGDObjectives(worksheetGD);
-
-                ExcelWorksheet worksheetGZ = package.Workbook.Worksheets["Indicadores GZ"];
+                await importGZObjectives(package.Workbook.Worksheets["Indicadores GZ"]);
 
                 return Ok();
             }
@@ -86,8 +84,8 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 }
                 catch (Exception e)
                 {
-                    // importUserSummaryModel.IncrementNotImportedUser();
                     Logger.Info(e.Message);
+                    new UserFriendlyException("Import GT Objectives failed!");
                 }
             }
             return true;
@@ -128,8 +126,8 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 }
                 catch (Exception e)
                 {
-                    // importUserSummaryModel.IncrementNotImportedUser();
                     Logger.Info(e.Message);
+                    new UserFriendlyException("Import GD Objectives failed!");
                 }
             }
             return true;
@@ -144,12 +142,36 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
             {
                 try
                 {
-                    await Task.Delay(100);
+                    await _salesObjectivesManager.ImportGZSalesObjectivesAsync(
+                        worksheet.Cells[row, 1].Value.ToString(),
+                        parseToLong(worksheet.Cells[row, 6].Value.ToString()),
+                        parseToLong(worksheet.Cells[row, 7].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 8].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 9].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 10].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 11].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 12].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 13].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 14].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 15].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 16].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 17].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 18].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 19].Value.ToString()),
+                        worksheet.Cells[row, 20].Value.ToString(),
+                        worksheet.Cells[row, 21].Value.ToString(),
+                        parseToDecimal(worksheet.Cells[row, 22].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 23].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 24].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 25].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 26].Value.ToString()),
+                        parseToDecimal(worksheet.Cells[row, 27].Value.ToString())
+                    );
                 }
                 catch (Exception e)
                 {
-                    // importUserSummaryModel.IncrementNotImportedUser();
                     Logger.Info(e.Message);
+                    new UserFriendlyException("Import GZ Objectives failed!");
                 }
             }
             return true;
