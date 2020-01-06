@@ -136,7 +136,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 var organizationUnit = _organizationUnitRepository
                     .GetAll()
                     .Where(ou => ou.Parent.DisplayName == user.Region)
-                    .FirstOrDefault(ou => ou.DisplayName == user.Area);
+                    .LastOrDefault(ou => ou.DisplayName == user.Area);
 
                 //* Create Organization Unit if not exists
                 if (organizationUnit.IsNullOrDeleted())
