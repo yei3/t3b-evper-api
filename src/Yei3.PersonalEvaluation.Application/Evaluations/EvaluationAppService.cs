@@ -434,5 +434,18 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
             return Task.CompletedTask;
         }
+
+        public async Task ReopenEvaluation(EntityDto<long> input)
+        {
+            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(input.Id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException(typeof(Evaluation), evaluation.Id);
+            }
+
+            evaluation.UnfinishEvaluation();
+            evaluation.Activate();
+        }
     }
 }

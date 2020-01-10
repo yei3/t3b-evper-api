@@ -14,6 +14,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<ICollection<EvaluationDto>> GetAll();
         Task ClosingComment(EvaluationCloseDto inpunt);
         Task FinalizeEvaluation(EntityDto<long> input);
+        Task ReopenEvaluation(EntityDto<long> input);
         Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
     }
 }
