@@ -73,5 +73,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             Status = EvaluationStatus.PendingReview;
         }
+
+        public void Activate()
+        {
+            IsActive = true;
+        }
     }
 }

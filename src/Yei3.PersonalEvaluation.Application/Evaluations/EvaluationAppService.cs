@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
@@ -383,6 +384,19 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
 
             return await Task.FromResult(result);
+        }
+
+        public async Task FinalizeEvaluation(EntityDto<long> input)
+        {
+            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(input.Id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException(typeof(Evaluation), evaluation.Id);
+            }
+
+            evaluation.FinishEvaluation();
+            evaluation.Activate();
         }
     }
 }

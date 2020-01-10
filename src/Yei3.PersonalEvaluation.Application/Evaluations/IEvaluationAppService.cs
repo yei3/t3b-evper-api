@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
+    using Abp.Application.Services.Dto;
     using Dto;
 
     public interface IEvaluationAppService
@@ -12,6 +13,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<EvaluationDto> Get(long id);
         Task<ICollection<EvaluationDto>> GetAll();
         Task ClosingComment(EvaluationCloseDto inpunt);
+        Task FinalizeEvaluation(EntityDto<long> input);
         Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
     }
 }
