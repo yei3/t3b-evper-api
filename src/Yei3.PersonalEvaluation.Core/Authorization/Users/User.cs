@@ -12,7 +12,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
     public class User : AbpUser<User>
     {
         public const string DefaultPassword = "123qwe";
-        public const int EmployeeNumberLength = 5;
+        public const int EmployeeNumberLength = 6;
 
         public virtual string EmployeeNumber { get; set; }
         public virtual string JobDescription { get; set; }
