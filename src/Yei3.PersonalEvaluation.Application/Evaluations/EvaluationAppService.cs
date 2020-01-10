@@ -447,5 +447,32 @@ namespace Yei3.PersonalEvaluation.Evaluations
             evaluation.UnfinishEvaluation();
             evaluation.Activate();
         }
+
+        public Task<ICollection<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
+        {
+            ICollection<EvaluationStatusListItemDto> evaluationStatuses = EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Template)
+                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
+                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
+                .Select( evaluation => new EvaluationStatusListItemDto {
+                    Id = evaluation.Id,
+                    EmployeeNumber = evaluation.User.EmployeeNumber,
+                    EmployeeName = evaluation.User.Name,
+                    EmployeeSurname = evaluation.User.Surname,
+                    Area = evaluation.User.Area,
+                    Region = evaluation.User.Region,
+                    EvaluationName = evaluation.Name,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
+                    IncludePastObjectives = evaluation.Template.IncludePastObjectives,
+                    Status = evaluation.Status
+                })
+                .OrderBy(evaluationStatus => evaluationStatus.Id)
+                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName)
+                .ToList();
+
+            return Task.FromResult(evaluationStatuses);
+        }
     }
 }
