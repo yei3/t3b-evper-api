@@ -18,11 +18,12 @@ namespace Yei3.PersonalEvaluation.EntityFrameworkCore.Seed.Host
         public void Create()
         {
             // Emailing
-            AddSettingIfNotExists(EmailSettingNames.DefaultFromAddress, "admin@mydomain.com");
-            AddSettingIfNotExists(EmailSettingNames.DefaultFromDisplayName, "mydomain.com mailer");
+            AddSettingIfNotExists(EmailSettingNames.DefaultFromAddress, "comunicadosrh@t3b.com.mx");
+            AddSettingIfNotExists(EmailSettingNames.DefaultFromDisplayName, "Soporte Tiendas 3B");
+            AddSettingIfNotExists("SendGridKey.Key", "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");
 
             // Languages
-            AddSettingIfNotExists(LocalizationSettingNames.DefaultLanguage, "en");
+            AddSettingIfNotExists(LocalizationSettingNames.DefaultLanguage, "es-Mx");
         }
 
         private void AddSettingIfNotExists(string name, string value, int? tenantId = null)

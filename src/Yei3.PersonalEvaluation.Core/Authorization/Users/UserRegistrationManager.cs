@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Abp.Authorization.Users;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Abp.Domain.Uow;
+using Abp.Extensions;
 using Abp.IdentityFramework;
 using Abp.Runtime.Session;
 using Abp.UI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
+using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 using Yei3.PersonalEvaluation.MultiTenancy;
-using Abp.Extensions;
+using Yei3.PersonalEvaluation.OrganizationUnit;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
@@ -28,30 +31,34 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         private readonly IPermissionManager _permissionManager;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
 
+        private readonly IRepository<UserOrganizationUnit, long> _userOrganizationUnitRepository;
+
         private readonly string PasswordSalt = "_t3B";
 
-        public UserRegistrationManager(
+        public UserRegistrationManager (
             TenantManager tenantManager,
             UserManager userManager,
-            RoleManager roleManager, IPermissionManager permissionManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository)
+            RoleManager roleManager,
+            IPermissionManager permissionManager,
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository,
+            IRepository<UserOrganizationUnit, long> userOrganizationUnitRepository)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _permissionManager = permissionManager;
             _organizationUnitRepository = organizationUnitRepository;
-
+            _userOrganizationUnitRepository = userOrganizationUnitRepository;
             AbpSession = NullAbpSession.Instance;
         }
 
-        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed)
+        public async Task<User> RegisterAsync (string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed)
         {
             CheckForTenant();
 
             var tenant = await GetActiveTenantAsync();
 
-            var user = new User
-            {
+            var user = new User {
                 TenantId = tenant.Id,
                 Name = name,
                 Surname = surname,
@@ -59,10 +66,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 IsActive = true,
                 UserName = userName,
                 IsEmailConfirmed = isEmailConfirmed,
-                Roles = new List<UserRole>()
+                Roles = new List<UserRole> ()
             };
 
-            user.SetNormalizedNames();
+            user.SetNormalizedNames ();
 
             foreach (var defaultRole in await _roleManager.Roles.Where(r => r.IsDefault).ToListAsync())
             {
@@ -77,7 +84,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             return user;
         }
 
-        public User ImportUser(
+        public async Task<User> ImportUserAsync (
             string employeeNumber,
             bool status,
             string firstLastName,
@@ -95,15 +102,16 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             string birthDate,
             string scholarship,
             string email,
-            bool isMale)
+            bool isMale,
+            bool isSalesArea)
         {
-            using (Abp.Domain.Uow.IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
+            using (IUnitOfWorkCompleteHandle unitOfWork = UnitOfWorkManager.Begin())
             {
 
-                _tenantManager.UnitOfWorkManager.Current.SetTenantId(1);
+                UnitOfWorkManager.Current.SetTenantId(1);
+                UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
 
-                User user = new User
-                {
+                User user = new User {
                     EmployeeNumber = employeeNumber,
                     UserName = employeeNumber,
                     IsActive = status,
@@ -114,60 +122,184 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     Region = region,
                     ImmediateSupervisor = immediateSupervisor,
                     SocialReason = socialReason,
-                    EntryDate = NormalizeDateTime(entryDate),
-                    ReassignDate = NormalizeDateTime(reassignDate),
-                    BirthDate = NormalizeDateTime(birthDate),
+                    EntryDate = NormalizeDateTime (entryDate),
+                    ReassignDate = NormalizeDateTime (reassignDate),
+                    BirthDate = NormalizeDateTime (birthDate),
                     Scholarship = scholarship,
-                    EmailAddress = email,
                     IsEmailConfirmed = false,
                     TenantId = 1,
-                    Roles = new List<UserRole>(),
+                    Roles = new List<UserRole> (),
+                    EmailAddress = email,
                     IsMale = isMale
                 };
-
-
-                try
-                {
-                    // mostly cause email is not set or repeated
-                    user.EmailAddress = $"{user.UserName}@dummyemail.com";
-                    _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress).GetAwaiter().GetResult();
-                }
-                catch (UserFriendlyException)
-                {
-                    User existingUser = _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber).GetAwaiter().GetResult();
-                    existingUser = user;
-                    _userManager.UpdateAsync(existingUser).GetAwaiter().GetResult();
-                    return existingUser;
-                }
-
-                _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}").GetAwaiter().GetResult();
-
-                if (isManager)
-                {
-                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator).GetAwaiter().GetResult();
-                }
-
-                if (isSupervisor)
-                {
-                    _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor).GetAwaiter().GetResult();
-                }
-
-                _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator).GetAwaiter().GetResult();
 
                 var organizationUnit = _organizationUnitRepository
                     .GetAll()
                     .Where(ou => ou.Parent.DisplayName == user.Region)
-                    .FirstOrDefault(ou => ou.DisplayName == user.Area);
+                    .LastOrDefault(ou => ou.DisplayName == user.Area);
 
-                if (!organizationUnit.IsNullOrDeleted())
+                //* Create Organization Unit if not exists
+                if (organizationUnit.IsNullOrDeleted())
                 {
-                    _userManager.AddToOrganizationUnitAsync(user, organizationUnit).GetAwaiter().GetResult();
+                    organizationUnit = await CreateOrganizationUnits(organizationUnit, user, isSalesArea);
                 }
 
-                unitOfWork.Complete();
+                try
+                {
+                    //* mostly cause email is not set or repeated
+                    user.EmailAddress = $"{user.UserName}@tiendas3b.com";
+                    await _userManager.CheckDuplicateUsernameOrEmailAddressAsync(user.Id, user.UserName, user.EmailAddress);
+                }
+                catch (UserFriendlyException)
+                {
+                    //! This must be implement on a better way or is the only one?
+                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
+
+                    if (!status) {
+                        await _userManager.DeleteAsync(existingUser);
+                        return user;
+                    }
+
+                    // Punto 4 PBI 1019
+                    var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
+                        uou => uou.UserId == existingUser.Id
+                    );
+
+                    if (userOrganizationUnit.IsNullOrDeleted())
+                    {
+                        if (userOrganizationUnit == null) 
+                            await _userManager.AddToOrganizationUnitAsync(existingUser, organizationUnit);
+                        else 
+                            userOrganizationUnit.UnDelete();
+                    }
+                    else if (existingUser.Area != user.Area)
+                    {
+                        userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
+                        await _userManager.SetOrganizationUnitsAsync(existingUser.Id, organizationUnit.Id);
+                    }
+
+                    //* Adding excel data to existing user                    
+                    existingUser.JobDescription = user.JobDescription;
+                    existingUser.Area = user.Area;
+                    existingUser.Region = user.Region;
+                    existingUser.ImmediateSupervisor = user.ImmediateSupervisor;
+                    existingUser.SocialReason = user.SocialReason;
+                    existingUser.ReassignDate = user.ReassignDate;
+                    existingUser.Scholarship = user.Scholarship;
+                    existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
+
+                    //! Just for deleted users
+                    if (existingUser.IsDeleted)
+                    {
+                        existingUser.IsDeleted = false;
+                        existingUser.DeleterUser = null;
+                        existingUser.DeletionTime = null;
+                        existingUser.LastModificationTime = DateTime.Now;
+                        existingUser.LastModifierUserId = AbpSession.UserId;
+
+                        await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
+            
+                        await _userManager.UpdateAsync(existingUser);
+
+                        await _userManager.ChangePasswordAsync(existingUser, $"{existingUser.EmployeeNumber}_t3B");
+
+                        await unitOfWork.CompleteAsync();
+
+                        return existingUser;
+                    }
+
+                    await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
+
+                    await _userManager.UpdateAsync(existingUser);
+
+                    await unitOfWork.CompleteAsync();
+
+                    return existingUser;
+                }
+
+                //* Create User if not exists
+                user.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
+                CheckErrors(await _userManager.CreateAsync(user, $"{user.EmployeeNumber}{PasswordSalt}"));
+
+                await AddOrRemoveUserRole(user, isSupervisor, isManager);
+
+                await _userManager.AddToOrganizationUnitAsync(user, organizationUnit);
+
+                await unitOfWork.CompleteAsync();
 
                 return user;
             }
+        }
+
+        public async Task AddOrRemoveUserRole(User user, bool isSupervisor, bool isManager)
+        {
+            if (isManager)
+            {
+                await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Administrator);
+            }
+            else
+            {
+                await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Administrator);
+            }
+
+            if (isSupervisor)
+            {
+                await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
+            }
+            else
+            {
+                await _userManager.RemoveFromRoleAsync(user, StaticRoleNames.Tenants.Supervisor);
+            }
+
+            await _userManager.AddToRoleAsync(user, StaticRoleNames.Tenants.Collaborator);
+        }
+
+        public async Task<Abp.Organizations.OrganizationUnit> CreateOrganizationUnits(Abp.Organizations.OrganizationUnit area, User user, bool isSalesArea)
+        {
+            var region = _organizationUnitRepository
+                    .GetAll()
+                    .FirstOrDefault(ou => ou.DisplayName == user.Region);
+
+            // Create region if not exists
+            if (region.IsNullOrDeleted())
+            {
+                region = await _organizationUnitRepository.InsertAsync( 
+                    new RegionOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Region));
+
+                var lastRegion = await _organizationUnitRepository
+                    .GetAll()
+                    .Where(ou => ou.ParentId == null)
+                    .LastOrDefaultAsync();
+
+                region.Code = Abp.Organizations.OrganizationUnit.CalculateNextCode(lastRegion.Code);
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
+
+            // Validate if a Sales Area Organization Unit
+            if (!isSalesArea)
+            {
+                area = await _organizationUnitRepository.InsertAsync(
+                    new AreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, region.Id)
+                );
+            }
+            else
+            {
+                area = await _organizationUnitRepository.InsertAsync(
+                    new SalesAreaOrganizationUnit(CurrentUnitOfWork.GetTenantId().Value, user.Area, region.Id)
+                );
+            }
+
+            var lastArea = await _organizationUnitRepository
+                .GetAll()
+                .Where(ou => ou.Parent.DisplayName == region.DisplayName)
+                .LastOrDefaultAsync();
+
+            area.Code = lastArea.IsNullOrDeleted() ? "00001" : Abp.Organizations.OrganizationUnit.CalculateNextCode(lastArea.Code);
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return area;
         }
 
         public async Task<bool> IsFirstTimeLogin(string userNameOrEmailAddress)
@@ -196,12 +328,15 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         private string ParseRole(string role)
         {
-            switch (role)
-            {
-                case "COLABORADOR": return StaticRoleNames.Tenants.Collaborator;
-                case "JEFE": return StaticRoleNames.Tenants.Supervisor;
-                case "ADMINISTRADOR": return StaticRoleNames.Tenants.Administrator;
-                default: return string.Empty;
+            switch (role) {
+                case "COLABORADOR":
+                    return StaticRoleNames.Tenants.Collaborator;
+                case "JEFE":
+                    return StaticRoleNames.Tenants.Supervisor;
+                case "ADMINISTRADOR":
+                    return StaticRoleNames.Tenants.Administrator;
+                default:
+                    return string.Empty;
             }
         }
 
@@ -213,7 +348,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             }
         }
 
-        private async Task<Tenant> GetActiveTenantAsync()
+        private async Task<Tenant> GetActiveTenantAsync ()
         {
             if (!AbpSession.TenantId.HasValue)
             {
@@ -228,12 +363,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
             var tenant = await _tenantManager.FindByIdAsync(tenantId);
             if (tenant == null)
             {
-                throw new UserFriendlyException(L("UnknownTenantId{0}", tenantId));
+                throw new UserFriendlyException(L ("UnknownTenantId{0}", tenantId));
             }
 
             if (!tenant.IsActive)
             {
-                throw new UserFriendlyException(L("TenantIdIsNotActive{0}", tenantId));
+                throw new UserFriendlyException(L ("TenantIdIsNotActive{0}", tenantId));
             }
 
             return tenant;

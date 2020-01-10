@@ -85,5 +85,12 @@
 
             return result;
         }
+        
+        public async Task<ICollection<User>> GetSubordinates(User rootUser)
+        {
+            return await Users
+                .Where(user => user.ImmediateSupervisor == rootUser.JobDescription)
+                .ToListAsync();
+        }
     }
 }

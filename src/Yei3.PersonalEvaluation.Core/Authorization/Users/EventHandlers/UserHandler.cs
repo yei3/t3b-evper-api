@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Events.Bus.Entities;
 using Abp.Events.Bus.Handlers;
+using Castle.Core.Logging;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 
@@ -27,11 +29,13 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
             _evaluationRevisionRepository = evaluationRevisionRepository;
         }
 
+        [UnitOfWork]
         public void HandleEvent(EntityDeletingEventData<User> eventData)
         {
             UpdateSupervisorSubordinateRelation(eventData.Entity);
         }
-
+        
+        [UnitOfWork]
         public void HandleEvent(EntityChangedEventData<User> eventData)
         {
             if (eventData.Entity.IsActive)
@@ -44,33 +48,35 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
 
         private void UpdateSupervisorSubordinateRelation(User eventUser)
         {
-            // find user immediate superior
-            User immediateSupervisor = _userManager.Users.FirstOrDefault(user => user.JobDescription == eventUser.ImmediateSupervisor);
-
-            if (immediateSupervisor == null)
+            try
             {
-                throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido.");
+                // find user immediate superior
+                User immediateSupervisor = _userManager.Users.FirstOrDefault(user => user.JobDescription == eventUser.ImmediateSupervisor);
+                // find subordinates
+                IQueryable<User> subordinates = _userManager.Users
+                    .Where(user => user.ImmediateSupervisor == eventUser.JobDescription);
+
+                // update to new immediate supervisor
+                foreach (User subordinate in subordinates)
+                {
+                    subordinate.ImmediateSupervisor = immediateSupervisor.JobDescription;
+                }
+
+                // find dandling revisions
+                IQueryable<EvaluationRevision> pendingRevisions = _evaluationRevisionRepository
+                    .GetAll()
+                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == eventUser.Id);
+
+                // update new reviewer
+                foreach (EvaluationRevision pendingRevision in pendingRevisions)
+                {
+                    pendingRevision.UpdateReviewer(immediateSupervisor);
+                }
             }
-
-            // find subordinates
-            IQueryable<User> subordinates = _userManager.Users
-                .Where(user => user.ImmediateSupervisor == eventUser.JobDescription);
-
-            // update to new immediate supervisor
-            foreach (User subordinate in subordinates)
+            catch (System.Exception)
             {
-                subordinate.ImmediateSupervisor = immediateSupervisor.JobDescription;
-            }
-
-            // find dandling revisions
-            IQueryable<EvaluationRevision> pendingRevisions = _evaluationRevisionRepository
-                .GetAll()
-                .Where(evaluationRevision => evaluationRevision.ReviewerUserId == eventUser.Id);
-
-            // update new reviewer
-            foreach (EvaluationRevision pendingRevision in pendingRevisions)
-            {
-                pendingRevision.UpdateReviewer(immediateSupervisor);
+                // throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido.");
+                return;
             }
         }
     }

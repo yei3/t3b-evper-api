@@ -15,7 +15,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits.Dto
         public string Code { get; set; }
         public long? ParentId { get; set; }
         public ICollection<OrganizationUnitUserDto> OrganizationUnitUsers { get; set; }
-        public bool IsSalesArea { get; set;} = false;
+        public bool IsSalesArea { get; set; } = false;
 
         public OrganizationUnitDto AsSalesArea() {
             this.IsSalesArea = true;
