@@ -5,14 +5,12 @@ using Abp.Authorization.Users;
 using Abp.Extensions;
 using Yei3.PersonalEvaluation.Evaluations;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
-using Yei3.PersonalEvaluation.Identity;
 
 namespace Yei3.PersonalEvaluation.Authorization.Users
 {
     public class User : AbpUser<User>
     {
         public const string DefaultPassword = "123qwe";
-        public const int EmployeeNumberLength = 6;
 
         public virtual string EmployeeNumber { get; set; }
         public virtual string JobDescription { get; set; }

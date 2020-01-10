@@ -22,10 +22,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Accounts.Dto
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (EmployeeNumber.Length != User.EmployeeNumberLength) {
-                yield return new ValidationResult($"El numero de empleado {EmployeeNumber} no es correcto.");
-            }
-
             if (Password != ConfirmPassword)
             {
                 yield return new ValidationResult($"Passwords no coinciden.");
