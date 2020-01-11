@@ -10,6 +10,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public string Text { get; set; }
         public DateTime CreationTime { get; set; }
         public string UserName { get; set; }
-
+        public long CreatorUserId { get; set; }
     }
 }
