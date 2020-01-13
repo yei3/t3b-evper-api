@@ -6,10 +6,12 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Collections.Extensions;
+using Abp.Linq.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Extensions;
+using Abp.Linq;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
 
+        public EvaluationAppService(IAsyncQueryableExecuter asyncQueryableExecuter) 
+        {
+            this.AsyncQueryableExecuter = asyncQueryableExecuter;
+               
+        }
+                private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
+
         public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
@@ -39,6 +48,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             UserManager = userManager;
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
+            AsyncQueryableExecuter = NullAsyncQueryableExecuter.Instance;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -460,9 +470,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
             evaluation.Activate();
         }
 
-        public Task<ICollection<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
+        public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
         {
-            ICollection<EvaluationStatusListItemDto> evaluationStatuses = EvaluationRepository
+            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Template)
@@ -479,12 +489,25 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
                     IncludePastObjectives = evaluation.Template.IncludePastObjectives,
                     Status = evaluation.Status
-                })
-                .OrderBy(evaluationStatus => evaluationStatus.Id)
-                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName)
-                .ToList();
+                });
 
-            return Task.FromResult(evaluationStatuses);
+            evaluationStatuses = evaluationStatuses
+                .OrderBy(evaluationStatus => evaluationStatus.Id)
+                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
+
+            int count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
+
+            if (input.ApplyPagination)
+            {
+                evaluationStatuses = evaluationStatuses
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount);
+            }
+
+            return new PagedResultDto<EvaluationStatusListItemDto>(
+                count,
+                await evaluationStatuses.ToListAsync()
+            );
         }
     }
 }
