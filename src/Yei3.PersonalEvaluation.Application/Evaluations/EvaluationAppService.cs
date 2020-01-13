@@ -34,12 +34,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
 
-        public EvaluationAppService(IAsyncQueryableExecuter asyncQueryableExecuter) 
+        public EvaluationAppService(IAsyncQueryableExecuter asyncQueryableExecuter)
         {
             this.AsyncQueryableExecuter = asyncQueryableExecuter;
-               
+
         }
-                private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
+        private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
 
         public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
@@ -478,7 +478,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .Include(evaluation => evaluation.Template)
                 .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
                 .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
-                .Select( evaluation => new EvaluationStatusListItemDto {
+                .Select(evaluation => new EvaluationStatusListItemDto
+                {
                     Id = evaluation.Id,
                     EmployeeNumber = evaluation.User.EmployeeNumber,
                     EmployeeName = evaluation.User.Name,
@@ -495,10 +496,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .OrderBy(evaluationStatus => evaluationStatus.Id)
                 .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
 
-            int count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
+            int count = 0;
 
             if (input.ApplyPagination)
             {
+                count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
+
                 evaluationStatuses = evaluationStatuses
                     .Skip(input.SkipCount)
                     .Take(input.MaxResultCount);
