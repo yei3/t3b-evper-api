@@ -9,7 +9,6 @@ using Abp.Collections.Extensions;
 using Abp.Linq.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
-using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.Linq;
 using Abp.Runtime.Session;
@@ -303,42 +302,31 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<EvaluationDto> Get(long id)
         {
-            Evaluation resultEvaluation = null;
-
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
-            {
-                resultEvaluation = await EvaluationRepository
-                    .GetAll()
-                    .Where(evaluation => !evaluation.IsDeleted)
-                    .Include(evaluation => evaluation.User)
-                    .Include(evaluation => evaluation.Revision)
-                    .ThenInclude(revision => revision.ReviewerUser)
-                    .Include(evaluation => evaluation.Questions)
-                    .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
-                    .ThenInclude(answer => answer.EvaluationMeasuredQuestion)
-                    .Include(evaluation => evaluation.Questions)
-                    .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
-                    .Include(evaluation => evaluation.Questions)
-                    .ThenInclude(evaluationQuestion => ((EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
-                    .Include(evaluation => evaluation.Template)
-                    .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
-                    .Include(evaluation => evaluation.Template.Sections)
-                    .ThenInclude(section => section.ChildSections)
-                    .Include(evaluation => evaluation.Template.Sections)
-                    .ThenInclude(section => section.MeasuredQuestions)
-                    .Include(evaluation => evaluation.Template.Sections)
-                    .ThenInclude(section => section.UnmeasuredQuestions)
-                    .Include(evaluation => evaluation.Template.Sections)
-                    .ThenInclude(section => section.NotEvaluableQuestions)
-                    .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
-            }
+            Evaluation resultEvaluation = await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Revision)
+                .ThenInclude(revision => revision.ReviewerUser)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
+                .ThenInclude(answer => answer.EvaluationMeasuredQuestion)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationUnmeasuredQuestion)evaluationQuestion).UnmeasuredAnswer)
+                .Include(evaluation => evaluation.Questions)
+                .ThenInclude(evaluationQuestion => ((EvaluationQuestions.NotEvaluableQuestion)evaluationQuestion).NotEvaluableAnswer)
+                .Include(evaluation => evaluation.Template)
+                .ThenInclude(evaluationTemplate => evaluationTemplate.Sections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.ChildSections)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.MeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.UnmeasuredQuestions)
+                .Include(evaluation => evaluation.Template.Sections)
+                .ThenInclude(section => section.NotEvaluableQuestions)
+                .FirstOrDefaultAsync(evaluation => evaluation.Id == id);
 
             var evaluationDto = resultEvaluation.MapTo<EvaluationDto>();
-
-            if (evaluationDto == null)
-            {
-                return null;
-            }
 
             evaluationDto.Template.PurgeSubSections();
 
@@ -364,7 +352,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             if (lastEvaluation != null)
             {
-
+                
             }
 
             return "";

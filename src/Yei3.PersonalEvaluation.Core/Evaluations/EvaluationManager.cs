@@ -159,22 +159,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
                         CreationTime = objectiveBinnacle.CreationTime,
-                        CreatorUserId = objectiveBinnacle.CreatorUserId.Value
+                        UserName = UserManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
                     }).ToList(),
                     isNotEvaluable = true,
                     isNextObjective = evaluationQuestion.Section.ParentSection.Name == "Próximos Objetivos" ? true : false
                 }).ToListAsync();
-
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
-            {
-                foreach (EvaluationObjectivesSummaryValueObject evaluationsSummary in evaluationObjectivesSummaryValueObjects)
-                {
-                    foreach (ObjectiveBinnacleValueObject binnacle in evaluationsSummary.Binnacle)
-                    {
-                        binnacle.UserName = UserManager.Users.Single(user => user.Id == binnacle.CreatorUserId).FullName;
-                    }
-                }
-            }
 
             evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
@@ -205,8 +194,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .ToList();
         }
 
-        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHome(long? userId = null)
-        {
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHome(long? userId = null){
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserPendingObjectiveAsync(userId);
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
@@ -306,14 +294,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
             }
 
             return pendingRevisions;
-        }
+        }   
 
         public async Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsPendingEvaluationsAsync(long? userId = null)
         {
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-
+            
             List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
 
             List<User> users = UserManager.Users
@@ -327,7 +315,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     .ToList();
                 evaluationsSummary.AddRange(currentUserEvaluations);
             }
-
+            
 
             return evaluationsSummary;
         }
@@ -349,20 +337,20 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             List<RevisionSummaryValueObject> revisionsSummary = new List<RevisionSummaryValueObject>();
 
-
-            List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
-                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
-                .Select(user => user.Id)
-                .ToList();
-
-            foreach (long idUser in userIds)
-            {
-                List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(idUser))
+            
+                List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
+                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                    .Select(user => user.Id)
                     .ToList();
 
-                revisionsSummary.AddRange(currentUserPendingRevisions);
-            }
+                foreach (long idUser in userIds)
+                {
+                    List<RevisionSummaryValueObject> currentUserPendingRevisions = (await GetUserPendingEvaluationRevisionsAsync(idUser))
+                        .ToList();
 
+                    revisionsSummary.AddRange(currentUserPendingRevisions);
+                }
+            
 
             return revisionsSummary;
         }
@@ -403,7 +391,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
                 });
             }
-
+            
 
             return collaboratorsPendingObjectivesSummary;
         }
@@ -433,25 +421,25 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
                 }).ToListAsync();
 
-            evaluationsResult.AddRange(await EvaluationRepository
-            .GetAll()
-            .Include(evaluation => evaluation.Template)
-            .Where(evaluation => evaluation.UserId == userId)
-            .Where(evaluation => evaluation.Status == EvaluationStatus.Validated)
-            .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
-            .Select(evaluation => new EvaluationSummaryValueObject
-            {
-                Term = evaluation.Term,
-                Id = evaluation.Id,
-                Name = evaluation.Name,
-                Description = evaluation.Template.Description,
-                Status = evaluation.Status,
-                EndDateTime = evaluation.EndDateTime,
-                CollaboratorName = user.FullName,
-                IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
-            }).ToListAsync());
+                evaluationsResult.AddRange(await EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.Template)
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => evaluation.Status == EvaluationStatus.Validated)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Select(evaluation => new EvaluationSummaryValueObject
+                {
+                    Term = evaluation.Term,
+                    Id = evaluation.Id,
+                    Name = evaluation.Name,
+                    Description = evaluation.Template.Description,
+                    Status = evaluation.Status,
+                    EndDateTime = evaluation.EndDateTime,
+                    CollaboratorName = user.FullName,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation
+                }).ToListAsync());
 
-            return evaluationsResult;
+                return evaluationsResult;
         }
 
         public async Task<ICollection<EvaluationSummaryValueObject>> GetUserOrganizationUnitCollaboratorsEvaluationsHistoryAsync(long? userId = null)
@@ -459,7 +447,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-
+            
             List<EvaluationSummaryValueObject> evaluationsSummary = new List<EvaluationSummaryValueObject>();
 
             List<long> userIds = (await UserManager.GetSubordinatesTree(supervisorUser))
@@ -482,6 +470,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
+
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
 
             bool isSupervisor = await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
@@ -493,15 +485,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             List<CollaboratorsPendingObjectivesSummaryValueObject> collaboratorsPendingObjectivesSummary = new List<CollaboratorsPendingObjectivesSummaryValueObject>();
 
-            List<User> users = new List<User>();
-
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
-            {
-                users = UserManager.Users
-                    .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
-                    .Distinct()
-                    .ToList();
-            }
+            List<User> users = UserManager.Users
+                .Distinct()
+                .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
+                .ToList();
 
             foreach (User user in users)
             {
@@ -520,7 +507,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
                 });
             }
-
+        
 
             return collaboratorsPendingObjectivesSummary;
         }
@@ -529,17 +516,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
-            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = new List<EvaluationObjectivesSummaryValueObject>();
-
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
-            {
-                evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
+            List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await EvaluationQuestionRepository
                 .GetAll()
-                .Where(evaluationQuestion => !evaluationQuestion.IsDeleted)
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
-                .Where(evaluationQuestion => !evaluationQuestion.Evaluation.IsDeleted)
-                .Where(evaluationQuestion => !evaluationQuestion.Evaluation.Template.IsDeleted)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.Template.IsAutoEvaluation)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .OfType<NotEvaluableQuestion>()
@@ -560,11 +540,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     isNotEvaluable = true
                 }).ToListAsync();
 
-                evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
+            evaluationObjectivesSummaryValueObjects.AddRange(await EvaluationQuestionRepository
                 .GetAll()
-                .Where(evaluationQuestion => !evaluationQuestion.IsDeleted)
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
-                .Where(evaluationQuestion => !evaluationQuestion.Evaluation.IsDeleted)
                 .Where(evaluationQuestion => evaluationQuestion.Evaluation.UserId == userId)
                 .Where(evaluationQuestion => evaluationQuestion.Status != EvaluationQuestionStatus.Validated)
                 .OfType<EvaluationMeasuredQuestion>()
@@ -580,20 +558,17 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         Id = objectiveBinnacle.Id,
                         EvaluationQuestionId = objectiveBinnacle.EvaluationQuestionId,
                         Text = objectiveBinnacle.Text,
-                        CreationTime = objectiveBinnacle.CreationTime,
-                        UserName = UserManager.Users.Single(user => user.Id == objectiveBinnacle.CreatorUserId).FullName
+                        CreationTime = objectiveBinnacle.CreationTime
                     }).ToList(),
                     isNotEvaluable = false
                 }).ToListAsync());
-            }
 
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
                 .ToList();
         }
 
-        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHistory(long? userId = null)
-        {
+        public async Task<List<EvaluationObjectivesSummaryValueObject>> GetUserObjectivesHistory(long? userId = null){
             List<EvaluationObjectivesSummaryValueObject> evaluationObjectivesSummaryValueObjects = await GetUserObjectivesHistoryAsync(userId);
             return evaluationObjectivesSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
@@ -632,7 +607,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-
+            
             List<EvaluationActionValueObject> actionSummaryValueObjects = new List<EvaluationActionValueObject>();
 
             List<User> users = UserManager.Users
@@ -641,7 +616,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             foreach (User user in users)
             {
-                List<EvaluationActionValueObject> newListActions = await EvaluationQuestionRepository
+                List<EvaluationActionValueObject>  newListActions = await EvaluationQuestionRepository
                 .GetAll()
                 .Include(evaluationQuestion => evaluationQuestion.Evaluation)
                 .ThenInclude(evaluation => evaluation.Template)
@@ -662,7 +637,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 actionSummaryValueObjects.AddRange(newListActions);
             }
-
+            
             return actionSummaryValueObjects
                 .OrderBy(dashboard => dashboard.DeliveryDate)
                 .ToList();
@@ -673,7 +648,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             userId = userId ?? AbpSession.GetUserId();
 
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
-
+            
             List<long> userIds = UserManager.Users
                     .Where(user => user.ImmediateSupervisor == supervisorUser.JobDescription)
                     .Select(user => user.Id)
