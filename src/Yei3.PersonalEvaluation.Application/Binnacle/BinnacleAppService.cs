@@ -66,7 +66,7 @@ namespace Yei3.PersonalEvaluation.Binnacle
                     .OrderByDescending(answer => answer.CreationTime);
 
                 pairAnswer = x
-                    .FirstOrDefault(answer =>
+                    .FirstOrDefault(answer => 
                         answer.NotEvaluableQuestion.Evaluation.UserId == currentEvaluableQuestion.Evaluation.UserId);
             }
 
@@ -83,13 +83,14 @@ namespace Yei3.PersonalEvaluation.Binnacle
 
         protected override ObjectiveBinnacleDto MapToEntityDto(ObjectiveBinnacle entity)
         {
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
-            {
-                ObjectiveBinnacleDto entityDto = base.MapToEntityDto(entity);
-                entityDto.UserName = _userManager.Users.Single(user => user.Id == entity.CreatorUserId).FullName;
+            //* Disable filter for soft delete
+            UnitOfWorkManager.Current.SetTenantId(1);
+            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
 
-                return entityDto;
-            }
+            ObjectiveBinnacleDto entityDto = base.MapToEntityDto(entity);
+            entityDto.UserName = _userManager.Users.Single(user => user.Id == entity.CreatorUserId).FullName;
+
+            return entityDto;
         }
     }
 }
