@@ -65,6 +65,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Startup
             {
                 options.SwaggerDoc("v1", new Info { Title = "PersonalEvaluation API", Version = "v1" });
                 options.OperationFilter<FormFileSwaggerFilter>();
+                options.OperationFilter<ToFileSwaggerFilter>();
                 options.DocInclusionPredicate((docName, description) => true);
 
                 // Define the BearerAuth scheme that's in use
