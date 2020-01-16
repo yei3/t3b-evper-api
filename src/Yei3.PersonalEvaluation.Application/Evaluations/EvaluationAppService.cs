@@ -463,6 +463,31 @@ namespace Yei3.PersonalEvaluation.Evaluations
             evaluation.Activate();
         }
 
+        protected IQueryable<EvaluationStatusListItemDto> GetEvaluationStatusAsQueryable(EvaluationStatusInputDto input)
+        {
+            return EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Template)
+                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
+                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
+                .Select(evaluation => new EvaluationStatusListItemDto
+                {
+                    Id = evaluation.Id,
+                    EmployeeNumber = evaluation.User.EmployeeNumber,
+                    EmployeeName = evaluation.User.Name,
+                    EmployeeSurname = evaluation.User.Surname,
+                    Area = evaluation.User.Area,
+                    Region = evaluation.User.Region,
+                    EvaluationName = evaluation.Name,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
+                    IncludePastObjectives = evaluation.Template.IncludePastObjectives,
+                    Status = evaluation.Status
+                })
+                .OrderBy(evaluationStatus => evaluationStatus.Id)
+                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
+        }
+
         public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
         {
 
@@ -521,7 +546,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         _ => _.Region,
                         _ => _.Area,
                         _ => _.EvaluationName,
-                        _ => _.IsAutoEvaluation ? "AED": "ED",
+                        _ => _.IsAutoEvaluation ? "AED" : "ED",
                         _ => _.IncludePastObjectives ? "Incluye Objetivos Anteriores" : "Sin Objetivos Anteriores",
                         _ => _.Id,
                         _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
@@ -533,6 +558,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return file;
         }
 
+        // TODO abstraer todo esto en un XLSX manager que genere excels de cualquier colleccion
+        // Start Excel Stuff
         protected void AddExcelObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
         {
             if (items.IsNullOrEmpty() || propertySelectors.IsNullOrEmpty())
@@ -548,32 +575,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 }
             }
         }
-
-        protected IQueryable<EvaluationStatusListItemDto> GetEvaluationStatusAsQueryable(EvaluationStatusInputDto input)
-        {
-            return EvaluationRepository
-                .GetAll()
-                .Include(evaluation => evaluation.User)
-                .Include(evaluation => evaluation.Template)
-                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
-                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
-                .Select(evaluation => new EvaluationStatusListItemDto
-                {
-                    Id = evaluation.Id,
-                    EmployeeNumber = evaluation.User.EmployeeNumber,
-                    EmployeeName = evaluation.User.Name,
-                    EmployeeSurname = evaluation.User.Surname,
-                    Area = evaluation.User.Area,
-                    Region = evaluation.User.Region,
-                    EvaluationName = evaluation.Name,
-                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
-                    IncludePastObjectives = evaluation.Template.IncludePastObjectives,
-                    Status = evaluation.Status
-                })
-                .OrderBy(evaluationStatus => evaluationStatus.Id)
-                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
-        }
-
+        
         protected FileDto CreateExcelPackage(string fileName, Action<ExcelPackage> creator)
         {
             var file = new FileDto(fileName, MimeTypeNames.ApplicationVndOpenxmlformatsOfficedocumentSpreadsheetmlSheet);
@@ -591,5 +593,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             CacheManager.GetCache(AppConsts.TempEvaluationStatusesFileName).Set(file.FileToken, excelPackage.GetAsByteArray(), new TimeSpan(0, 0, 1, 0)); // expire time is 1 min by default
         }
+        // End Excel Stuff
     }
 }
