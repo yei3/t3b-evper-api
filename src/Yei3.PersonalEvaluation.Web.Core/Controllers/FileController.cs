@@ -21,7 +21,7 @@ namespace Yei3.PersonalEvaluation.Controllers
         {
             if (!(CacheManager.GetCache(AppConsts.TempEvaluationStatusesFileName).Get(file.FileToken, ep => ep) is byte[] fileBytes))
             {
-                return NotFound(L("RequestedFileDoesNotExists"));
+                return NotFound("El archivo requerido no fue encontrado.");
             }
 
             return File(fileBytes, file.FileType, file.FileName);
