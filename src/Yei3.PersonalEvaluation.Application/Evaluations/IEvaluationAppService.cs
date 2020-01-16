@@ -17,5 +17,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task ReopenEvaluation(EntityDto<long> input);
         Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
         Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input);
+        FileDto GetEvaluationsStatusSheet(EvaluationStatusInputDto input);
     }
 }

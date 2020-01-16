@@ -21,6 +21,9 @@ using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Abp.Runtime.Caching;
+using Yei3.PersonalEvaluation.Net.MimeTypes;
+using OfficeOpenXml;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -32,7 +35,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
-
+        private readonly ICacheManager CacheManager;
         public EvaluationAppService(IAsyncQueryableExecuter asyncQueryableExecuter)
         {
             this.AsyncQueryableExecuter = asyncQueryableExecuter;
@@ -40,7 +43,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         }
         private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, ICacheManager cacheManager)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
@@ -48,6 +51,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
             AsyncQueryableExecuter = NullAsyncQueryableExecuter.Instance;
+            CacheManager = cacheManager;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -353,7 +357,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             if (lastEvaluation != null)
             {
-                
+
             }
 
             return "";
@@ -461,7 +465,93 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
         {
-            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = EvaluationRepository
+
+            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
+
+            int count = 0;
+
+            if (input.ApplyPagination)
+            {
+                count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
+
+                evaluationStatuses = evaluationStatuses
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount);
+            }
+
+            return new PagedResultDto<EvaluationStatusListItemDto>(
+                count,
+                await evaluationStatuses.ToListAsync()
+            );
+        }
+
+        public FileDto GetEvaluationsStatusSheet(EvaluationStatusInputDto input)
+        {
+            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
+            FileDto file = CreateExcelPackage("EvaluationStatuses.xlsx", excelPackage =>
+                {
+                    var sheet = excelPackage.Workbook.Worksheets.Add("EvaluationStatuses");
+                    sheet.OutLineApplyStyle = true;
+
+                    string[] headerTexts = new string[] {
+                        "COLABORADOR",
+                        "NOMBRE",
+                        "APELLIDOS",
+                        "REGION",
+                        "AREA",
+                        "NOMBRE DE EVALUACION",
+                        "TIPO",
+                        "INCLUYE OBJETIVOS ANTERIORES",
+                        "EVALUACION",
+                        "ESTATUS"
+                    };
+
+                    for (int i = 0; i < headerTexts.Length; i++)
+                    {
+                        string headerText = headerTexts[i];
+
+                        sheet.Cells[1, i + 1].Value = headerText;
+                        sheet.Cells[1, i + 1].Style.Font.Bold = true;
+                    }
+
+                    AddExcelObjects(sheet, 2, evaluationStatuses.ToList(),
+                        _ => _.EmployeeNumber,
+                        _ => _.EmployeeName,
+                        _ => _.EmployeeSurname,
+                        _ => _.Region,
+                        _ => _.Area,
+                        _ => _.EvaluationName,
+                        _ => _.IsAutoEvaluation ? "AED": "ED",
+                        _ => _.IncludePastObjectives ? "Incluye Objetivos Anteriores" : "Sin Objetivos Anteriores",
+                        _ => _.Id,
+                        _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
+                            : _.Status == EvaluationStatus.Finished ? "Finalizada"
+                            : "En Proceso"
+                    );
+                });
+
+            return file;
+        }
+
+        protected void AddExcelObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
+        {
+            if (items.IsNullOrEmpty() || propertySelectors.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                for (var j = 0; j < propertySelectors.Length; j++)
+                {
+                    sheet.Cells[i + startRowIndex, j + 1].Value = propertySelectors[j](items[i]);
+                }
+            }
+        }
+
+        protected IQueryable<EvaluationStatusListItemDto> GetEvaluationStatusAsQueryable(EvaluationStatusInputDto input)
+        {
+            return EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Template)
@@ -479,27 +569,27 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
                     IncludePastObjectives = evaluation.Template.IncludePastObjectives,
                     Status = evaluation.Status
-                });
-
-            evaluationStatuses = evaluationStatuses
+                })
                 .OrderBy(evaluationStatus => evaluationStatus.Id)
                 .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
+        }
 
-            int count = 0;
+        protected FileDto CreateExcelPackage(string fileName, Action<ExcelPackage> creator)
+        {
+            var file = new FileDto(fileName, MimeTypeNames.ApplicationVndOpenxmlformatsOfficedocumentSpreadsheetmlSheet);
 
-            if (input.ApplyPagination)
+            using (var excelPackage = new ExcelPackage())
             {
-                count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
-
-                evaluationStatuses = evaluationStatuses
-                    .Skip(input.SkipCount)
-                    .Take(input.MaxResultCount);
+                creator(excelPackage);
+                SaveFileToCache(excelPackage, file);
             }
 
-            return new PagedResultDto<EvaluationStatusListItemDto>(
-                count,
-                await evaluationStatuses.ToListAsync()
-            );
+            return file;
+        }
+
+        protected void SaveFileToCache(ExcelPackage excelPackage, FileDto file)
+        {
+            CacheManager.GetCache(AppConsts.TempEvaluationStatusesFileName).Set(file.FileToken, excelPackage.GetAsByteArray(), new TimeSpan(0, 0, 1, 0)); // expire time is 1 min by default
         }
     }
 }

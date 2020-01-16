@@ -17,5 +17,7 @@
         public const string SectionObjectivesName = "Objetivos";
         public const string SectionNextObjectivesName = "Próximos Objetivos";
         public const int YearsLengthInDays = 365;
+        public const string TempEvaluationStatusesFileName = "TempEvaluationStatusesFile";
+
     }
 }
