@@ -259,7 +259,8 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     {
                         ObjectiveBinnacle currentObjectiveBinnacle = new ObjectiveBinnacle(
                             objectiveBinnacle.Text,
-                            currentQuestion.Id
+                            currentQuestion.Id,
+                            objectiveBinnacle.CreatorUserId
                         );
 
                         currentQuestion.Binnacle.Add(currentObjectiveBinnacle);

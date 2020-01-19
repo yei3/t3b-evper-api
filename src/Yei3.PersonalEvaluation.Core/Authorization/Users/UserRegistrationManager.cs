@@ -198,7 +198,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         existingUser.LastModifierUserId = AbpSession.UserId;
 
                         await AddOrRemoveUserRole(existingUser, isSupervisor, isManager);
-            
+
                         await _userManager.UpdateAsync(existingUser);
 
                         await _userManager.ChangePasswordAsync(existingUser, $"{existingUser.EmployeeNumber}_t3B");
