@@ -85,7 +85,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GT Objectives failed!");
+                    throw new UserFriendlyException("Import GT Objectives failed. Error en la fila {0}", i);
                 }
             }
             return true;
@@ -127,7 +127,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GD Objectives failed!");
+                    throw new UserFriendlyException("Import GD Objectives failed. Error en la fila {0}", i);
                 }
             }
             return true;
@@ -171,7 +171,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GZ Objectives failed!");
+                    throw new UserFriendlyException("Import GZ Objectives failed. Error en la fila {0}", i);
                 }
             }
             return true;
