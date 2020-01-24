@@ -10,6 +10,21 @@
                 "${workspaceFolder}/src/Yei3.PersonalEvaluation.Migrator/Yei3.PersonalEvaluation.Migrator.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/src/Yei3.PersonalEvaluation.Web.Host",
+                "--configuration",
+                "Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": "clean"
         }
     ]
 }
