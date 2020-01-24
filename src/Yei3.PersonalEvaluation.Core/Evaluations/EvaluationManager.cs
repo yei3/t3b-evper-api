@@ -152,6 +152,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     Status = evaluationQuestion.Status,
                     Name = evaluationQuestion.Text,
                     DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
+                    Deliverable = evaluationQuestion.NotEvaluableAnswer.Text,
                     Id = evaluationQuestion.Id,
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
