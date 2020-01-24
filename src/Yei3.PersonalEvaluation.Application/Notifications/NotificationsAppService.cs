@@ -211,5 +211,14 @@ namespace Yei3.PersonalEvaluation.Notifications
             await _emailSender.SendAsync(mail);
 
         }
+
+        public async Task Publish_SentReopenedUserNotification(SentReopenedNotificationData dto)
+        {
+
+            User user = await UserManager.GetUserByIdAsync(dto.UserId);
+            UserIdentifier targetUserId = new UserIdentifier(user.TenantId, user.Id);
+            await _notificationPublisher.PublishAsync("GeneralNotification", new SentGeneralUserNotificationData("Atención", "Se ha reabierto el siguiente objetivo: '" + dto.ObjectiveName + "'"), userIds: new[] { targetUserId });
+
+        }
     }
 }

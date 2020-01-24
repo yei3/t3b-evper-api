@@ -154,6 +154,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     DeliveryDate = evaluationQuestion.NotEvaluableAnswer.CommitmentTime,
                     Deliverable = evaluationQuestion.NotEvaluableAnswer.Text,
                     Id = evaluationQuestion.Id,
+                    UserId = evaluationQuestion.Evaluation.UserId,
                     Binnacle = evaluationQuestion.Binnacle.Select(objectiveBinnacle => new ObjectiveBinnacleValueObject
                     {
                         Id = objectiveBinnacle.Id,
