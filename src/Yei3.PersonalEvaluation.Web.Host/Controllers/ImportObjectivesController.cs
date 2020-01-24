@@ -1,32 +1,44 @@
-using System.Threading.Tasks;
-using System;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Abp.Application.Services;
 using Abp.BackgroundJobs;
 using Abp.UI;
+using Abp.Runtime.Session;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
-using Yei3.PersonalEvaluation.Controllers;
+using Yei3.PersonalEvaluation.Authorization.Roles;
+using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Core.Evaluations.SalesObjectives;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 {
     [Route("api/[controller]")]
-    public class ImportObjectivesController : PersonalEvaluationControllerBase
+    public class ImportObjectivesController : ApplicationService
     {
+        private readonly UserManager _userManager;
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly SalesObjectivesManager _salesObjectivesManager;
 
-        public ImportObjectivesController(IBackgroundJobManager backgroundJobManager, SalesObjectivesManager salesObjectivesManager)
+        public ImportObjectivesController(UserManager userManager, IBackgroundJobManager backgroundJobManager, SalesObjectivesManager salesObjectivesManager)
         {
+            _userManager = userManager;
             _backgroundJobManager = backgroundJobManager;
             _salesObjectivesManager = salesObjectivesManager;
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportObjectivesAction(string emailAddress, [FromForm]IFormFile file)
+        public async Task ImportObjectivesAction(string emailAddress, [FromForm]IFormFile file)
         {
             string filePath = Path.GetTempFileName();
+
+            User administratorUser = await _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            if (!await _userManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
+            {
+                throw new UserFriendlyException(401, $"Usuario {administratorUser.FullName} no es un Administrador.");
+            }
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -38,17 +50,17 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
 
-                await importGTObjectives(package.Workbook.Worksheets["Indicadores GT"]);
+                var importGTObjectivesTask = ImportGTObjectivesAsync(package.Workbook.Worksheets["Indicadores GT"]);
+                var importGDObjectivesTask = ImportGDObjectivesAsync(package.Workbook.Worksheets["Indicadores GD"]);
+                var importGZObjectivesTask = ImportGZObjectivesAsync(package.Workbook.Worksheets["Indicadores GZ"]);
 
-                await importGDObjectives(package.Workbook.Worksheets["Indicadores GD"]);
-
-                await importGZObjectives(package.Workbook.Worksheets["Indicadores GZ"]);
-
-                return Ok();
+                await importGTObjectivesTask;
+                await importGDObjectivesTask;
+                await importGZObjectivesTask;
             }
         }
 
-        internal async Task<bool> importGTObjectives(ExcelWorksheet worksheet)
+        internal async Task ImportGTObjectivesAsync(ExcelWorksheet worksheet)
         {
             int rowCount = worksheet.Dimension.Rows;
                 
@@ -85,13 +97,12 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GT Objectives failed. Error en la fila {0}", i);
+                    throw new UserFriendlyException(400, $"Import GT Objectives failed. Error en la fila {row}");
                 }
             }
-            return true;
         }
 
-        internal async Task<bool> importGDObjectives(ExcelWorksheet worksheet)
+        internal async Task ImportGDObjectivesAsync(ExcelWorksheet worksheet)
         {
             int rowCount = worksheet.Dimension.Rows;
                 
@@ -127,13 +138,12 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GD Objectives failed. Error en la fila {0}", i);
+                    throw new UserFriendlyException(400, $"Import GD Objectives failed. Error en la fila {row}");
                 }
             }
-            return true;
         }
 
-        internal async Task<bool> importGZObjectives(ExcelWorksheet worksheet)
+        internal async Task ImportGZObjectivesAsync(ExcelWorksheet worksheet)
         {
             int rowCount = worksheet.Dimension.Rows;
                 
@@ -171,26 +181,40 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException("Import GZ Objectives failed. Error en la fila {0}", i);
+                    throw new UserFriendlyException(400, $"Import GZ Objectives failed. Error en la fila {row}");
                 }
             }
-            return true;
         }
 
         internal static long parseToLong(string number)
         {
-            if (long.TryParse(number, out long x))
-                return x;
-            else
-                return 0;
+            try
+            {
+                if (long.TryParse(number, out long x))
+                    return x;
+                else
+                    return 0;
+            }
+            catch (System.Exception)
+            {
+                throw new UserFriendlyException(400, $"Import Objectives Parse failed");
+            }
+            
         }
 
         internal static decimal parseToDecimal(string number)
         {
-            if (decimal.TryParse(number, out decimal x))
-                return x;
-            else
-                return 0;
+            try
+            {
+                if (decimal.TryParse(number, out decimal x))
+                    return x;
+                else
+                    return 0;
+            }
+            catch (System.Exception)
+            {
+                throw new UserFriendlyException(400, $"Import Objectives Parse failed");
+            }
         }
     }
 }
