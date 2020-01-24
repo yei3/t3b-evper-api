@@ -97,7 +97,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException(400, $"Import GT Objectives failed. Error en la fila {row}");
+                    throw new UserFriendlyException(400, $"Falló la Carga de Objectivos de Ventas para GT. Error en la fila {row}");
                 }
             }
         }
@@ -138,7 +138,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException(400, $"Import GD Objectives failed. Error en la fila {row}");
+                    throw new UserFriendlyException(400, $"Falló la Carga de Objectivos de Ventas para GD. Error en la fila {row}");
                 }
             }
         }
@@ -181,7 +181,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 catch (Exception e)
                 {
                     Logger.Info(e.Message);
-                    throw new UserFriendlyException(400, $"Import GZ Objectives failed. Error en la fila {row}");
+                    throw new UserFriendlyException(400, $"Falló la Carga de Objectivos de Ventas para GZ. Error en la fila {row}");
                 }
             }
         }
