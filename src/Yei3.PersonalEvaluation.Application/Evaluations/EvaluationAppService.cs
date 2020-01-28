@@ -423,11 +423,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 return;
             }
 
-            if (DateTime.Now.IsBetween(evaluation.StartDateTime, evaluation.EndDateTime))
-            {
-                throw new UserFriendlyException("La evaluación está activa, por el momento no se puede eliminar.");
-            }
-
             await EvaluationRepository.DeleteAsync(evaluation);
         }
 
