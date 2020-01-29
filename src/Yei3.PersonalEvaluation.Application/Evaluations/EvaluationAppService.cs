@@ -37,11 +37,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
         private readonly ICacheManager CacheManager;
-        public EvaluationAppService(IAsyncQueryableExecuter asyncQueryableExecuter)
-        {
-            this.AsyncQueryableExecuter = asyncQueryableExecuter;
 
-        }
         private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
 
         public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, ICacheManager cacheManager)
@@ -121,7 +117,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     input.EndDate);
 
                 User immediateSupervisor =
-                    users.FirstOrDefault(currentUser => currentUser.JobDescription == user.ImmediateSupervisor);
+                    UserManager.Users.FirstOrDefault(currentUser => currentUser.JobDescription == user.ImmediateSupervisor);
 
                 currentEvaluation.SetRevision(
                     currentEvaluation.EvaluationId,
