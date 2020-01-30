@@ -543,7 +543,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         _ => _.Id,
                         _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
                             : _.Status == EvaluationStatus.Finished ? "Finalizada"
-                            : _.Status == EvaluationStatus.PendingReview ? "Pte. Revision"
+                            : _.Status == EvaluationStatus.PendingReview ? "Pte. Revisión"
                             : _.Status == EvaluationStatus.Validated ? "Cerrada"
                             : "No Iniciada"
                     );
