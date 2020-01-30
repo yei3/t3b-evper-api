@@ -3,20 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Collections.Extensions;
+using Abp.Linq.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
+using Abp.Linq;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
+using Abp.Runtime.Caching;
+using Yei3.PersonalEvaluation.Net.MimeTypes;
+using OfficeOpenXml;
+using Abp.Timing;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -25,19 +33,22 @@ namespace Yei3.PersonalEvaluation.Evaluations
     {
         private readonly IRepository<EvaluationTemplates.EvaluationTemplate, long> EvaluationTemplateRepository;
         private readonly IRepository<Evaluation, long> EvaluationRepository;
-        private readonly IRepository<Sections.Section, long> SectionRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
+        private readonly ICacheManager CacheManager;
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, IRepository<Sections.Section, long> sectionRepository)
+        private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
+
+        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, ICacheManager cacheManager)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
             UserManager = userManager;
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
-            SectionRepository = sectionRepository;
+            AsyncQueryableExecuter = NullAsyncQueryableExecuter.Instance;
+            CacheManager = cacheManager;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -106,7 +117,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     input.EndDate);
 
                 User immediateSupervisor =
-                    users.FirstOrDefault(currentUser => currentUser.JobDescription == user.ImmediateSupervisor);
+                    UserManager.Users.FirstOrDefault(currentUser => currentUser.JobDescription == user.ImmediateSupervisor);
 
                 currentEvaluation.SetRevision(
                     currentEvaluation.EvaluationId,
@@ -218,13 +229,14 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
                 if (!lastEvaluationNextObjectiveSectionId.HasValue || !currentEvaluationObjectivesSectionId.HasValue) continue;
 
-                IQueryable<EvaluationQuestions.NotEvaluableQuestion> questions = NotEvaluableQuestionRepository
+                IQueryable<EvaluationQuestions.NotEvaluableQuestion> notEvaluableQuestions = NotEvaluableQuestionRepository
                     .GetAll()
                     .Include(question => question.NotEvaluableAnswer)
+                    .Include(question => question.Binnacle)
                     .Where(question => question.SectionId == lastEvaluationNextObjectiveSectionId.Value)
                     .Where(question => question.EvaluationId == lastEvaluation.Id);
 
-                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in questions)
+                foreach (EvaluationQuestions.NotEvaluableQuestion notEvaluableQuestion in notEvaluableQuestions)
                 {
 
                     EvaluationQuestions.NotEvaluableQuestion currentQuestion = new EvaluationQuestions.NotEvaluableQuestion(
@@ -232,7 +244,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         notEvaluableQuestion.Text,
                         currentEvaluation.Id,
                         notEvaluableQuestion.NotEvaluableAnswer.CommitmentTime,
-                        EvaluationQuestionStatus.Unanswered)
+                        notEvaluableQuestion.Status)
                     {
                         SectionId = currentEvaluationObjectivesSectionId.Value
                     };
@@ -244,6 +256,16 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     );
 
                     await NotEvaluableQuestionRepository.InsertAsync(currentQuestion);
+                    foreach (ObjectiveBinnacle objectiveBinnacle in notEvaluableQuestion.Binnacle)
+                    {
+                        ObjectiveBinnacle currentObjectiveBinnacle = new ObjectiveBinnacle(
+                            objectiveBinnacle.Text,
+                            currentQuestion.Id,
+                            objectiveBinnacle.CreatorUserId
+                        );
+
+                        currentQuestion.Binnacle.Add(currentObjectiveBinnacle);
+                    }
                 }
             }
         }
@@ -280,48 +302,13 @@ namespace Yei3.PersonalEvaluation.Evaluations
             return Task.FromResult(evaluationsDto);
         }
 
-        public async Task Delete(long id)
-        {
-            Evaluation evaluation = EvaluationRepository.FirstOrDefault(id);
-
-            if (evaluation.IsNullOrDeleted())
-            {
-                return;
-            }
-
-            if (DateTime.Now.IsBetween(evaluation.StartDateTime, evaluation.EndDateTime))
-            {
-                throw new UserFriendlyException("La evaluación está activa, por el momento no se puede eliminar.");
-            }
-
-            await EvaluationRepository.DeleteAsync(evaluation);
-        }
-
-        public Task ClosingComment(EvaluationCloseDto evaluationClose)
-        {
-            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
-
-            Evaluation autoEvaluation = EvaluationRepository
-                .GetAll()
-                .Where(evaluations => evaluations.Term == evaluation.Term)
-                .Where(evaluations => evaluations.UserId == evaluation.UserId)
-                .OrderByDescending(evaluations => evaluations.CreationTime)
-                .FirstOrDefault(evaluations => evaluations.Id != evaluationClose.Id);
-
-            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted())
-            {
-                evaluation.ClosingComment = evaluationClose.Comment;
-                evaluation.IsActive = false;
-                autoEvaluation.IsActive = false;
-            }
-            return Task.CompletedTask;
-        }
-
         public async Task<EvaluationDto> Get(long id)
         {
             Evaluation resultEvaluation = await EvaluationRepository
                 .GetAll()
                 .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Revision)
+                .ThenInclude(revision => revision.ReviewerUser)
                 .Include(evaluation => evaluation.Questions)
                 .ThenInclude(evaluationQuestion => ((EvaluationMeasuredQuestion)evaluationQuestion).MeasuredAnswer)
                 .ThenInclude(answer => answer.EvaluationMeasuredQuestion)
@@ -345,7 +332,32 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             evaluationDto.Template.PurgeSubSections();
 
+            User evaluatorUser = resultEvaluation.Revision.ReviewerUser;
+
+            evaluationDto.EvaluatorFullName = evaluatorUser.FullName;
+
             return evaluationDto;
+        }
+
+        //TODO: Enpoint to return the period of a user by his last evaluations
+        public async Task<string> GetUserPeriod()
+        {
+            var userId = AbpSession.GetUserId();
+
+            var lastEvaluation = await EvaluationRepository
+                .GetAll()
+                .Where(evaluation => evaluation.UserId == userId)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .OrderByDescending(evaluation => evaluation.CreationTime)
+                .Select(evaluation => evaluation.CreationTime)
+                .FirstOrDefaultAsync();
+
+            if (lastEvaluation != null)
+            {
+
+            }
+
+            return "";
         }
 
         public async Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary()

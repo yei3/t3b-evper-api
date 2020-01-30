@@ -18,6 +18,9 @@ namespace Yei3.PersonalEvaluation.Report
         Task<IList<SalesCapabilitiesReportDto>> GetEvaluatorCapabilitiesSalesReport(AdministratorInputDto input);
         Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesReport(AdministratorInputDto input);
         Task<IList<CapabilitiesReportDto>> GetAdministratorCapabilitiesReport(AdministratorInputDto input);
+        Task<AdministratorObjectiveReportDto> GetAdministratorObjectivesSalesReport(AdministratorInputDto input);
+        Task<IList<SalesCapabilitiesReportDto>> GetAdministratorCapabilitiesSalesReport(AdministratorInputDto input);
         Task<EvaluationEmployeeDataDto> GetEvaluationEmployeeData(AdministratorInputDto input);
+        Task<EvaluationEmployeeDataDto> GetAdministratorEvaluationEmployeeData(AdministratorInputDto input);
     }
 }

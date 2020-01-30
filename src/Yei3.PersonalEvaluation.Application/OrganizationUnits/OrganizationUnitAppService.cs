@@ -14,20 +14,22 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
     using Abp.AutoMapper;
     using Yei3.PersonalEvaluation.Authorization.Roles;
     using Abp.UI;
-    using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
     using Yei3.PersonalEvaluation.Core.OrganizationUnit;
+    using Abp.Collections.Extensions;
 
     public class OrganizationUnitAppService : PersonalEvaluationAppServiceBase, IOrganizationUnitAppService
     {
         private readonly IRepository<OrganizationUnit, long> _repository;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
         private readonly IRepository<RegionOrganizationUnit, long> _regionOrganizationUnitRepository;
+        private readonly UserManager _userManager;
 
-        public OrganizationUnitAppService(IRepository<OrganizationUnit, long> repository, IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository, IRepository<RegionOrganizationUnit, long> regionOrganizationUnitRepository)
+        public OrganizationUnitAppService(IRepository<OrganizationUnit, long> repository, IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository, IRepository<RegionOrganizationUnit, long> regionOrganizationUnitRepository, UserManager userManager)
         {
             _repository = repository;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
             _regionOrganizationUnitRepository = regionOrganizationUnitRepository;
+            _userManager = userManager;
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllOrganizationUnits()
@@ -56,16 +58,24 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllAreaOrganizationUnits()
         {
-            List<AreaOrganizationUnit> organizationUnits = await _areaOrganizationUnitRepository.GetAllListAsync();
-            List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
-            return organizationUnitDtos;
+            IEnumerable<OrganizationUnitDto> areas = (await _areaOrganizationUnitRepository.GetAllListAsync())
+                .OfType<SalesAreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
+
+            areas = areas.Concat(
+               (await _areaOrganizationUnitRepository.GetAllListAsync())
+                .OfType<AreaOrganizationUnit>()
+                .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>())
+            );
+
+            return areas.Distinct().ToList();
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAllAreasOrganizationUnitsByRegionCode(string regionCode)
         {
             List<AreaOrganizationUnit> organizationUnits = (await _areaOrganizationUnitRepository
                 .GetAllListAsync())
-                .Where(organizationUnit => organizationUnit.Code.StartsWith(regionCode))
+                .WhereIf(regionCode != null, organizationUnit => organizationUnit.Code.StartsWith(regionCode))
                 .ToList();
             List<OrganizationUnitDto> organizationUnitDtos = organizationUnits.MapTo<List<OrganizationUnitDto>>();
             return organizationUnitDtos;
@@ -73,25 +83,34 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
 
         public async Task<ICollection<OrganizationUnitDto>> GetMyRegionOrganizationUnit()
         {
-            User administratorUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
-            List<Abp.Organizations.OrganizationUnit> organizationUnits = await UserManager.GetOrganizationUnitsAsync(administratorUser);
-            List<Abp.Organizations.OrganizationUnit> regions = new List<OrganizationUnit>();
-            foreach (Abp.Organizations.OrganizationUnit area in organizationUnits)
+            User currentUser = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            List<OrganizationUnitDto> regions = new List<OrganizationUnitDto>();
+
+            IEnumerable<string> regionCodes = (await UserManager.GetOrganizationUnitsAsync(currentUser))
+                .Select(organizationUnit => organizationUnit.Code.Substring(0, 5))
+                .Distinct();
+
+            foreach (string code in regionCodes)
             {
-                if (area.ParentId != null)
-                {
-                    regions.Add(_regionOrganizationUnitRepository.Get(area.ParentId.Value));
-                }
+                OrganizationUnitDto currentRegion = (await _regionOrganizationUnitRepository
+                    .SingleAsync(region => region.Code == code))
+                    .MapTo<OrganizationUnitDto>();
+
+                if (regions.Contains(currentRegion))
+                    continue;
+
+                regions.Add(currentRegion);
             }
-            List<OrganizationUnitDto> organizationUnitDtos = regions.MapTo<List<OrganizationUnitDto>>();
-            return organizationUnitDtos;
+
+            return regions;
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree()
         {
             User currentUser = await GetCurrentUserIfSupervisor();
 
-            IEnumerable<OrganizationUnitDto> areas =  (await UserManager.GetOrganizationUnitsAsync(currentUser))
+            IEnumerable<OrganizationUnitDto> areas = (await UserManager.GetOrganizationUnitsAsync(currentUser))
                 .OfType<SalesAreaOrganizationUnit>()
                 .Select(organizationUnit => organizationUnit.MapTo<OrganizationUnitDto>().AsSalesArea());
 
@@ -152,12 +171,12 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             return currentUser;
         }
 
-        public async Task<ICollection<UserFullNameDto>> GetUserTree()
+        public async Task<ICollection<UserFullNameAndJobDescriptionDto>> GetUserTree()
         {
             User currentUser = await GetCurrentUserIfSupervisor();
             List<User> subordinates = await UserManager.GetSubordinatesTree(currentUser);
 
-            return subordinates.MapTo<List<UserFullNameDto>>();
+            return subordinates.MapTo<List<UserFullNameAndJobDescriptionDto>>();
         }
 
         public async Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree()
@@ -186,6 +205,34 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
             }
 
             return regions;
+        }
+
+        public async Task<ICollection<AreaJobDescriptionDto>> GetAreasJobDescription(long? areaId)
+        {
+            List<AreaJobDescriptionDto> areasJobDescription = new List<AreaJobDescriptionDto>();
+
+            IEnumerable<AreaOrganizationUnit> areas = _areaOrganizationUnitRepository
+                .GetAll()
+                .WhereIf(areaId.HasValue, area => area.Id == areaId);
+
+            foreach (AreaOrganizationUnit area in areas)
+            {
+                AreaJobDescriptionDto areaJobDescription = new AreaJobDescriptionDto {
+                        AreaId = area.Id,
+                        JobDescriptions = new List<string>()
+                };
+                
+                List<User> users = await _userManager.GetUsersInOrganizationUnit(area);
+                
+                foreach (User user in users)
+                {
+                    areaJobDescription.JobDescriptions.AddIfNotContains(user.JobDescription);
+                }
+
+                areasJobDescription.Add(areaJobDescription);
+            }
+
+            return areasJobDescription;
         }
     }
 }

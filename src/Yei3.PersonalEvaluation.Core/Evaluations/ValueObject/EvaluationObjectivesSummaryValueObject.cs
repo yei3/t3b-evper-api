@@ -15,5 +15,6 @@ namespace Yei3.PersonalEvaluation.Evaluations.ValueObject
         public ICollection<ObjectiveBinnacleValueObject> Binnacle { get; set; }
         public bool isNotEvaluable { get; set; }
         public bool isNextObjective { get; set;}
+        public long UserId { get; set; }
     }
 }

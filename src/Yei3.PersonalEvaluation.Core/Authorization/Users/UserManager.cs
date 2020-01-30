@@ -17,7 +17,6 @@
     using Microsoft.EntityFrameworkCore;
     using System.Threading.Tasks;
     using System.Linq;
-    using Yei3.PersonalEvaluation.Core;
     using Yei3.PersonalEvaluation.Core.OrganizationUnit;
 
     public class UserManager : AbpUserManager<Role, User>
@@ -84,6 +83,13 @@
             }
 
             return result;
+        }
+        
+        public async Task<ICollection<User>> GetSubordinates(User rootUser)
+        {
+            return await Users
+                .Where(user => user.ImmediateSupervisor == rootUser.JobDescription)
+                .ToListAsync();
         }
     }
 }

@@ -42,7 +42,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
         public virtual DateTime StartDateTime { get; protected set; }
         public virtual DateTime EndDateTime { get; protected set; }
         public virtual ICollection<EvaluationQuestion> Questions { get; protected set; }
-        public bool IsActive { get; set; }
+
+        //* business: true by default 
+        public bool IsActive { get; set; } = true;
 
         public void SetRevision(long evaluationId, long reviewerUserId, DateTime revisionDateTime)
         {
@@ -72,6 +74,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
         public void ScheduleReview()
         {
             Status = EvaluationStatus.PendingReview;
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
         }
     }
 }

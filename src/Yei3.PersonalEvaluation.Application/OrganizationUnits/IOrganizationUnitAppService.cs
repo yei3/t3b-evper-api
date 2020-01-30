@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.Application.Services;
-using Yei3.PersonalEvaluation.Application.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 
 namespace Yei3.PersonalEvaluation.OrganizationUnits
@@ -17,6 +16,7 @@ namespace Yei3.PersonalEvaluation.OrganizationUnits
         Task<ICollection<OrganizationUnitDto>> GetAreasOrganizationUnitTree();
         Task<ICollection<OrganizationUnitDto>> GetRegionsOrganizationUnitTree();
         Task<ICollection<UserJobDescriptionDto>> GetUserJobDescriptionTree();
-        Task<ICollection<UserFullNameDto>> GetUserTree();
+        Task<ICollection<AreaJobDescriptionDto>> GetAreasJobDescription(long? areaId);
+        Task<ICollection<UserFullNameAndJobDescriptionDto>> GetUserTree();
     }
 }

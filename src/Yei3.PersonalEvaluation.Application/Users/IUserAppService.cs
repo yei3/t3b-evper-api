@@ -16,5 +16,7 @@ namespace Yei3.PersonalEvaluation.Users
         Task RecoverPassword(RecoverPasswordDto recoverPassword);
         Task<bool> IsUserSalesMan();
         Task<ICollection<string>> GetAllJobDescriptions();
+        Task<ICollection<UserAreaDto>> GetUsersByArea(long? areaId);
+        Task<ICollection<UserFullNameDto>> GetSubordinatesByUser(long userId);
     }
 }
