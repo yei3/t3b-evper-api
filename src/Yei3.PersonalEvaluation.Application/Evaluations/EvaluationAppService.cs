@@ -384,5 +384,197 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
             return await Task.FromResult(result);
         }
+
+        public async Task FinalizeEvaluation(EntityDto<long> input)
+        {
+            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(input.Id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException(typeof(Evaluation), evaluation.Id);
+            }
+
+            evaluation.FinishEvaluation();
+            evaluation.Activate();
+        }
+
+        public async Task Delete(long id)
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                return;
+            }
+
+            await EvaluationRepository.DeleteAsync(evaluation);
+        }
+
+        public Task ClosingComment(EvaluationCloseDto evaluationClose)
+        {
+            Evaluation evaluation = EvaluationRepository.FirstOrDefault(evaluationClose.Id);
+
+            Evaluation autoEvaluation = EvaluationRepository
+                .GetAll()
+                .Where(evaluations => evaluations.Term == evaluation.Term)
+                .Where(evaluations => evaluations.UserId == evaluation.UserId)
+                .OrderByDescending(evaluations => evaluations.CreationTime)
+                .FirstOrDefault(evaluations => evaluations.Id != evaluationClose.Id);
+
+            if (!evaluation.IsNullOrDeleted() && !autoEvaluation.IsNullOrDeleted())
+            {
+                evaluation.ClosingComment = evaluationClose.Comment;
+                evaluation.IsActive = false;
+                autoEvaluation.IsActive = false;
+            }
+            return Task.CompletedTask;
+        }
+
+        public async Task ReopenEvaluation(EntityDto<long> input)
+        {
+            Evaluation evaluation = await EvaluationRepository.FirstOrDefaultAsync(input.Id);
+
+            if (evaluation.IsNullOrDeleted())
+            {
+                throw new EntityNotFoundException(typeof(Evaluation), evaluation.Id);
+            }
+
+            evaluation.UnfinishEvaluation();
+            evaluation.Activate();
+        }
+
+        protected IQueryable<EvaluationStatusListItemDto> GetEvaluationStatusAsQueryable(EvaluationStatusInputDto input)
+        {
+            return EvaluationRepository
+                .GetAll()
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Template)
+                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
+                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
+                .Select(evaluation => new EvaluationStatusListItemDto
+                {
+                    Id = evaluation.Id,
+                    EmployeeNumber = evaluation.User.EmployeeNumber,
+                    EmployeeName = evaluation.User.Name,
+                    EmployeeSurname = evaluation.User.Surname,
+                    Area = evaluation.User.Area,
+                    Region = evaluation.User.Region,
+                    EvaluationName = evaluation.Name,
+                    IsAutoEvaluation = evaluation.Template.IsAutoEvaluation,
+                    IncludePastObjectives = evaluation.Template.IncludePastObjectives,
+                    Status = evaluation.Status
+                })
+                .OrderBy(evaluationStatus => evaluationStatus.Id)
+                .ThenBy(evaluationStatus => evaluationStatus.EmployeeName);
+        }
+
+        public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
+        {
+
+            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
+
+            int count = 0;
+
+            if (input.ApplyPagination)
+            {
+                count = await AsyncQueryableExecuter.CountAsync(evaluationStatuses);
+
+                evaluationStatuses = evaluationStatuses
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount);
+            }
+
+            return new PagedResultDto<EvaluationStatusListItemDto>(
+                count,
+                await evaluationStatuses.ToListAsync()
+            );
+        }
+
+        public FileDto GetEvaluationsStatusSheet(EvaluationStatusInputDto input)
+        {
+            IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
+            FileDto file = CreateExcelPackage($"EstatusEvaluaciones_{Clock.Now:yyyyMMdd_HH:mm}.xlsx", excelPackage =>
+                {
+                    var sheet = excelPackage.Workbook.Worksheets.Add("EstatusEvaluaciones");
+                    sheet.OutLineApplyStyle = true;
+
+                    string[] headerTexts = new string[] {
+                        "COLABORADOR",
+                        "NOMBRE",
+                        "APELLIDOS",
+                        "REGION",
+                        "AREA",
+                        "NOMBRE DE EVALUACION",
+                        "TIPO",
+                        "INCLUYE OBJETIVOS ANTERIORES",
+                        "EVALUACION",
+                        "ESTATUS"
+                    };
+
+                    for (int i = 0; i < headerTexts.Length; i++)
+                    {
+                        string headerText = headerTexts[i];
+
+                        sheet.Cells[1, i + 1].Value = headerText;
+                        sheet.Cells[1, i + 1].Style.Font.Bold = true;
+                    }
+
+                    AddExcelObjects(sheet, 2, evaluationStatuses.ToList(),
+                        _ => _.EmployeeNumber,
+                        _ => _.EmployeeName,
+                        _ => _.EmployeeSurname,
+                        _ => _.Region,
+                        _ => _.Area,
+                        _ => _.EvaluationName,
+                        _ => _.IsAutoEvaluation ? "AED" : "ED",
+                        _ => _.IncludePastObjectives ? "Incluye Objetivos Anteriores" : "Sin Objetivos Anteriores",
+                        _ => _.Id,
+                        _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
+                            : _.Status == EvaluationStatus.Finished ? "Finalizada"
+                            : _.Status == EvaluationStatus.PendingReview ? "Pte. Revision"
+                            : _.Status == EvaluationStatus.Validated ? "Cerrada"
+                            : "No Iniciada"
+                    );
+                });
+
+            return file;
+        }
+
+        // TODO abstraer todo esto en un XLSX manager que genere excels de cualquier colleccion
+        // Start Excel Stuff
+        protected void AddExcelObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
+        {
+            if (items.IsNullOrEmpty() || propertySelectors.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                for (var j = 0; j < propertySelectors.Length; j++)
+                {
+                    sheet.Cells[i + startRowIndex, j + 1].Value = propertySelectors[j](items[i]);
+                }
+            }
+        }
+        
+        protected FileDto CreateExcelPackage(string fileName, Action<ExcelPackage> creator)
+        {
+            var file = new FileDto(fileName, MimeTypeNames.ApplicationVndOpenxmlformatsOfficedocumentSpreadsheetmlSheet);
+
+            using (var excelPackage = new ExcelPackage())
+            {
+                creator(excelPackage);
+                SaveFileToCache(excelPackage, file);
+            }
+
+            return file;
+        }
+
+        protected void SaveFileToCache(ExcelPackage excelPackage, FileDto file)
+        {
+            CacheManager.GetCache(AppConsts.TempEvaluationStatusesFileName).Set(file.FileToken, excelPackage.GetAsByteArray(), new TimeSpan(0, 0, 1, 0)); // expire time is 1 min by default
+        }
+        // End Excel Stuff
     }
 }
