@@ -41,9 +41,9 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         public string Region { get; set; }
         public string ImmediateSupervisor { get; set; }
         public string SocialReason { get; set; }
-        public DateTime EntryDate { get; set; }
-        public DateTime ReassignDate { get; set; }
-        public DateTime BirthDate { get; set; }
+        public string EntryDate { get; set; }
+        public string ReassignDate { get; set; }
+        public string BirthDate { get; set; }
         public string Scholarship { get; set; }
         public string JobDescription { get; set; }
     }
