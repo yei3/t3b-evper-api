@@ -109,6 +109,16 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
+        public async Task<User> GetUserByUsername(string userName)
+        {
+            var user = await Repository.FirstOrDefaultAsync(x => x.UserName == userName);
+            if (user.IsNullOrDeleted())
+            {
+                throw new UserFriendlyException(404, $"El usuario no ha sido encontrado con ese número de empleado");
+            }
+            return user;
+        }
+
         public async Task<ListResultDto<RoleDto>> GetRoles()
         {
             var roles = await _roleRepository.GetAllListAsync();
