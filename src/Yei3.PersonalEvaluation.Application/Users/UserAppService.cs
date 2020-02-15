@@ -33,7 +33,7 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IRepository<Role> _roleRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
-
+        private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
 
         public UserAppService(
@@ -43,6 +43,7 @@ namespace Yei3.PersonalEvaluation.Users
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
             IEmailSender emailSender,
+            UserRegistrationManager userRegistrationManager,
             IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository
         )
             : base(repository)
@@ -52,6 +53,7 @@ namespace Yei3.PersonalEvaluation.Users
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
             _emailSender = emailSender;
+            _userRegistrationManager = userRegistrationManager;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
         }
 
@@ -335,6 +337,38 @@ namespace Yei3.PersonalEvaluation.Users
             return (await _userManager.GetSubordinates(currentUser))
                 .Where(user => !user.JobDescription.IsNullOrEmpty())
                 .MapTo<ICollection<UserFullNameDto>>();
+        }
+
+        public async Task<User> UpdateUserExtended(UserExtendedDto input)
+        {
+            try
+            {
+                return await _userRegistrationManager.ImportUserAsync(
+                    input.UserName,
+                    input.IsActive,
+                    input.MiddleName,
+                    input.LastName,
+                    input.Name,
+                    input.JobDescription,
+                    input.Area,
+                    input.Region,
+                    input.ImmediateSupervisor,
+                    input.SocialReason,
+                    input.IsManager,
+                    input.IsSupervisor,
+                    input.EntryDate,
+                    input.ReassignDate,
+                    input.BirthDate,
+                    input.Scholarship,
+                    input.EmailAddress,
+                    input.IsMale,
+                    input.IsSalesArea
+                );
+            }
+            catch (Exception)
+            {
+                throw new UserFriendlyException($"El usuario {input.UserName} no pudo ser no actualizado.");
+            }
         }
     }
 }
