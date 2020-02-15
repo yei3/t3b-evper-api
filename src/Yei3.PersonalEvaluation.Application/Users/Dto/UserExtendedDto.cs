@@ -12,31 +12,16 @@ namespace Yei3.PersonalEvaluation.Users.Dto
     [AutoMapFrom(typeof(User))]
     public class UserExtendedDto : EntityDto<long>
     {
-        [Required]
-        [StringLength(AbpUserBase.MaxUserNameLength)]
         public string UserName { get; set; }
-
-        [Required]
-        [StringLength(AbpUserBase.MaxNameLength)]
         public string Name { get; set; }
-
-        [Required]
-        [StringLength(AbpUserBase.MaxSurnameLength)]
-        public string MiddleName { get; set; }
-
-        [Required]
-        [StringLength(AbpUserBase.MaxSurnameLength)]
-        public string LastName { get; set; }
-
-        [Required]
+        public string FirstLastName { get; set; }
+        public string SecondLastName { get; set; }
+        public string FullName { get; set; }
         [EmailAddress]
         [StringLength(AbpUserBase.MaxEmailAddressLength)]
         public string EmailAddress { get; set; }
         public bool IsMale { get; set; }
         public bool IsActive { get; set; }
-        public bool IsManager { get; set; } = false;
-        public bool IsSupervisor { get; set; } = false;
-        public bool IsSalesArea { get; set; } = false;
         public string Area { get; set; }
         public string Region { get; set; }
         public string ImmediateSupervisor { get; set; }
@@ -46,5 +31,6 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         public string BirthDate { get; set; }
         public string Scholarship { get; set; }
         public string JobDescription { get; set; }
+        public string[] Roles { get; set; }
     }
 }

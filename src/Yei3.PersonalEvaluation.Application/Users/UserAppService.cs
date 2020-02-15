@@ -111,7 +111,7 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
-        public async Task<UserDto> GetUserByUsername(string employeeNumber)
+        public async Task<UserExtendedDto> GetUserByUsername(string employeeNumber)
         {
             var user = await Repository.FirstOrDefaultAsync(x => x.UserName == employeeNumber);
 
@@ -122,10 +122,10 @@ namespace Yei3.PersonalEvaluation.Users
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            var userDto = base.MapToEntityDto(user);
-            userDto.RoleNames = roles.ToArray();
+            var userExtendedDto = MapToEntityExtendedDto(user);
+            userExtendedDto.Roles = roles.ToArray();
 
-            return userDto;
+            return userExtendedDto;
         }
 
         public async Task<ListResultDto<RoleDto>> GetRoles()
@@ -219,7 +219,7 @@ namespace Yei3.PersonalEvaluation.Users
             user.SetNormalizedNames();
         }
 
-        protected override UserExte MapToEntityDto(User user)
+        protected override UserDto MapToEntityDto(User user)
         {
             List<Abp.Organizations.OrganizationUnit> organizationUnits = _userManager.GetOrganizationUnitsAsync(user).GetAwaiter().GetResult();
 
@@ -339,30 +339,62 @@ namespace Yei3.PersonalEvaluation.Users
                 .MapTo<ICollection<UserFullNameDto>>();
         }
 
+        internal UserExtendedDto MapToEntityExtendedDto(User user)
+        {
+            return new UserExtendedDto(){
+                Id = user.Id,
+                Name = user.Name,
+                UserName = user.UserName,
+                FirstLastName = user.Surname,
+                SecondLastName = user.Surname,
+                FullName = user.FullName,
+                EmailAddress = user.EmailAddress,
+                JobDescription = user.JobDescription,
+                Area = user.Area,
+                Region = user.Region,
+                ImmediateSupervisor = user.ImmediateSupervisor,
+                SocialReason = user.SocialReason,
+                EntryDate = user.EntryDate.ToShortDateString(),
+                ReassignDate = user.ReassignDate.ToString(),
+                BirthDate = user.BirthDate.ToShortDateString(),
+                Scholarship = user.Scholarship,
+                IsMale = user.IsMale
+            };
+        }
+
         public async Task<User> UpdateUserExtended(UserExtendedDto input)
         {
+            var isManager = false;
+            var isSupervisor = false;
+            
+            foreach (var rol in input.Roles)
+            {
+                if(rol == "Administrator") isManager = true;
+                if(rol == "Supervisor") isSupervisor = true;
+            }
+
             try
             {
                 return await _userRegistrationManager.ImportUserAsync(
                     input.UserName,
                     input.IsActive,
-                    input.MiddleName,
-                    input.LastName,
+                    input.FirstLastName,
+                    input.SecondLastName,
                     input.Name,
                     input.JobDescription,
                     input.Area,
                     input.Region,
                     input.ImmediateSupervisor,
                     input.SocialReason,
-                    input.IsManager,
-                    input.IsSupervisor,
+                    isManager,
+                    isSupervisor,
                     input.EntryDate,
                     input.ReassignDate,
                     input.BirthDate,
                     input.Scholarship,
                     input.EmailAddress,
                     input.IsMale,
-                    input.IsSalesArea
+                    false
                 );
             }
             catch (Exception)
