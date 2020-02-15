@@ -7,12 +7,12 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Yei3.PersonalEvaluation.Migrator/Yei3.PersonalEvaluation.Migrator.csproj"
+                "${workspaceFolder}/src/Yei3.PersonalEvaluation.Web.Host/Yei3.PersonalEvaluation.Web.Host.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish-release",
+            "label": "publish",
             "command": "dotnet",
             "type": "process",
             "args": [
