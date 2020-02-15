@@ -109,14 +109,21 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
-        public async Task<User> GetUserByUsername(string userName)
+        public async Task<UserDto> GetUserByUsername(string employeeNumber)
         {
-            var user = await Repository.FirstOrDefaultAsync(x => x.UserName == userName);
+            var user = await Repository.FirstOrDefaultAsync(x => x.UserName == employeeNumber);
+
             if (user.IsNullOrDeleted())
             {
                 throw new UserFriendlyException(404, $"El usuario no ha sido encontrado con ese número de empleado");
             }
-            return user;
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userDto = base.MapToEntityDto(user);
+            userDto.RoleNames = roles.ToArray();
+
+            return userDto;
         }
 
         public async Task<ListResultDto<RoleDto>> GetRoles()
@@ -210,13 +217,13 @@ namespace Yei3.PersonalEvaluation.Users
             user.SetNormalizedNames();
         }
 
-        protected override UserDto MapToEntityDto(User user)
+        protected override UserExte MapToEntityDto(User user)
         {
-            var roles = _roleManager.Roles.Where(r => user.Roles.Any(ur => ur.RoleId == r.Id)).Select(r => r.NormalizedName);
             List<Abp.Organizations.OrganizationUnit> organizationUnits = _userManager.GetOrganizationUnitsAsync(user).GetAwaiter().GetResult();
+
             var userDto = base.MapToEntityDto(user);
-            userDto.RoleNames = roles.ToArray();
             userDto.OrganizationUnits = organizationUnits.MapTo<List<OrganizationUnitDto>>();
+
             return userDto;
         }
 
