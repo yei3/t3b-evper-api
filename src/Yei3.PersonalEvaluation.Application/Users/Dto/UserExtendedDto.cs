@@ -23,7 +23,9 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         public bool IsMale { get; set; }
         public bool IsActive { get; set; }
         public string Area { get; set; }
+        public string AreaCode { get; set; }
         public string Region { get; set; }
+        public string RegionCode { get; set; }
         public string ImmediateSupervisor { get; set; }
         public string SocialReason { get; set; }
         public string EntryDate { get; set; }

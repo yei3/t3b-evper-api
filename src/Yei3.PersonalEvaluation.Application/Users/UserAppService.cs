@@ -35,6 +35,7 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IEmailSender _emailSender;
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
+        private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -44,7 +45,8 @@ namespace Yei3.PersonalEvaluation.Users
             IPasswordHasher<User> passwordHasher,
             IEmailSender emailSender,
             UserRegistrationManager userRegistrationManager,
-            IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository
+            IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository,
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository
         )
             : base(repository)
         {
@@ -55,6 +57,7 @@ namespace Yei3.PersonalEvaluation.Users
             _emailSender = emailSender;
             _userRegistrationManager = userRegistrationManager;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
+            _organizationUnitRepository = organizationUnitRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -111,7 +114,7 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
-        public async Task<UserExtendedDto> GetUserByUsername(string employeeNumber)
+        public async Task<UserExtendedDto> GetUserExtendedByUsername(string employeeNumber)
         {
             var user = await Repository.FirstOrDefaultAsync(x => x.UserName == employeeNumber);
 
@@ -124,6 +127,20 @@ namespace Yei3.PersonalEvaluation.Users
 
             var userExtendedDto = MapToEntityExtendedDto(user);
             userExtendedDto.Roles = roles.ToArray();
+
+            var areaCode = _areaOrganizationUnitRepository
+                .GetAll()
+                .Where(region => region.Parent.DisplayName.Contains(user.Region))
+                .Where(area => area.DisplayName.Contains(user.Area))
+                .Select(area => area.Code).FirstOrDefault();
+
+            var regionCode = _organizationUnitRepository
+                .GetAll()
+                .Where(region => region.DisplayName == user.Region)
+                .Select(region => region.Code).FirstOrDefault();
+
+            userExtendedDto.AreaCode = areaCode;
+            userExtendedDto.RegionCode = regionCode;
 
             return userExtendedDto;
         }
