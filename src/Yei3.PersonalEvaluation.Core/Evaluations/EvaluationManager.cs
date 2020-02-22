@@ -505,7 +505,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
                 });
             }
-        
 
             return collaboratorsPendingObjectivesSummary;
         }
