@@ -542,10 +542,11 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         _ => _.IncludePastObjectives ? "Incluye Objetivos Anteriores" : "Sin Objetivos Anteriores",
                         _ => _.Id,
                         _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
+                            : _.Status == EvaluationStatus.Pending ? "En proceso"
                             : _.Status == EvaluationStatus.Finished ? "Finalizada"
                             : _.Status == EvaluationStatus.PendingReview ? "Pte. Revisión"
                             : _.Status == EvaluationStatus.Validated ? "Cerrada"
-                            : "En proceso"
+                            : "No Iniciada"
                     );
                 });
 
