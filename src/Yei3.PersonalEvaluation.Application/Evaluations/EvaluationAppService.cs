@@ -545,7 +545,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                             : _.Status == EvaluationStatus.Finished ? "Finalizada"
                             : _.Status == EvaluationStatus.PendingReview ? "Pte. Revisión"
                             : _.Status == EvaluationStatus.Validated ? "Cerrada"
-                            : "No Iniciada"
+                            : "En proceso"
                     );
                 });
 
