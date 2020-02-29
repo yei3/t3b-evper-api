@@ -310,7 +310,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         private DateTime NormalizeDateTime(string dateString) // 07/02/2014
         {
-
             if (dateString.IsNullOrEmpty())
             {
                 return new DateTime(0);

@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
@@ -15,14 +10,20 @@ using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Runtime.Session;
 using Abp.UI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
 using Yei3.PersonalEvaluation.OrganizationUnit;
-using Abp.Collections.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace Yei3.PersonalEvaluation.Users
 {
@@ -371,12 +372,20 @@ namespace Yei3.PersonalEvaluation.Users
                 Region = user.Region,
                 ImmediateSupervisor = user.ImmediateSupervisor,
                 SocialReason = user.SocialReason,
-                EntryDate = user.EntryDate.ToShortDateString(),
-                ReassignDate = user.ReassignDate.ToString(),
-                BirthDate = user.BirthDate.ToShortDateString(),
+                EntryDate = user.EntryDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                ReassignDate = GetShortDateString(user.ReassignDate),
+                BirthDate = user.BirthDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
                 Scholarship = user.Scholarship,
                 IsMale = user.IsMale
             };
+        }
+
+        internal string GetShortDateString(DateTime? date)
+        {
+            if(date.Value == null)
+                return new DateTime(0).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+            return date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
         }
 
         public async Task<User> UpdateUserExtended(UserExtendedDto input)
