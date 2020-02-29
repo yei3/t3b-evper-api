@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
 using Abp.Authorization.Users;
 using Abp.AutoMapper;
 using Yei3.PersonalEvaluation.Authorization.Users;
-using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 
 namespace Yei3.PersonalEvaluation.Users.Dto
 {
@@ -17,6 +15,7 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         public string FirstLastName { get; set; }
         public string SecondLastName { get; set; }
         public string FullName { get; set; }
+
         [EmailAddress]
         [StringLength(AbpUserBase.MaxEmailAddressLength)]
         public string EmailAddress { get; set; }

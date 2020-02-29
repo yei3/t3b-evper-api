@@ -155,8 +155,12 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     //! This must be implement on a better way or is the only one?
                     User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
 
-                    if (!status) {
+                    if (!status)
+                    {
                         await _userManager.DeleteAsync(existingUser);
+
+                        await unitOfWork.CompleteAsync();
+
                         return user;
                     }
 
