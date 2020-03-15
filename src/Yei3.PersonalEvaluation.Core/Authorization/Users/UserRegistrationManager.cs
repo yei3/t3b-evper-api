@@ -191,6 +191,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.ReassignDate = user.ReassignDate;
                     existingUser.Scholarship = user.Scholarship;
                     existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
+                    existingUser.Name = user.Name;
+                    existingUser.Surname = user.Surname;
 
                     //! Just for deleted users
                     if (existingUser.IsDeleted)
