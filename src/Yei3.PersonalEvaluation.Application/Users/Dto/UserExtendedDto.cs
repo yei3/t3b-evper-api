@@ -20,7 +20,7 @@ namespace Yei3.PersonalEvaluation.Users.Dto
         [StringLength(AbpUserBase.MaxEmailAddressLength)]
         public string EmailAddress { get; set; }
         public bool IsMale { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
         public string Area { get; set; }
         public string AreaCode { get; set; }
         public string Region { get; set; }
