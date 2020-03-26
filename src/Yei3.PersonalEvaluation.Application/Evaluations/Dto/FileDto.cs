@@ -1,8 +1,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Abp.AutoMapper;
+using Yei3.PersonalEvaluation.ExcelExport;
 
 namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
+    [AutoMapFrom(typeof(FileValueObject))]
     public class FileDto
     {
         [Required]

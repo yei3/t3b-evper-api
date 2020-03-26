@@ -15,9 +15,9 @@
         public const string SectionCapability = "competencias";
         public const string SectionJobCapability = "competencias del puesto";
         public const string SectionObjectivesName = "Objetivos";
+        public const string SectionEvaluatedObjectivesName = "Objetivos Evaluados";
         public const string SectionNextObjectivesName = "Próximos Objetivos";
         public const int YearsLengthInDays = 365;
         public const string TempEvaluationStatusesFileName = "TempEvaluationStatusesFile";
-
     }
 }

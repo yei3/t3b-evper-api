@@ -21,10 +21,9 @@ using Yei3.PersonalEvaluation.Binnacle;
 using Yei3.PersonalEvaluation.Evaluations.Dto;
 using Yei3.PersonalEvaluation.Evaluations.EvaluationQuestions;
 using Yei3.PersonalEvaluation.Evaluations.Questions;
-using Abp.Runtime.Caching;
-using Yei3.PersonalEvaluation.Net.MimeTypes;
-using OfficeOpenXml;
 using Abp.Timing;
+using Yei3.PersonalEvaluation.ExcelExport;
+using System.Globalization;
 
 namespace Yei3.PersonalEvaluation.Evaluations
 {
@@ -35,12 +34,12 @@ namespace Yei3.PersonalEvaluation.Evaluations
         private readonly IRepository<Evaluation, long> EvaluationRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> OrganizationUnitRepository;
         private readonly UserManager UserManager;
+        private readonly IExcelExportManager ExcelExportManager;
         private readonly IRepository<EvaluationQuestions.NotEvaluableQuestion, long> NotEvaluableQuestionRepository;
-        private readonly ICacheManager CacheManager;
 
         private IAsyncQueryableExecuter AsyncQueryableExecuter { get; set; }
 
-        public EvaluationAppService(IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository, ICacheManager cacheManager)
+        public EvaluationAppService(IExcelExportManager excelExportManager, IRepository<EvaluationTemplates.EvaluationTemplate, long> evaluationTemplateRepository, IRepository<Evaluation, long> evaluationRepository, UserManager userManager, IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository, IRepository<EvaluationQuestions.NotEvaluableQuestion, long> notEvaluableQuestionRepository)
         {
             EvaluationTemplateRepository = evaluationTemplateRepository;
             EvaluationRepository = evaluationRepository;
@@ -48,7 +47,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
             OrganizationUnitRepository = organizationUnitRepository;
             NotEvaluableQuestionRepository = notEvaluableQuestionRepository;
             AsyncQueryableExecuter = NullAsyncQueryableExecuter.Instance;
-            CacheManager = cacheManager;
+            ExcelExportManager = excelExportManager;
         }
 
         public async Task ApplyEvaluationTemplate(CreateEvaluationDto input)
@@ -505,7 +504,10 @@ namespace Yei3.PersonalEvaluation.Evaluations
         public FileDto GetEvaluationsStatusSheet(EvaluationStatusInputDto input)
         {
             IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
-            FileDto file = CreateExcelPackage($"EstatusEvaluaciones_{Clock.Now:yyyyMMdd_HH:mm}.xlsx", excelPackage =>
+            FileValueObject file = ExcelExportManager.CreateExcelPackage(
+                AppConsts.TempEvaluationStatusesFileName,
+                $"EstatusEvaluaciones_{Clock.Now:yyyyMMdd_HH:mm}.xlsx",
+                excelPackage =>
                 {
                     var sheet = excelPackage.Workbook.Worksheets.Add("EstatusEvaluaciones");
                     sheet.OutLineApplyStyle = true;
@@ -531,7 +533,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         sheet.Cells[1, i + 1].Style.Font.Bold = true;
                     }
 
-                    AddExcelObjects(sheet, 2, evaluationStatuses.ToList(),
+                    ExcelExportManager.AddExcelObjects(sheet, 2, evaluationStatuses.ToList(),
                         _ => _.EmployeeNumber,
                         _ => _.EmployeeName,
                         _ => _.EmployeeSurname,
@@ -549,44 +551,195 @@ namespace Yei3.PersonalEvaluation.Evaluations
                     );
                 });
 
-            return file;
+            return file.MapTo<FileDto>();
         }
 
-        // TODO abstraer todo esto en un XLSX manager que genere excels de cualquier colleccion
-        // Start Excel Stuff
-        protected void AddExcelObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
+        public async Task<PagedResultDto<EvaluationResultListItemDto>> GetEvaluationsResult(EvaluationResultInputDto input)
         {
-            if (items.IsNullOrEmpty() || propertySelectors.IsNullOrEmpty())
+            IQueryable<EvaluationResultListItemDto> evaluationResults = GetEvaluationsResultAsQueryable(input);
+
+            int count = 0;
+
+            if (input.ApplyPagination)
             {
-                return;
+                count = await AsyncQueryableExecuter.CountAsync(evaluationResults);
+
+                evaluationResults = evaluationResults
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount);
             }
 
-            for (var i = 0; i < items.Count; i++)
-            {
-                for (var j = 0; j < propertySelectors.Length; j++)
+            return new PagedResultDto<EvaluationResultListItemDto>(
+                count,
+                await evaluationResults.ToListAsync()
+            );
+        }
+
+        public FileDto GetEvaluationsResultSheet(EvaluationResultInputDto input)
+        {
+            IQueryable<EvaluationResultListItemDto> evaluationStatuses = GetEvaluationsResultAsQueryable(input);
+            FileValueObject file = ExcelExportManager.CreateExcelPackage(
+                AppConsts.TempEvaluationStatusesFileName,
+                $"ResultadosEvaluaciones_{Clock.Now:yyyyMMdd_HH:mm}.xlsx",
+                excelPackage =>
                 {
-                    sheet.Cells[i + startRowIndex, j + 1].Value = propertySelectors[j](items[i]);
-                }
-            }
+                    var sheet = excelPackage.Workbook.Worksheets.Add("ResultadosEvaluaciones");
+                    sheet.OutLineApplyStyle = true;
+
+                    string[] headerTexts = new string[] {
+                        "Num. Empleado",
+                        "Periodo",
+                        "% Objetivos Logrados",
+                        "% Excede Requerimiento",
+                        "% Cumple Requerimiento",
+                        "% Insatisfactorio",
+                        "% Numero de Objetivos Actuales",
+                        "Evaluacion Global"
+                    };
+
+                    for (int i = 0; i < headerTexts.Length; i++)
+                    {
+                        string headerText = headerTexts[i];
+
+                        sheet.Cells[1, i + 1].Value = headerText;
+                        sheet.Cells[1, i + 1].Style.Font.Bold = true;
+                    }
+
+                    ExcelExportManager.AddExcelObjects(sheet, 2, evaluationStatuses.ToList(),
+                        _ => _.EmployeeNumber,
+                        _ => _.Period,
+                        _ => $"{_.AchievedObjectivesPercent}:0.00",
+                        _ => $"{_.ExceededRequirementPercent}:0.00",
+                        _ => $"{_.CompletedRequirementPercent}:0.00",
+                        _ => $"{_.UnsatisfactoryRequirementPercent}:0.00",
+                        _ => _.CurrentObjectivesCount,
+                        _ => _.GlobalEvaluationsCount
+                    );
+                });
+
+            return file.MapTo<FileDto>();
         }
-        
-        protected FileDto CreateExcelPackage(string fileName, Action<ExcelPackage> creator)
+
+        protected IQueryable<EvaluationResultListItemDto> GetEvaluationsResultAsQueryable(EvaluationResultInputDto input)
         {
-            var file = new FileDto(fileName, MimeTypeNames.ApplicationVndOpenxmlformatsOfficedocumentSpreadsheetmlSheet);
+            IQueryable<EvaluationResultListItemDto> salesUsers = EvaluationRepository
+                .GetAll()
+                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.StartDateTime >= input.StartDateTime.Value)
+                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.StartDateTime <= input.EndDateTime.Value)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => !evaluation.Template.IncludePastObjectives)
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Questions)
+                .Include(evaluation => evaluation.Template)
+                .Select(evaluation => new EvaluationResultListItemDto
+                {
+                    Id = evaluation.Id,
+                    EmployeeNumber = evaluation.User.UserName,
+                    Period = evaluation.StartDateTime.Month <= 2
+                        ? $"{evaluation.StartDateTime.Year - 1}-02"
+                        : evaluation.StartDateTime.Month > 2 && evaluation.StartDateTime.Month < 9
+                        ? $"{evaluation.StartDateTime.Year}-01"
+                        : $"{evaluation.StartDateTime.Year}-02",
+                    GlobalEvaluationsCount =
+                        (decimal.Multiply(
+                            decimal.Divide(
+                                evaluation.Questions
+                                .OfType<EvaluationMeasuredQuestion>()
+                                .Where(question => question.MeasuredQuestion.Relation == MeasuredQuestionRelation.Equals
+                                    ? question.MeasuredAnswer.Real == question.Expected
+                                    : question.MeasuredQuestion.Relation == MeasuredQuestionRelation.Higher
+                                        ? question.MeasuredAnswer.Real > question.Expected
+                                        : question.MeasuredQuestion.Relation == MeasuredQuestionRelation.HigherOrEquals
+                                            ? question.MeasuredAnswer.Real >= question.Expected
+                                            : question.MeasuredQuestion.Relation == MeasuredQuestionRelation.Lower
+                                                ? question.MeasuredAnswer.Real < question.Expected
+                                                : question.MeasuredQuestion.Relation == MeasuredQuestionRelation.LowerOrEquals
+                                                    ? question.MeasuredAnswer.Real <= question.Expected
+                                                    : false)
+                                .Count(), 9m
+                        ), 0.4m)
+                        +
+                        decimal.Multiply(
+                            decimal.Divide(
+                                evaluation.Questions
+                                .OfType<EvaluationUnmeasuredQuestion>()
+                                .Where(question => question.UnmeasuredQuestion.Section.ParentSection.Name.StartsWith(AppConsts.SectionJobCapability, StringComparison.CurrentCultureIgnoreCase))
+                                .Where(question => question.UnmeasuredAnswer.Action == "true")
+                                .Count(), 11
+                            ), 0.3m
+                        )
+                        +
+                        decimal.Multiply(
+                            decimal.Divide(
+                                evaluation.Questions
+                                .OfType<EvaluationUnmeasuredQuestion>()
+                                .Where(question => question.UnmeasuredQuestion.Section.ParentSection.Name.StartsWith(AppConsts.Section3bCulture, StringComparison.CurrentCultureIgnoreCase))
+                                .Where(question => question.UnmeasuredAnswer.Action == "true")
+                                .Count(), 10
+                            ), 0.3m
+                        )
+                    ) * 100m
+                });
 
-            using (var excelPackage = new ExcelPackage())
-            {
-                creator(excelPackage);
-                SaveFileToCache(excelPackage, file);
-            }
+            IQueryable<EvaluationResultListItemDto> nonSalesUsers = EvaluationRepository
+                .GetAll()
+                .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.StartDateTime >= input.StartDateTime.Value)
+                .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.StartDateTime <= input.EndDateTime.Value)
+                .Where(evaluation => !evaluation.Template.IsAutoEvaluation)
+                .Where(evaluation => evaluation.Template.IncludePastObjectives)
+                .Include(evaluation => evaluation.User)
+                .Include(evaluation => evaluation.Questions)
+                .Include(evaluation => evaluation.Template)
+                .Select(evaluation => new EvaluationResultListItemDto
+                {
+                    Id = evaluation.Id,
+                    EmployeeNumber = evaluation.User.UserName,
+                    Period = evaluation.StartDateTime.Month <= 2
+                        ? $"{evaluation.StartDateTime.Year - 1}-02"
+                        : evaluation.StartDateTime.Month > 2 && evaluation.StartDateTime.Month < 9
+                        ? $"{evaluation.StartDateTime.Year}-01"
+                        : $"{evaluation.StartDateTime.Year}-02",
+                    AchievedObjectivesPercent =
+                        evaluation.Questions
+                            .OfType<EvaluationQuestions.NotEvaluableQuestion>()
+                            .Where(question => question.Section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                            .Count() == 0
+                            ? 0
+                            : decimal.Divide(
+                                evaluation.Questions
+                                    .OfType<EvaluationQuestions.NotEvaluableQuestion>()
+                                    .Where(question => question.Status == EvaluationQuestionStatus.Validated)
+                                    .Count(),
+                                evaluation.Questions
+                                    .OfType<EvaluationQuestions.NotEvaluableQuestion>()
+                                    .Where(question => question.Section.ParentSection.Name.StartsWith(AppConsts.SectionObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                                    .Count()) * 100m,
+                    ExceededRequirementPercent = decimal.Divide(
+                        evaluation.Questions
+                        .OfType<EvaluationUnmeasuredQuestion>()
+                        .Where(question => question.UnmeasuredAnswer.Text == "+100")
+                        .Count() * 100m, 30
+                    ),
+                    CompletedRequirementPercent = decimal.Divide(
+                        evaluation.Questions
+                        .OfType<EvaluationUnmeasuredQuestion>()
+                        .Where(question => question.UnmeasuredAnswer.Text == "71-99")
+                        .Count() * 100m, 30
+                    ),
+                    UnsatisfactoryRequirementPercent = decimal.Divide(
+                        evaluation.Questions
+                        .OfType<EvaluationUnmeasuredQuestion>()
+                        .Where(question => question.UnmeasuredAnswer.Text == "-70")
+                        .Count() * 100m, 30
+                    ),
+                    CurrentObjectivesCount = evaluation.Questions
+                        .OfType<EvaluationQuestions.NotEvaluableQuestion>()
+                        .Where(question => question.Section.ParentSection.Name.StartsWith(AppConsts.SectionNextObjectivesName, StringComparison.CurrentCultureIgnoreCase))
+                        .Count()
 
-            return file;
+                });
+
+            return nonSalesUsers.Union(salesUsers);
         }
-
-        protected void SaveFileToCache(ExcelPackage excelPackage, FileDto file)
-        {
-            CacheManager.GetCache(AppConsts.TempEvaluationStatusesFileName).Set(file.FileToken, excelPackage.GetAsByteArray(), new TimeSpan(0, 0, 1, 0)); // expire time is 1 min by default
-        }
-        // End Excel Stuff
     }
 }

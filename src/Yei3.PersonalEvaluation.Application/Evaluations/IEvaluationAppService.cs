@@ -18,5 +18,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
         Task<ICollection<AdministratorEvaluationSummaryDto>> GetAdministratorEvaluationSummary();
         Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input);
         FileDto GetEvaluationsStatusSheet(EvaluationStatusInputDto input);
+        Task<PagedResultDto<EvaluationResultListItemDto>> GetEvaluationsResult(EvaluationResultInputDto input);
+        FileDto GetEvaluationsResultSheet(EvaluationResultInputDto input);
     }
 }

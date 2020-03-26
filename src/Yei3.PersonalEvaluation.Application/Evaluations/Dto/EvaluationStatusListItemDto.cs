@@ -1,5 +1,4 @@
 using Abp.Application.Services.Dto;
-using Yei3.PersonalEvaluation.Evaluations;
 
 namespace Yei3.PersonalEvaluation.Evaluations.Dto
 {
