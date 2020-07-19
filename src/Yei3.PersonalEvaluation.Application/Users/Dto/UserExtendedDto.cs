@@ -12,8 +12,7 @@ namespace Yei3.PersonalEvaluation.Users.Dto
     {
         public string UserName { get; set; }
         public string Name { get; set; }
-        public string FirstLastName { get; set; }
-        public string SecondLastName { get; set; }
+        public string LastName { get; set; }
         public string FullName { get; set; }
 
         [EmailAddress]

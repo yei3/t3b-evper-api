@@ -87,8 +87,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public async Task<User> ImportUserAsync (
             string employeeNumber,
             bool status,
-            string firstLastName,
-            string secondLastName,
+            string lastName,
             string name,
             string jobDescription,
             string area,
@@ -115,7 +114,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     EmployeeNumber = employeeNumber,
                     UserName = employeeNumber,
                     IsActive = status,
-                    Surname = $"{firstLastName} {secondLastName}",
+                    Surname = lastName,
                     Name = name,
                     JobDescription = jobDescription,
                     Area = area,
