@@ -166,7 +166,9 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                     // Punto 4 PBI 1019
                     var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
-                        uou => uou.UserId == existingUser.Id
+                        uou => (
+                            uou.OrganizationUnitId == organizationUnit.Id && uou.UserId == existingUser.Id
+                        )
                     );
 
                     if (userOrganizationUnit.IsNullOrDeleted())
