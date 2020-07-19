@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
+- 1145
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -14,7 +14,7 @@ variables:
 
 steps:
 - task: UseDotNet@2 
-  displayName: ".NET Core .1 LTS"
+  displayName: ".NET Core 2.1 LTS"
   inputs:
     packageType: 'sdk'
     version: '2.1.x'
