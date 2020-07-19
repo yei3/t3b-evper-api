@@ -163,11 +163,11 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         return user;
                     }
 
-                    // Punto 4 PBI 1019
-                    var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
-                        uou => (
-                            uou.OrganizationUnitId == organizationUnit.Id && uou.UserId == existingUser.Id
-                        )
+                    var userOrganizationUnits = _userOrganizationUnitRepository.GetAllList(
+                        uou => uou.UserId == existingUser.Id
+                    );
+                    var userOrganizationUnit = userOrganizationUnits.FirstOrDefault(
+                        uou => uou.OrganizationUnitId == organizationUnit.Id
                     );
 
                     if (userOrganizationUnit.IsNullOrDeleted())
@@ -181,6 +181,14 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     {
                         userOrganizationUnit.OrganizationUnitId = organizationUnit.Id;
                         await _userManager.SetOrganizationUnitsAsync(existingUser.Id, organizationUnit.Id);
+                    }
+
+                    foreach (var uou in userOrganizationUnits)
+                    {
+                        if (uou.Id != userOrganizationUnit.Id)
+                        {
+                            _userOrganizationUnitRepository.Delete(uou.Id);
+                        }
                     }
 
                     //* Adding excel data to existing user                    
