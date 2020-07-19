@@ -362,9 +362,8 @@ namespace Yei3.PersonalEvaluation.Users
             return new UserExtendedDto(){
                 Id = user.Id,
                 Name = user.Name,
+                LastName = user.Surname,
                 UserName = user.UserName,
-                FirstLastName = user.Surname,
-                SecondLastName = user.Surname,
                 FullName = user.FullName,
                 EmailAddress = user.EmailAddress,
                 JobDescription = user.JobDescription,
@@ -404,8 +403,7 @@ namespace Yei3.PersonalEvaluation.Users
                 return await _userRegistrationManager.ImportUserAsync(
                     input.UserName,
                     input.IsActive,
-                    input.FirstLastName,
-                    input.SecondLastName,
+                    input.LastName,
                     input.Name,
                     input.JobDescription,
                     input.Area,

@@ -482,7 +482,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
         {
-
             IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
 
             int count = 0;
