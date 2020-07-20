@@ -43,7 +43,7 @@ namespace Yei3.PersonalEvaluation.NotEvaluableAnswers
                             currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.Term)
                         .OrderByDescending(answer => answer.CreationTime)
                         .FirstOrDefault(answer => answer.NotEvaluableQuestion.Evaluation.UserId ==
-                                                   currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
+                                                    currentEvaluableAnswer.NotEvaluableQuestion.Evaluation.UserId);
                 }
             }
             

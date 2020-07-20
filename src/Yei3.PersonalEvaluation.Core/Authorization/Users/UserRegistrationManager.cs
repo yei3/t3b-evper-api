@@ -87,8 +87,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         public async Task<User> ImportUserAsync (
             string employeeNumber,
             bool status,
-            string firstLastName,
-            string secondLastName,
+            string lastName,
             string name,
             string jobDescription,
             string area,
@@ -115,7 +114,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     EmployeeNumber = employeeNumber,
                     UserName = employeeNumber,
                     IsActive = status,
-                    Surname = $"{firstLastName} {secondLastName}",
+                    Surname = lastName,
                     Name = name,
                     JobDescription = jobDescription,
                     Area = area,
@@ -155,14 +154,20 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     //! This must be implement on a better way or is the only one?
                     User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
 
-                    if (!status) {
+                    if (!status)
+                    {
                         await _userManager.DeleteAsync(existingUser);
+
+                        await unitOfWork.CompleteAsync();
+
                         return user;
                     }
 
-                    // Punto 4 PBI 1019
-                    var userOrganizationUnit = _userOrganizationUnitRepository.FirstOrDefault(
+                    var userOrganizationUnits = _userOrganizationUnitRepository.GetAllList(
                         uou => uou.UserId == existingUser.Id
+                    );
+                    var userOrganizationUnit = userOrganizationUnits.FirstOrDefault(
+                        uou => uou.OrganizationUnitId == organizationUnit.Id
                     );
 
                     if (userOrganizationUnit.IsNullOrDeleted())
@@ -178,6 +183,14 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                         await _userManager.SetOrganizationUnitsAsync(existingUser.Id, organizationUnit.Id);
                     }
 
+                    foreach (var uou in userOrganizationUnits)
+                    {
+                        if (uou.Id != userOrganizationUnit.Id)
+                        {
+                            _userOrganizationUnitRepository.Delete(uou.Id);
+                        }
+                    }
+
                     //* Adding excel data to existing user                    
                     existingUser.JobDescription = user.JobDescription;
                     existingUser.Area = user.Area;
@@ -187,6 +200,8 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.ReassignDate = user.ReassignDate;
                     existingUser.Scholarship = user.Scholarship;
                     existingUser.EmailAddress = email.IsNullOrEmpty() ? $"{user.UserName}@tiendas3b.com" : email;
+                    existingUser.Name = user.Name;
+                    existingUser.Surname = user.Surname;
 
                     //! Just for deleted users
                     if (existingUser.IsDeleted)
@@ -310,7 +325,6 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
         private DateTime NormalizeDateTime(string dateString) // 07/02/2014
         {
-
             if (dateString.IsNullOrEmpty())
             {
                 return new DateTime(0);

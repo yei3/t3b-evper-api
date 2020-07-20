@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
+using Abp.Collections.Extensions;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
@@ -15,14 +10,20 @@ using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Runtime.Session;
 using Abp.UI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
 using Yei3.PersonalEvaluation.OrganizationUnit;
-using Abp.Collections.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace Yei3.PersonalEvaluation.Users
 {
@@ -33,8 +34,9 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly IRepository<Role> _roleRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IEmailSender _emailSender;
-
+        private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
+        private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -43,7 +45,9 @@ namespace Yei3.PersonalEvaluation.Users
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
             IEmailSender emailSender,
-            IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository
+            UserRegistrationManager userRegistrationManager,
+            IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository,
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository
         )
             : base(repository)
         {
@@ -52,7 +56,9 @@ namespace Yei3.PersonalEvaluation.Users
             _roleRepository = roleRepository;
             _passwordHasher = passwordHasher;
             _emailSender = emailSender;
+            _userRegistrationManager = userRegistrationManager;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
+            _organizationUnitRepository = organizationUnitRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -107,6 +113,37 @@ namespace Yei3.PersonalEvaluation.Users
             {
                 throw new UserFriendlyException(e.Message);
             }
+        }
+
+        public async Task<UserExtendedDto> GetUserExtendedByUsername(string employeeNumber)
+        {
+            var user = await Repository.FirstOrDefaultAsync(x => x.UserName == employeeNumber);
+
+            if (user.IsNullOrDeleted())
+            {
+                throw new UserFriendlyException(404, $"El usuario no ha sido encontrado con ese número de empleado");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userExtendedDto = MapToEntityExtendedDto(user);
+            userExtendedDto.Roles = roles.ToArray();
+
+            var areaCode = _areaOrganizationUnitRepository
+                .GetAll()
+                .Where(region => region.Parent.DisplayName.Contains(user.Region))
+                .Where(area => area.DisplayName.Contains(user.Area))
+                .Select(area => area.Code).FirstOrDefault();
+
+            var regionCode = _organizationUnitRepository
+                .GetAll()
+                .Where(region => region.DisplayName == user.Region)
+                .Select(region => region.Code).FirstOrDefault();
+
+            userExtendedDto.AreaCode = areaCode;
+            userExtendedDto.RegionCode = regionCode;
+
+            return userExtendedDto;
         }
 
         public async Task<ListResultDto<RoleDto>> GetRoles()
@@ -202,11 +239,11 @@ namespace Yei3.PersonalEvaluation.Users
 
         protected override UserDto MapToEntityDto(User user)
         {
-            var roles = _roleManager.Roles.Where(r => user.Roles.Any(ur => ur.RoleId == r.Id)).Select(r => r.NormalizedName);
             List<Abp.Organizations.OrganizationUnit> organizationUnits = _userManager.GetOrganizationUnitsAsync(user).GetAwaiter().GetResult();
+
             var userDto = base.MapToEntityDto(user);
-            userDto.RoleNames = roles.ToArray();
             userDto.OrganizationUnits = organizationUnits.MapTo<List<OrganizationUnitDto>>();
+
             return userDto;
         }
 
@@ -318,6 +355,76 @@ namespace Yei3.PersonalEvaluation.Users
             return (await _userManager.GetSubordinates(currentUser))
                 .Where(user => !user.JobDescription.IsNullOrEmpty())
                 .MapTo<ICollection<UserFullNameDto>>();
+        }
+
+        internal UserExtendedDto MapToEntityExtendedDto(User user)
+        {
+            return new UserExtendedDto(){
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.Surname,
+                UserName = user.UserName,
+                FullName = user.FullName,
+                EmailAddress = user.EmailAddress,
+                JobDescription = user.JobDescription,
+                Area = user.Area,
+                Region = user.Region,
+                ImmediateSupervisor = user.ImmediateSupervisor,
+                SocialReason = user.SocialReason,
+                EntryDate = user.EntryDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                ReassignDate = GetShortDateString(user.ReassignDate),
+                BirthDate = user.BirthDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                Scholarship = user.Scholarship,
+                IsMale = user.IsMale
+            };
+        }
+
+        internal string GetShortDateString(DateTime? date)
+        {
+            if(date.Value == null)
+                return new DateTime(0).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+            return date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+        }
+
+        public async Task<User> UpdateUserExtended(UserExtendedDto input)
+        {
+            var isManager = false;
+            var isSupervisor = false;
+            
+            foreach (var rol in input.Roles)
+            {
+                if(rol == "Administrator") isManager = true;
+                if(rol == "Supervisor") isSupervisor = true;
+            }
+
+            try
+            {
+                return await _userRegistrationManager.ImportUserAsync(
+                    input.UserName,
+                    input.IsActive,
+                    input.LastName,
+                    input.Name,
+                    input.JobDescription,
+                    input.Area,
+                    input.Region,
+                    input.ImmediateSupervisor,
+                    input.SocialReason,
+                    isManager,
+                    isSupervisor,
+                    input.EntryDate,
+                    input.ReassignDate,
+                    input.BirthDate,
+                    input.Scholarship,
+                    input.EmailAddress,
+                    input.IsMale,
+                    false
+                );
+            }
+            catch (Exception)
+            {
+                throw new UserFriendlyException($"El usuario {input.UserName} no pudo ser no actualizado.");
+            }
         }
     }
 }

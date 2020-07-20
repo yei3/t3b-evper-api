@@ -481,7 +481,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
 
         public async Task<PagedResultDto<EvaluationStatusListItemDto>> GetEvaluationsStatus(EvaluationStatusInputDto input)
         {
-
             IQueryable<EvaluationStatusListItemDto> evaluationStatuses = GetEvaluationStatusAsQueryable(input);
 
             int count = 0;
@@ -544,8 +543,9 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         _ => _.IncludePastObjectives ? "Incluye Objetivos Anteriores" : "Sin Objetivos Anteriores",
                         _ => _.Id,
                         _ => _.Status == EvaluationStatus.NonInitiated ? "No Iniciada"
+                            : _.Status == EvaluationStatus.Pending ? "En proceso"
                             : _.Status == EvaluationStatus.Finished ? "Finalizada"
-                            : _.Status == EvaluationStatus.PendingReview ? "Pte. Revision"
+                            : _.Status == EvaluationStatus.PendingReview ? "Pte. Revisión"
                             : _.Status == EvaluationStatus.Validated ? "Cerrada"
                             : "No Iniciada"
                     );

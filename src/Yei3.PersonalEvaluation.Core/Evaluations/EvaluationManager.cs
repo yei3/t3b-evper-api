@@ -472,10 +472,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
         {
             userId = userId ?? AbpSession.GetUserId();
 
-            //* Disable filter for soft delete
-            UnitOfWorkManager.Current.SetTenantId(1);
-            UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete);
-
             User supervisorUser = await UserManager.GetUserByIdAsync(userId.Value);
 
             bool isSupervisor = await UserManager.IsInRoleAsync(supervisorUser, StaticRoleNames.Tenants.Supervisor);
@@ -509,7 +505,6 @@ namespace Yei3.PersonalEvaluation.Evaluations
                         .Count(objective => objective.Status == EvaluationQuestionStatus.Validated)
                 });
             }
-        
 
             return collaboratorsPendingObjectivesSummary;
         }
