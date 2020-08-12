@@ -1,13 +1,16 @@
-using System.Threading.Tasks;
 using System;
 using System.IO;
+using System.Threading.Tasks;
+using Abp.BackgroundJobs;
+using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Controllers;
 using Yei3.PersonalEvaluation.Core.Authorization.Users;
-using Abp.BackgroundJobs;
 using Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
@@ -15,12 +18,13 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
     [Route("api/[controller]")]
     public class ImportUsersController : PersonalEvaluationControllerBase
     {
-
+        private readonly UserManager _userManager;
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IBackgroundJobManager _backgroundJobManager;
 
-        public ImportUsersController(UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
+        public ImportUsersController(UserManager userManager, UserRegistrationManager userRegistrationManager, IBackgroundJobManager backgroundJobManager)
         {
+            _userManager = userManager;
             _userRegistrationManager = userRegistrationManager;
             _backgroundJobManager = backgroundJobManager;
         }
@@ -30,7 +34,14 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         {
             string filePath = Path.GetTempFileName();
             
-            ImportUserSummaryModel importUserSummaryModel = new ImportUserSummaryModel("./View/ImportedUserSummaryView.cshtml", emailAddress);
+            // ImportUserSummaryModel importUserSummaryModel = new ImportUserSummaryModel("./View/ImportedUserSummaryView.cshtml", emailAddress);
+
+            User administratorUser = await _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+            if (!await _userManager.IsInRoleAsync(administratorUser, StaticRoleNames.Tenants.Administrator))
+            {
+                throw new UserFriendlyException(401, $"Usuario {administratorUser.FullName} no es un Administrador.");
+            }
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -44,6 +55,11 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                 ExcelWorksheet worksheet = package.Workbook.Worksheets["Sheet1"];
 
                 int rowCount = worksheet.Dimension.Rows;
+
+                if (rowCount < 2 && rowCount > 1000)
+                {
+                    return BadRequest("Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
+                }
 
                 //* start in row 2 cause data starts there, any template change can break this, is better if we provide the template
                 for (int row = 2; row <= rowCount; row++)
@@ -80,18 +96,18 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                                 && worksheet.Cells[row, 8].Value.ToString().Contains('X', StringComparison.InvariantCultureIgnoreCase)
                         );
 
-                        importUserSummaryModel.ImportedUserDictionary.Add(currentUser.EmployeeNumber, currentUser.FullName);
-                        importUserSummaryModel.IncrementImportedUser();
+                        // importUserSummaryModel.ImportedUserDictionary.Add(currentUser.EmployeeNumber, currentUser.FullName);
+                        // importUserSummaryModel.IncrementImportedUser();
                     }
                     catch (Exception e)
                     {
-                        importUserSummaryModel.IncrementNotImportedUser();
+                        // importUserSummaryModel.IncrementNotImportedUser();
                         Logger.Info(e.Message);
                         Logger.Info($"Usuario {worksheet.Cells[row, 3].Value} fue agregado anteriormente.");
                     }
                 }
 
-                await _backgroundJobManager.EnqueueAsync<SendImportUserReportBackgroundJob, ImportUserSummaryModel>(importUserSummaryModel);
+                // await _backgroundJobManager.EnqueueAsync<SendImportUserReportBackgroundJob, ImportUserSummaryModel>(importUserSummaryModel);
 
                 return Ok();
             }
