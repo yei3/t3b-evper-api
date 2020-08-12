@@ -56,7 +56,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
                 int rowCount = worksheet.Dimension.Rows;
 
-                if (rowCount < 2 && rowCount > 1000)
+                if (rowCount < 2 || rowCount > 1000)
                 {
                     return BadRequest("Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
                 }
