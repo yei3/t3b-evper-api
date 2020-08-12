@@ -30,7 +30,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportUsersAction(string emailAddress, [FromForm]IFormFile file)
+        public async Task ImportUsersAction(string emailAddress, [FromForm]IFormFile file)
         {
             string filePath = Path.GetTempFileName();
             
@@ -56,9 +56,13 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
                 int rowCount = worksheet.Dimension.Rows;
 
-                if (rowCount < 2 || rowCount > 1000)
+                if (rowCount < 2)
                 {
-                    return BadRequest("Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
+                    throw new UserFriendlyException(400, "Sin registros por procesar. Seleccione un archivo con mil registros máximo.");
+                }
+                if (rowCount > 1000)
+                {
+                    throw new UserFriendlyException(400, "Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
                 }
 
                 //* start in row 2 cause data starts there, any template change can break this, is better if we provide the template
@@ -109,7 +113,6 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 
                 // await _backgroundJobManager.EnqueueAsync<SendImportUserReportBackgroundJob, ImportUserSummaryModel>(importUserSummaryModel);
 
-                return Ok();
             }
         }
     }
