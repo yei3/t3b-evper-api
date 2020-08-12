@@ -64,7 +64,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         {
             int rowCount = worksheet.Dimension.Rows;
 
-            if (rowCount < 2 && rowCount > 1000)
+            if (rowCount < 2 || rowCount > 1000)
             {
                 throw new UserFriendlyException(400, "Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
             }
@@ -111,7 +111,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         {
             int rowCount = worksheet.Dimension.Rows;
 
-            if (rowCount < 2 && rowCount > 1000)
+            if (rowCount < 2 || rowCount > 1000)
             {
                 throw new UserFriendlyException(400, "Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
             }
@@ -156,7 +156,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
         {
             int rowCount = worksheet.Dimension.Rows;
 
-            if (rowCount < 2 && rowCount > 1000)
+            if (rowCount < 2 || rowCount > 1000)
             {
                 throw new UserFriendlyException(400, "Límite de registros por cargar/modificar excedido. Seleccione un archivo con mil registros máximo.");
             }
