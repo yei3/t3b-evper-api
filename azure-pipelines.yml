@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- 1150
+- main
 
 pool:
   vmImage: 'ubuntu-latest'
