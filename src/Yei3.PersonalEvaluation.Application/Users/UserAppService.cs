@@ -131,8 +131,8 @@ namespace Yei3.PersonalEvaluation.Users
 
             var areaCode = _areaOrganizationUnitRepository
                 .GetAll()
-                .Where(region => region.Parent.DisplayName.Contains(user.Region))
-                .Where(area => area.DisplayName.Contains(user.Area))
+                .Where(region => region.Parent.DisplayName.Equals(user.Region))
+                .Where(area => area.DisplayName.Equals(user.Area))
                 .Select(area => area.Code).FirstOrDefault();
 
             var regionCode = _organizationUnitRepository
