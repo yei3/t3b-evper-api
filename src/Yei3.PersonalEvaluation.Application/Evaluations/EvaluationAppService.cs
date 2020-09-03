@@ -461,6 +461,7 @@ namespace Yei3.PersonalEvaluation.Evaluations
                 .GetAll()
                 .Include(evaluation => evaluation.User)
                 .Include(evaluation => evaluation.Template)
+                .Where(evaluation => evaluation.User.IsActive == true)
                 .WhereIf(input.StartDateTime.HasValue, evaluation => evaluation.CreationTime >= input.StartDateTime.Value)
                 .WhereIf(input.EndDateTime.HasValue, evaluation => evaluation.CreationTime <= input.EndDateTime.Value)
                 .Select(evaluation => new EvaluationStatusListItemDto
