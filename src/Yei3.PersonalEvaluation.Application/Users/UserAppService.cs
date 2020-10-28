@@ -14,10 +14,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Authorization.Users;
+using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
+using Yei3.PersonalEvaluation.OrganizationUnit;
 using Yei3.PersonalEvaluation.OrganizationUnits.Dto;
 using Yei3.PersonalEvaluation.Roles.Dto;
 using Yei3.PersonalEvaluation.Users.Dto;
-using Yei3.PersonalEvaluation.OrganizationUnit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,6 +38,7 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
+        private readonly IRepository<EvaluationRevision, long> _evaluationRevisionRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -47,7 +49,8 @@ namespace Yei3.PersonalEvaluation.Users
             IEmailSender emailSender,
             UserRegistrationManager userRegistrationManager,
             IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository,
-            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository,
+            IRepository<EvaluationRevision, long> evaluationRevisionRepository
         )
             : base(repository)
         {
@@ -59,6 +62,7 @@ namespace Yei3.PersonalEvaluation.Users
             _userRegistrationManager = userRegistrationManager;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
             _organizationUnitRepository = organizationUnitRepository;
+            _evaluationRevisionRepository = evaluationRevisionRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -115,6 +119,46 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
+        public async Task Inactivate(EntityDto<long> input)
+        {
+            try
+            {
+                var inactiveUser = await _userManager.GetUserByIdAsync(input.Id);
+                // find immediate superior
+                var immediateSupervisor =
+                    _userManager.Users.FirstOrDefault(user => user.JobDescription == inactiveUser.ImmediateSupervisor);
+
+                if (!immediateSupervisor.IsNullOrDeleted())
+                {
+                    return;
+                }
+                // find collaborators
+                var collaborators = _userManager.Users
+                    .Where(user => user.ImmediateSupervisor == inactiveUser.JobDescription);
+
+                // update to new immediate supervisor
+                foreach (var collaborator in collaborators)
+                {
+                    collaborator.ImmediateSupervisor = immediateSupervisor.JobDescription;
+                }
+
+                // find dandling revisions
+                var pendingRevisions = _evaluationRevisionRepository
+                    .GetAll()
+                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == inactiveUser.Id);
+
+                // update new reviewer
+                foreach (EvaluationRevision pendingRevision in pendingRevisions)
+                {
+                    pendingRevision.UpdateReviewer(immediateSupervisor);
+                } 
+            }
+            catch (Exception e)
+            {
+                throw new UserFriendlyException(e.Message);
+            }
+        }
+
         public async Task<UserExtendedDto> GetUserExtendedByUsername(string employeeNumber)
         {
             var user = await Repository.FirstOrDefaultAsync(x => x.UserName == employeeNumber);
@@ -144,6 +188,46 @@ namespace Yei3.PersonalEvaluation.Users
             userExtendedDto.RegionCode = regionCode;
 
             return userExtendedDto;
+        }
+
+        public async Task<User> UpdateUserExtended(UserExtendedDto input)
+        {
+            var isManager = false;
+            var isSupervisor = false;
+            
+            foreach (var rol in input.Roles)
+            {
+                if(rol == "Administrator") isManager = true;
+                if(rol == "Supervisor") isSupervisor = true;
+            }
+
+            try
+            {
+                return await _userRegistrationManager.ImportUserAsync(
+                    input.UserName,
+                    input.IsActive,
+                    input.LastName,
+                    input.Name,
+                    input.JobDescription,
+                    input.Area,
+                    input.Region,
+                    input.ImmediateSupervisor,
+                    input.SocialReason,
+                    isManager,
+                    isSupervisor,
+                    input.EntryDate,
+                    input.ReassignDate,
+                    input.BirthDate,
+                    input.Scholarship,
+                    input.EmailAddress,
+                    input.IsMale,
+                    false
+                );
+            }
+            catch (Exception)
+            {
+                throw new UserFriendlyException($"El usuario {input.UserName} no pudo ser no actualizado.");
+            }
         }
 
         public async Task<ListResultDto<RoleDto>> GetRoles()
@@ -385,46 +469,6 @@ namespace Yei3.PersonalEvaluation.Users
                 return new DateTime(0).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
             return date.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-        }
-
-        public async Task<User> UpdateUserExtended(UserExtendedDto input)
-        {
-            var isManager = false;
-            var isSupervisor = false;
-            
-            foreach (var rol in input.Roles)
-            {
-                if(rol == "Administrator") isManager = true;
-                if(rol == "Supervisor") isSupervisor = true;
-            }
-
-            try
-            {
-                return await _userRegistrationManager.ImportUserAsync(
-                    input.UserName,
-                    input.IsActive,
-                    input.LastName,
-                    input.Name,
-                    input.JobDescription,
-                    input.Area,
-                    input.Region,
-                    input.ImmediateSupervisor,
-                    input.SocialReason,
-                    isManager,
-                    isSupervisor,
-                    input.EntryDate,
-                    input.ReassignDate,
-                    input.BirthDate,
-                    input.Scholarship,
-                    input.EmailAddress,
-                    input.IsMale,
-                    false
-                );
-            }
-            catch (Exception)
-            {
-                throw new UserFriendlyException($"El usuario {input.UserName} no pudo ser no actualizado.");
-            }
         }
     }
 }
