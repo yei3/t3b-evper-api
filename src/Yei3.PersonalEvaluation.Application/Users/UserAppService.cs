@@ -123,35 +123,48 @@ namespace Yei3.PersonalEvaluation.Users
         {
             try
             {
-                var inactiveUser = await _userManager.GetUserByIdAsync(input.Id);
+                var activeUserTask = _userManager.GetUserByIdAsync(input.Id);
+                var sessionUserTask = _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+
+                var activeUser = await activeUserTask;
+                var sessionUser =   await sessionUserTask;
                 // find immediate superior
-                var immediateSupervisor =
-                    _userManager.Users.FirstOrDefault(user => user.JobDescription == inactiveUser.ImmediateSupervisor);
+                var immediateSupervisor = await
+                    _userManager.Users.FirstOrDefaultAsync(user => user.JobDescription == activeUser.ImmediateSupervisor);
 
                 if (!immediateSupervisor.IsNullOrDeleted())
                 {
-                    return;
-                }
-                // find collaborators
-                var collaborators = _userManager.Users
-                    .Where(user => user.ImmediateSupervisor == inactiveUser.JobDescription);
+                    // throw new UserFriendlyException("No hay supervisor");
+                    // find collaborators
+                    var collaborators = _userManager.Users
+                        .Where(user => user.ImmediateSupervisor == activeUser.JobDescription);
 
-                // update to new immediate supervisor
-                foreach (var collaborator in collaborators)
-                {
-                    collaborator.ImmediateSupervisor = immediateSupervisor.JobDescription;
+                    // update to new immediate supervisor
+                    foreach (var collaborator in collaborators)
+                    {
+                        collaborator.ImmediateSupervisor = immediateSupervisor.JobDescription;
+                    }
                 }
 
                 // find dandling revisions
                 var pendingRevisions = _evaluationRevisionRepository
                     .GetAll()
-                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == inactiveUser.Id);
+                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id);
 
                 // update new reviewer
-                foreach (EvaluationRevision pendingRevision in pendingRevisions)
+                foreach (var pendingRevision in pendingRevisions)
                 {
                     pendingRevision.UpdateReviewer(immediateSupervisor);
-                } 
+                }
+
+                //update user
+                activeUser.ImmediateSupervisor = String.Empty;
+                activeUser.IsActive = false;
+                activeUser.DeleterUser = sessionUser;
+                activeUser.DeleterUserId = sessionUser.Id;
+                activeUser.DeletionTime = DateTime.Now;
+
+                await _userManager.UpdateAsync(activeUser);
             }
             catch (Exception e)
             {
