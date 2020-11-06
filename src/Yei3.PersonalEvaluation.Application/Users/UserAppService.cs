@@ -38,7 +38,6 @@ namespace Yei3.PersonalEvaluation.Users
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IRepository<AreaOrganizationUnit, long> _areaOrganizationUnitRepository;
         private readonly IRepository<Abp.Organizations.OrganizationUnit, long> _organizationUnitRepository;
-        private readonly IRepository<EvaluationRevision, long> _evaluationRevisionRepository;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -49,8 +48,7 @@ namespace Yei3.PersonalEvaluation.Users
             IEmailSender emailSender,
             UserRegistrationManager userRegistrationManager,
             IRepository<AreaOrganizationUnit, long> areaOrganizationUnitRepository,
-            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository,
-            IRepository<EvaluationRevision, long> evaluationRevisionRepository
+            IRepository<Abp.Organizations.OrganizationUnit, long> organizationUnitRepository
         )
             : base(repository)
         {
@@ -62,7 +60,6 @@ namespace Yei3.PersonalEvaluation.Users
             _userRegistrationManager = userRegistrationManager;
             _areaOrganizationUnitRepository = areaOrganizationUnitRepository;
             _organizationUnitRepository = organizationUnitRepository;
-            _evaluationRevisionRepository = evaluationRevisionRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -123,48 +120,12 @@ namespace Yei3.PersonalEvaluation.Users
         {
             try
             {
-                var activeUserTask = _userManager.GetUserByIdAsync(input.Id);
-                var sessionUserTask = _userManager.GetUserByIdAsync(AbpSession.GetUserId());
+                var inactiveUser = await _userManager.InactivateAsync(input.Id, AbpSession.GetUserId());
 
-                var activeUser = await activeUserTask;
-                var sessionUser =   await sessionUserTask;
-                // find immediate superior
-                var immediateSupervisor = await
-                    _userManager.Users.FirstOrDefaultAsync(user => user.JobDescription == activeUser.ImmediateSupervisor);
-
-                if (!immediateSupervisor.IsNullOrDeleted())
+                if (inactiveUser.IsActive)
                 {
-                    // throw new UserFriendlyException("No hay supervisor");
-                    // find collaborators
-                    var collaborators = _userManager.Users
-                        .Where(user => user.ImmediateSupervisor == activeUser.JobDescription);
-
-                    // update to new immediate supervisor
-                    foreach (var collaborator in collaborators)
-                    {
-                        collaborator.ImmediateSupervisor = immediateSupervisor.JobDescription;
-                    }
+                    
                 }
-
-                // find dandling revisions
-                var pendingRevisions = _evaluationRevisionRepository
-                    .GetAll()
-                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id);
-
-                // update new reviewer
-                foreach (var pendingRevision in pendingRevisions)
-                {
-                    pendingRevision.UpdateReviewer(immediateSupervisor);
-                }
-
-                //update user
-                activeUser.ImmediateSupervisor = String.Empty;
-                activeUser.IsActive = false;
-                activeUser.DeleterUser = sessionUser;
-                activeUser.DeleterUserId = sessionUser.Id;
-                activeUser.DeletionTime = DateTime.Now;
-
-                await _userManager.UpdateAsync(activeUser);
             }
             catch (Exception e)
             {
@@ -217,6 +178,7 @@ namespace Yei3.PersonalEvaluation.Users
             try
             {
                 return await _userRegistrationManager.ImportUserAsync(
+                    AbpSession.GetUserId(),
                     input.UserName,
                     input.IsActive,
                     input.LastName,

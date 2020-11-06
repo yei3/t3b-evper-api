@@ -85,6 +85,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
         }
 
         public async Task<User> ImportUserAsync (
+            long sessionUserId,
             string employeeNumber,
             bool status,
             string lastName,
@@ -156,7 +157,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                     if (!status)
                     {
-                        await _userManager.DeleteAsync(existingUser);
+                        await _userManager.InactivateAsync(existingUser.Id, sessionUserId);
 
                         await unitOfWork.CompleteAsync();
 
