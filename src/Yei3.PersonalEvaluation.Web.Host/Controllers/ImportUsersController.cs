@@ -10,8 +10,6 @@ using OfficeOpenXml;
 using Yei3.PersonalEvaluation.Authorization.Users;
 using Yei3.PersonalEvaluation.Authorization.Roles;
 using Yei3.PersonalEvaluation.Controllers;
-using Yei3.PersonalEvaluation.Core.Authorization.Users;
-using Yei3.PersonalEvaluation.Core.Authorization.Users.BackgroundJob;
 
 namespace Yei3.PersonalEvaluation.Web.Host.Controllers
 {
@@ -71,6 +69,7 @@ namespace Yei3.PersonalEvaluation.Web.Host.Controllers
                     try
                     {
                         User currentUser = await _userRegistrationManager.ImportUserAsync(
+                            sessionUserId: administratorUser.Id,
                             employeeNumber: worksheet.Cells[row, 1].Value.ToString(),
                             status: worksheet.Cells[row, 2].Value.ToString() == "ACTIVO",
                             lastName: $"{worksheet.Cells[row, 3].Value.ToString()} {worksheet.Cells[row, 4].Value?.ToString()}",

@@ -1,26 +1,28 @@
 ﻿namespace Yei3.PersonalEvaluation.Authorization.Users
 {
-
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Abp.Authorization;
     using Abp.Authorization.Users;
     using Abp.Configuration;
+    using Abp.Domain.Entities;
     using Abp.Domain.Repositories;
     using Abp.Domain.Uow;
     using Abp.Organizations;
     using Abp.Runtime.Caching;
     using Yei3.PersonalEvaluation.Authorization.Roles;
-    using Microsoft.EntityFrameworkCore;
-    using System.Threading.Tasks;
-    using System.Linq;
     using Yei3.PersonalEvaluation.Core.OrganizationUnit;
+    using Yei3.PersonalEvaluation.Evaluations.EvaluationRevisions;
 
     public class UserManager : AbpUserManager<Role, User>
     {
+        private readonly IRepository<EvaluationRevision, long> _evaluationRevisionRepository;
         public UserManager(
             RoleManager roleManager,
             UserStore store,
@@ -37,6 +39,7 @@
             ICacheManager cacheManager,
             IRepository<OrganizationUnit, long> organizationUnitRepository,
             IRepository<UserOrganizationUnit, long> userOrganizationUnitRepository,
+            IRepository<EvaluationRevision, long> evaluationRevisionRepository,
             IOrganizationUnitSettings organizationUnitSettings,
             ISettingManager settingManager)
             : base(
@@ -58,6 +61,66 @@
                 organizationUnitSettings,
                 settingManager)
         {
+            _evaluationRevisionRepository = evaluationRevisionRepository;
+        }
+
+        public async Task<User> InactivateAsync(long userId, long sessionUserId)
+        {
+            var activeUserTask = this.GetUserByIdAsync(userId);
+            var sessionUserTask = this.GetUserByIdAsync(sessionUserId);
+
+            var activeUser = await activeUserTask;
+            var sessionUser =   await sessionUserTask;
+
+            try
+            {
+                
+                // find immediate superior
+                var immediateSupervisor = await
+                    this.Users.FirstOrDefaultAsync(user => user.JobDescription == activeUser.ImmediateSupervisor);
+
+                if (!immediateSupervisor.IsNullOrDeleted())
+                {
+                    // throw new UserFriendlyException("No hay supervisor");
+                    // find collaborators
+                    var collaborators = this.Users
+                        .Where(user => user.ImmediateSupervisor == activeUser.JobDescription);
+
+                    // update to new immediate supervisor
+                    foreach (var collaborator in collaborators)
+                    {
+                        collaborator.ImmediateSupervisor = immediateSupervisor.JobDescription;
+                    }
+                }
+
+                // find dandling revisions
+                var pendingRevisions = _evaluationRevisionRepository
+                    .GetAll()
+                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id);
+
+                // update new reviewer
+                foreach (var pendingRevision in pendingRevisions)
+                {
+                    pendingRevision.UpdateReviewer(immediateSupervisor);
+                }
+
+                //update user
+                activeUser.ImmediateSupervisor = String.Empty;
+                activeUser.IsActive = false;
+                activeUser.DeleterUser = sessionUser;
+                activeUser.DeleterUserId = sessionUser.Id;
+                activeUser.DeletionTime = DateTime.Now;
+
+                await this.UpdateAsync(activeUser);
+
+                
+            }
+            catch (Exception e)
+            {
+                //
+            }
+
+            return activeUser;
         }
 
         public async Task<User> FindByEmployeeNumberAsync(string employeeNumber)
