@@ -157,7 +157,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
 
                     if (!status)
                     {
-                        await _userManager.InactivateAsync(existingUser.Id, sessionUserId);
+                        await _userManager.InactivateAsync(existingUser, sessionUserId);
 
                         await unitOfWork.CompleteAsync();
 

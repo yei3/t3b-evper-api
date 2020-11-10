@@ -64,20 +64,18 @@
             _evaluationRevisionRepository = evaluationRevisionRepository;
         }
 
-        public async Task<User> InactivateAsync(long userId, long sessionUserId)
+        public async Task<User> InactivateAsync(User activeUser, long sessionUserId)
         {
-            var activeUserTask = this.GetUserByIdAsync(userId);
-            var sessionUserTask = this.GetUserByIdAsync(sessionUserId);
 
-            var activeUser = await activeUserTask;
-            var sessionUser =   await sessionUserTask;
+            var sessionUserTask = this.GetUserByIdAsync(sessionUserId);
+            var immediateSupervisorTask =
+                    this.Users.FirstOrDefaultAsync(user => user.JobDescription == activeUser.ImmediateSupervisor);
 
             try
             {
-                
+                var sessionUser =   await sessionUserTask;                
                 // find immediate superior
-                var immediateSupervisor = await
-                    this.Users.FirstOrDefaultAsync(user => user.JobDescription == activeUser.ImmediateSupervisor);
+                var immediateSupervisor = await immediateSupervisorTask;
 
                 if (!immediateSupervisor.IsNullOrDeleted())
                 {
@@ -96,7 +94,9 @@
                 // find dandling revisions
                 var pendingRevisions = _evaluationRevisionRepository
                     .GetAll()
-                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id);
+                    .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id)
+                    .Where(evaluationRevision => evaluationRevision.RevisionDateTime > DateTime.Now)
+                    .Where(evaluationRevision => evaluationRevision.Status != EvaluationRevisionStatus.Revised);
 
                 // update new reviewer
                 foreach (var pendingRevision in pendingRevisions)
@@ -112,12 +112,10 @@
                 activeUser.DeletionTime = DateTime.Now;
 
                 await this.UpdateAsync(activeUser);
-
-                
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                //
+                throw new Exception($"Usuario {activeUser.Id} . Exception: {ex.Message}");
             }
 
             return activeUser;
