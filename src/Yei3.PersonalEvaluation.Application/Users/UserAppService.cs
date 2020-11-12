@@ -116,9 +116,9 @@ namespace Yei3.PersonalEvaluation.Users
             }
         }
 
-        public async Task Inactivate(EntityDto<long> input)
+        public async Task Inactivate(long userId)
         {
-            var inputUser = await _userManager.GetUserByIdAsync(input.Id);
+            var inputUser = await _userManager.GetUserByIdAsync(userId);
             try
             {
                 var inactiveUser = await _userManager.InactivateAsync(inputUser, AbpSession.GetUserId());
