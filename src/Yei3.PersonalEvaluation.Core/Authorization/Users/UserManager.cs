@@ -95,8 +95,9 @@
                 var pendingRevisions = _evaluationRevisionRepository
                     .GetAll()
                     .Where(evaluationRevision => evaluationRevision.ReviewerUserId == activeUser.Id)
-                    .Where(evaluationRevision => evaluationRevision.RevisionDateTime > DateTime.Now)
-                    .Where(evaluationRevision => evaluationRevision.Status != EvaluationRevisionStatus.Revised);
+                    .Where(evaluationRevision => evaluationRevision.Evaluation.EndDateTime > DateTime.Now)
+                    .Where(evaluationRevision => (evaluationRevision.Evaluation.Status == Evaluations.EvaluationStatus.NonInitiated
+                                              || evaluationRevision.Evaluation.Status == Evaluations.EvaluationStatus.Pending));
 
                 // update new reviewer
                 foreach (var pendingRevision in pendingRevisions)
