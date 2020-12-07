@@ -75,7 +75,7 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
             }
             catch (Exception ex)
             {
-                throw new Exception($"Usuario {eventUser.FullName} no tiene supervisor definido. Exception: {ex.Message}");
+                throw new Exception($"Supervisor update failed! User: {eventUser.UserName}. Exception: {ex.Message}");
             }
         }
     }

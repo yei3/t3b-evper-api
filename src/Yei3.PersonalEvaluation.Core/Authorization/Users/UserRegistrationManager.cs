@@ -153,7 +153,7 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                 catch (UserFriendlyException)
                 {
                     //! This must be implement on a better way or is the only one?
-                    User existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
+                    var existingUser = await _userManager.FindByEmployeeNumberAsync(user.EmployeeNumber);
 
                     if (!status)
                     {
@@ -204,10 +204,10 @@ namespace Yei3.PersonalEvaluation.Authorization.Users
                     existingUser.Name = user.Name;
                     existingUser.Surname = user.Surname;
 
-                    //! Just for deleted users
-                    if (existingUser.IsDeleted)
+                    //! Just for inactive users
+                    if (!existingUser.IsActive)
                     {
-                        existingUser.IsDeleted = false;
+                        existingUser.IsActive = true;
                         existingUser.DeleterUser = null;
                         existingUser.DeletionTime = null;
                         existingUser.LastModificationTime = DateTime.Now;
