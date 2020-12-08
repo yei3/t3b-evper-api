@@ -122,11 +122,6 @@ namespace Yei3.PersonalEvaluation.Users
             try
             {
                 var inactiveUser = await _userManager.InactivateAsync(inputUser, AbpSession.GetUserId());
-
-                if (inactiveUser.IsActive)
-                {
-                    
-                }
             }
             catch (Exception e)
             {
