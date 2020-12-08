@@ -38,12 +38,12 @@ namespace Yei3.PersonalEvaluation.Core.Authorization.Users.EventHandlers
         [UnitOfWork]
         public void HandleEvent(EntityChangedEventData<User> eventData)
         {
-            if (eventData.Entity.IsActive)
+            if (!eventData.Entity.IsActive)
             {
                 return;
             }
-
-            UpdateSupervisorSubordinateRelation(eventData.Entity);
+            //! This is not neccessary anymore
+            // UpdateSupervisorSubordinateRelation(eventData.Entity);
         }
 
         private void UpdateSupervisorSubordinateRelation(User eventUser)
